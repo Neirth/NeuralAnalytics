@@ -1,0 +1,56 @@
+\documentclass[a4paper,12pt]{report} % Article class with paper size and font
+
+% Essential packages
+\usepackage[utf8]{inputenc}                     % UTF-8 encoding
+\usepackage[english]{babel}                     % English language
+\usepackage{amsmath,amssymb}                    % For math
+\usepackage{graphicx}                           % For images
+\usepackage{listings}                           % For code snippets
+\usepackage{hyperref}                           % For clickable links and references
+\usepackage{geometry}                           % For margins
+\usepackage{fancyhdr}                           % Headers and footers
+\usepackage{parskip}                            % Spacing between paragraphs
+
+% Header and footer configuration
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Neural Analytics}                 % Left header
+\fancyhead[R]{\thepage}                         % Right header (page number)
+\fancyfoot[C]{Author: Sergio Martinez Aznar}    % Centered footer
+\geometry{margin=2.5cm}                         % Margin settings
+
+% Code configuration
+\lstset{
+    basicstyle=\ttfamily\small,                 % Font style
+    numbers=left,                               % Line numbers
+    numberstyle=\tiny,                          % Number size
+    stepnumber=1,                               % Step number
+    frame=single,                               % Box around code
+    breaklines=true,                            % Break long lines
+    captionpos=b,                               % Title position
+    language=Python                             % Default language
+}
+
+\begin{document}
+
+% Title
+\title{\textbf{Neural Analytics}}               % Bold title
+\author{Sergio Martinez Aznar \\ Computer Engineering Degree \\ Universidad Politécnica de Valencia}
+\date{\today}
+\maketitle
+\newpage
+
+
+% Tables of Contents and Figures
+\include{chapters/chapter_0/TableOfContents}
+\include{chapters/chapter_0/TableOfFigures}
+
+% Chapters
+\include{chapters/chapter_1/Abstract}
+\include{chapters/chapter_2/Introduction}
+
+% Bibliography
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}
