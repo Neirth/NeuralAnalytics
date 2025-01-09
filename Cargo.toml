@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "packages/neural_analytics_cli",
+    "packages/neural_analytics_core",
+    "packages/neural_analytics_gui",
+    "packages/neural_analytics_model",
+]
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
