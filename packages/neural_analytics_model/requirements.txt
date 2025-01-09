@@ -1,0 +1,5 @@
+scikit-learn==1.5.2
+numpy==2.1.2
+pandas==2.2.3
+torch==2.5.0
+onnx==1.17.0
