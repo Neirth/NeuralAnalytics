@@ -1,0 +1,44 @@
+\newgeometry{margin=0in}
+
+
+% Alturas ajustadas para que encajen en una sola página
+\newcommand{\blockheight}{21cm} % Altura del bloque amarillo pastel
+\newcommand{\footerheight}{8.3cm} % Altura del bloque negro
+\fontfamily{phv}\selectfont % Start Helvetica font
+
+% Bloque amarillo pastel
+\noindent
+\colorbox[HTML]{fef193}{ % Color amarillo pastel
+    \parbox[b][\blockheight][c]{\textwidth}{ % Bloque del tamaño adecuado
+
+        \begin{center}
+            {
+                \Huge\textbf{\MyTitle\\[0.2cm]}
+            } 
+            {\Large Grado en Ingenieria Informática} \\
+        \end{center}
+    }
+}\vspace{-8pt}% Elimina el espacio entre bloques
+
+% Bloque negro
+\noindent
+\colorbox{black}{
+    \parbox[b][\footerheight][c]{\textwidth}{ % Bloque del tamaño adecuado
+        \color{white} % Texto en color blanco
+        \begin{center}
+            \begin{tabular}{p{0.7\textwidth}c}
+                {\large\textbf{Trabajo Fin de Grado}} \\[0.5cm]
+                \textbf{Autor:} \MyAuthor \\[0.2cm]
+                \textbf{Tutor/es:} Jordi Linares \\[0.2cm]
+                \textbf{Curso Académico:} 2024/2025 \\[0.2cm]
+                \textbf{Fecha de Depósito:} \today
+                &
+                \raisebox{-0.1\height}{\includegraphics[height=1.5cm]{./assets/logo_universidad.png}}
+            
+            \end{tabular}
+        \end{center}
+    }
+}
+
+\restoregeometry
+\fontfamily{\familydefault}\selectfont % Restore default font
