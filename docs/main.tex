@@ -10,11 +10,18 @@
 \usepackage{geometry}                           % For margins
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
+\usepackage{xcolor}                             % For colors
+\usepackage{authoraftertitle}
+\setlength{\headheight}{14.49998pt}             % Adjust head height
+
+\title{Neural Analytics}                       % Title
+\author{Sergio Martinez Aznar}                 % Author
 
 % Header and footer configuration
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{Neural Analytics}                 % Left header
+\fancyhead[L]{\MyTitle}                         % Left header
+\setlength{\headwidth}{16cm}                    % Header width
 \fancyhead[R]{\thepage}                         % Right header (page number)
 \fancyfoot[C]{Author: Sergio Martinez Aznar}    % Centered footer
 \geometry{margin=2.5cm}                         % Margin settings
@@ -34,12 +41,10 @@
 \begin{document}
 
 % Title
-\title{\textbf{Neural Analytics}}               % Bold title
-\author{Sergio Martinez Aznar \\ Computer Engineering Degree \\ Universidad Politécnica de Valencia}
-\date{\today}
-\maketitle
-\newpage
+\include{cover/project_cover}
 
+% Giving thanks
+\include{chapters/chapter_0/GivingThanks}
 
 % Tables of Contents and Figures
 \include{chapters/chapter_0/TableOfContents}
@@ -49,8 +54,8 @@
 \include{chapters/chapter_1/Abstract}
 \include{chapters/chapter_2/Introduction}
 
-% Bibliography
 \bibliographystyle{plain}
+\nocite{*}                                      % Include all references in the bibliography
 \bibliography{bibliography}
 
 \end{document}
