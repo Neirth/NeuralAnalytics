@@ -1,9 +1,9 @@
-\documentclass[a4paper,12pt]{report} % Article class with paper size and font
+\documentclass[a4paper,12pt]{report}            % Article class with paper size and font
 
 % Essential packages
 \usepackage[utf8]{inputenc}                     % UTF-8 encoding
 \usepackage[english]{babel}                     % English language
-\usepackage{amsmath,amssymb}                    % For math
+\usepackage{amsmath,amssymb,amsthm}             % For math
 \usepackage{graphicx}                           % For images
 \usepackage{listings}                           % For code snippets
 \usepackage{hyperref}                           % For clickable links and references
@@ -11,11 +11,16 @@
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
 \usepackage{xcolor}                             % For colors
-\usepackage{authoraftertitle}
+\usepackage{authoraftertitle}                   % For author and title
+\usepackage{lipsum}                             % For dummy text
+\usepackage{natbib}                             % For citations
+\usepackage{nomencl}                            % For nomenclature
+\makenomenclature
+\bibliographystyle{plain}                       % Bibliography style
 \setlength{\headheight}{14.49998pt}             % Adjust head height
 
-\title{Neural Analytics}                       % Title
-\author{Sergio Martinez Aznar}                 % Author
+\title{Neural Analytics: A brief research about Neuroscience and AI}
+\author{Sergio Martínez Aznar}                  
 
 % Header and footer configuration
 \pagestyle{fancy}
@@ -39,23 +44,27 @@
 }
 
 \begin{document}
-
 % Title
 \include{cover/project_cover}
 
 % Giving thanks
-\include{chapters/chapter_0/GivingThanks}
+\include{chapters/chapter_aux/GivingThanks}
+
+% Introduction and Abstract
+\include{chapters/chapter_aux/Introduction}
+\include{chapters/chapter_aux/Abstract}
 
 % Tables of Contents and Figures
-\include{chapters/chapter_0/TableOfContents}
-\include{chapters/chapter_0/TableOfFigures}
+\include{chapters/chapter_aux/TableOfContents}
+\include{chapters/chapter_aux/TableOfFigures}
+\include{chapters/chapter_aux/TableOfNotations}
 
 % Chapters
-\include{chapters/chapter_1/Abstract}
-\include{chapters/chapter_2/Introduction}
+\include{chapters/chapter_1/LoremIpsum}
 
-\bibliographystyle{plain}
-\nocite{*}                                      % Include all references in the bibliography
-\bibliography{bibliography}
+% End chapters
+\include{chapters/chapter_end/Conclusions}
+\include{chapters/chapter_end/Acknowledgments}
+% \include{chapters/chapter_end/Bibliography}
 
 \end{document}
