@@ -1,0 +1,102 @@
+name: Build and Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install TeXLive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full
+
+      - name: Build PDF
+        working-directory: docs
+        run: |
+          pdflatex -interaction=nonstopmode main.tex
+          pdflatex -interaction=nonstopmode main.tex  # Run twice for references
+          
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: docs/main.pdf
+
+  build_binaries:
+    name: Build Binaries
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Build CLI
+        run: cargo build --release -p neural_analytics_cli
+        
+      - name: Build GUI
+        run: cargo build --release -p neural_analytics_gui
+        
+      - name: Prepare artifacts
+        shell: bash
+        run: |
+          mkdir artifacts
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            cp target/release/neural_analytics_cli.exe artifacts/
+            cp target/release/neural_analytics_gui.exe artifacts/
+          else
+            cp target/release/neural_analytics_cli artifacts/
+            cp target/release/neural_analytics_gui artifacts/
+          fi
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ runner.os }}
+          path: artifacts/*
+
+  create_release:
+    name: Create Release
+    needs: [build_docs, build_binaries]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_assets
+          
+      - name: Prepare release assets
+        run: |
+          cd release_assets
+          zip -r documentation.zip documentation/*
+          zip -r neural_analytics_linux.zip binaries-Linux/*
+          zip -r neural_analytics_windows.zip binaries-Windows/*
+          zip -r neural_analytics_macos.zip binaries-macOS/*
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release_assets/documentation.zip
+            release_assets/neural_analytics_linux.zip
+            release_assets/neural_analytics_windows.zip
+            release_assets/neural_analytics_macos.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
