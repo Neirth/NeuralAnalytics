@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "streetsidesoftware.code-spell-checker",
+        "james-yu.latex-workshop",
+        "rust-lang.rust-analyzer",
+        "ms-python.python",
+        "ms-toolsai.tensorboard",
+        "vadimcn.vscode-lldb",
+        "doi.fileheadercomment"
+    ]
+}
