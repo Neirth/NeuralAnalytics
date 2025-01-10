@@ -1,37 +1,37 @@
 \newgeometry{margin=0in}
 
-
-% Alturas ajustadas para que encajen en una sola página
-\newcommand{\blockheight}{21cm} % Altura del bloque amarillo pastel
-\newcommand{\footerheight}{8.3cm} % Altura del bloque negro
+% Heights adjusted to fit on a single page
+\newcommand{\blockheight}{21cm} % Pastel yellow block height
+\newcommand{\footerheight}{8.3cm} % Black block height
 \fontfamily{phv}\selectfont % Start Helvetica font
 
-% Bloque amarillo pastel
+% Pastel yellow block
 \noindent
-\colorbox[HTML]{fef193}{ % Color amarillo pastel
-    \parbox[b][\blockheight][c]{\textwidth}{ % Bloque del tamaño adecuado
+\colorbox[HTML]{feb809}{ % Pastel yellow color
+    \parbox[b][\blockheight][c]{\textwidth}{ % Block of adequate size
 
         \begin{center}
-            {
-                \Huge\textbf{\MyTitle\\[0.2cm]}
-            } 
-            {\Large Grado en Ingenieria Informática} \\
+            {\Huge\textbf{\MyTitle\\[0.5cm]}} 
+            {\Large Bachelor's Degree in Computer Engineering} \\
         \end{center}
     }
-}\vspace{-8pt}% Elimina el espacio entre bloques
+}
 
-% Bloque negro
+\vspace{-8pt} % Remove space between blocks
+
+% Black block
 \noindent
 \colorbox{black}{
-    \parbox[b][\footerheight][c]{\textwidth}{ % Bloque del tamaño adecuado
-        \color{white} % Texto en color blanco
+    \parbox[b][\footerheight][c]{\textwidth}{ % Block of adequate size
+        \color{white} % White text color
         \begin{center}
-            \begin{tabular}{p{0.7\textwidth}c}
-                {\large\textbf{Trabajo Fin de Grado}} \\[0.5cm]
-                \textbf{Autor:} \MyAuthor \\[0.2cm]
-                \textbf{Tutor/es:} Jordi Linares \\[0.2cm]
-                \textbf{Curso Académico:} 2024/2025 \\[0.2cm]
-                \textbf{Fecha de Depósito:} \today
+            \begin{tabular}{p{0.5\textwidth}c}
+                {\large\textbf{Final Degree Project}} \\[0.5cm]
+                \textbf{Author:} \\ \MyAuthor \\[0.2cm]
+                \textbf{Supervisor(s):} \\
+                Jordi Linares Pellicer \\[0.2cm]
+                \textbf{Academic Year:} \\
+                2024/2025 \\[0.2cm]
                 &
                 \raisebox{-0.1\height}{\includegraphics[height=1.5cm]{./assets/logo_universidad.png}}
             
