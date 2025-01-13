@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/rust,rust-analyzer,git,python,jupyternotebooks,visualstudiocode,macos,linux,windows,latex
 # Edit at https://www.toptal.com/developers/gitignore?templates=rust,rust-analyzer,git,python,jupyternotebooks,visualstudiocode,macos,linux,windows,latex
 
+### Project-specific files ###
+**/.devcontainer/qnx-*
+
 ### Git ###
 # Created by git for backups. To disable backups in Git:
 # $ git config --global mergetool.keepBackup false
