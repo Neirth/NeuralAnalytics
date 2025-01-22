@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt]{report}            % Article class with paper size and font
+\documentclass[a4paper,12pt]{book}            % Book class with paper size and font
 
 % Essential packages
 \usepackage[utf8]{inputenc}                     % UTF-8 encoding
@@ -44,6 +44,7 @@
 }
 
 \begin{document}
+
 % Title
 \include{cover/project_cover}
 
@@ -51,20 +52,29 @@
 \include{chapters/chapter_aux/GivingThanks}
 
 % Introduction and Abstract
-\include{chapters/chapter_aux/Introduction}
-\include{chapters/chapter_aux/Abstract}
+\frontmatter
+    % Abstracts
+    \include{chapters/chapter_aux/Resume}
+    \include{chapters/chapter_aux/Abstract}
 
-% Tables of Contents and Figures
-\include{chapters/chapter_aux/TableOfContents}
-\include{chapters/chapter_aux/TableOfFigures}
-\include{chapters/chapter_aux/TableOfNotations}
+    % Tables of Contents and Figures
+    \include{chapters/chapter_aux/TableOfContents}
+    \include{chapters/chapter_aux/TableOfFigures}
+    \include{chapters/chapter_aux/TableOfNotations}
 
 % Chapters
-\include{chapters/chapter_1/LoremIpsum}
+\mainmatter
+    \part{Theoretical Framework}
+        \include{chapters/chapter_1/Introduction}
+
+    \part{Practical Framework}
+        \include{chapters/chapter_2/LoremIpsum}
 
 % End chapters
-\include{chapters/chapter_end/Conclusions}
-\include{chapters/chapter_end/Acknowledgments}
-% \include{chapters/chapter_end/Bibliography}
+\backmatter
+    \include{chapters/chapter_end/Conclusions}
+    \include{chapters/chapter_end/Acknowledgments}
+    % \include{chapters/chapter_end/Bibliography}
+    % \include{chapters/chapter_end/AlphabeticIndex}
 
 \end{document}
