@@ -6,6 +6,7 @@
         "ms-python.python",
         "ms-toolsai.tensorboard",
         "vadimcn.vscode-lldb",
-        "doi.fileheadercomment"
+        "doi.fileheadercomment",
+        "wayou.vscode-todo-highlight",
     ]
 }
