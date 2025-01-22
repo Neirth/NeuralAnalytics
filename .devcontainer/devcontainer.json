@@ -1,25 +1,10 @@
 {
-    "name": "QNX 8 SDK DevContainer",
+    "name": "Bachellor's Degree DevContainer",
     "build": {
         "dockerfile": "Dockerfile.shell",
         "context": ".."
     },
     "customizations": {
-        "vscode": {
-            "extensions": [
-                "qnx.qnx-vscode",
-                "twxs.cmake",
-                "ms-vscode.hexeditor",
-                "wayou.vscode-todo-highlight",
-                "ms-vscode.cpptools",
-                "ms-vscode.cmake-tools",
-                "theqtcompany.qt",
-                "theqtcompany.qt-core",
-                "theqtcompany.qt-cpp",
-                "theqtcompany.qt-qml",
-                "theqtcompany.qt-ui"
-            ]
-        },
         "settings": {
             "terminal.integrated.shell.linux": "/bin/bash"
         }
