@@ -1,57 +1,89 @@
 use std::process::Command;
 use std::path::Path;
 use std::fs;
+use std::io;
 
-fn main() {
-    // Get the project root directory
-    let project_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    // Path to the Python script
-    let script_path = project_root.join("src/main.py");
-    // Path to the build file in ./build
-    let build_file_path = project_root.join("build/neural_analytics.onnx");
-
-    // Check if the Python script exists
-    if !script_path.exists() {
-        panic!("[!] The file main.py is not found in the src folder");
+fn install_requirements(project_root: &Path) {
+    let requirements_path = project_root.join("requirements.txt");
+    
+    if (!requirements_path.exists()) {
+        panic!("[!] Requirements.txt file not found in project directory");
     }
 
-    // Check if the build file already exists
-    if !build_file_path.exists() {
-        // Call the Python script only if the build file does not exist
-        let output = Command::new("python3")
-            .arg(&script_path)
-            .output()
-            .expect("[!] Error executing the Python script");
+    println!("[*] Installing Python dependencies...");
+    let output = Command::new("pip3")
+        .args(["install", "-r"])
+        .arg(&requirements_path)
+        .output()
+        .expect("[!] Error executing pip");
 
-        // Display output or errors from the script in the console
+    if (!output.status.success()) {
+        panic!(
+            "[!] Error installing dependencies: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+    println!("[*] Dependencies installed successfully");
+}
+
+fn build_model(script_path: &Path, build_file_path: &Path) -> io::Result<()> {
+    if !script_path.exists() {
+        panic!("[!] File main.py not found in src folder");
+    }
+
+    if !build_file_path.exists() {
+        let output = Command::new("python3")
+            .arg(script_path)
+            .output()?;
+
         if !output.status.success() {
             eprintln!(
-                "[!] Error in the Python script: {}",
+                "[!] Python script error: {}",
                 String::from_utf8_lossy(&output.stderr)
             );
-        } else {
-            println!(
-                "[*] Script executed successfully: {}",
-                String::from_utf8_lossy(&output.stdout)
-            );
+            return Err(io::Error::new(io::ErrorKind::Other, "Python script failed"));
         }
+
+        println!(
+            "[*] Script executed successfully: {}",
+            String::from_utf8_lossy(&output.stdout)
+        );
     } else {
-        println!("[*] The build file already exists, skipping script execution.");
+        println!("[*] Build file already exists, skipping script execution");
     }
 
-    // Copy the file neural_analytics.onnx
+    Ok(())
+}
+
+fn copy_model_assets(build_file_path: &Path, project_root: &Path) -> io::Result<()> {
     let mut target_dir = Path::new("target")
         .join(std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string()))
         .join("assets");
 
     target_dir = project_root.join("../../").join(target_dir);
 
-    // Create the target directory if it does not exist
-    fs::create_dir_all(&target_dir).expect("[!] OS: Error creating the target directory");
+    fs::create_dir_all(&target_dir)
+        .map_err(|e| io::Error::new(e.kind(), "[!] Error creating target directory"))?;
 
-    // Copy the file
     let target_path = target_dir.join("neural_analytics.onnx");
-    fs::copy(&build_file_path, &target_path).expect("[!] OS: Error copying the file");
+    fs::copy(build_file_path, &target_path)
+        .map_err(|e| io::Error::new(e.kind(), "[!] Error copying file"))?;
 
     println!("[*] File copied to: {:?}", target_path);
+    Ok(())
+}
+
+fn main() {
+    let project_root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    
+    install_requirements(&project_root);
+
+    let script_path = project_root.join("src/main.py");
+    let build_file_path = project_root.join("build/neural_analytics.onnx");
+
+    build_model(&script_path, &build_file_path)
+        .expect("[!] Failed to build model");
+        
+    copy_model_assets(&build_file_path, project_root)
+        .expect("[!] Failed to copy model assets");
 }

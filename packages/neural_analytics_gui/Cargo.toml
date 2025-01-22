@@ -1,0 +1,13 @@
+[package]
+name = "neural_analytics_gui"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sergio Martinez <7413024+Neirth@users.noreply.github.com>"]
+description = "GUI interface for Neural Analytics project"
+
+[dependencies]
+# GUI dependencies
+slint = { version = "1.3", default-features = false, features = ["compat-1-2", "unsafe-single-threaded", "libm", "renderer-software"] }
+
+# Workspace dependencies
+neural_analytics_core = { path = "../neural_analytics_core" }
