@@ -1,13 +1,14 @@
 # --- Builder stage (compilar Rust desde fuente) ---
-FROM --platform=linux/amd64 ubuntu:22.04 AS builder
+FROM --platform=linux/amd64 ubuntu:20.04 AS builder
 
 # Configurar shell a bash
 SHELL ["/bin/bash", "-c"]
 
 # Instalar dependencias necesarias
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -yqq \
     build-essential cmake gcc g++ libssl-dev git python3 \
-    curl pkg-config ninja-build gcc-aarch64-linux-gnu && \
+    curl pkg-config ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clonar Rust desde fuente
@@ -19,6 +20,12 @@ COPY .devcontainer/qnx-license /root/.qnx
 
 # Añadir configuración de montaje del SDK de QNX
 COPY .devcontainer/qnx-sdk /opt/qnx-sdk
+
+# Deshabilitamos el backtrace para QNX
+COPY .devcontainer/patchs/rust_backtrace.patch /mono-rust/rust_backtrace.patch
+
+# Aplicar parches
+RUN git apply rust_backtrace.patch
 
 # Configurar entorno de compilación
 RUN mkdir -p /opt/qnx-sdk
@@ -32,41 +39,56 @@ RUN export QNX_SDP_HOME=/opt/qnx-sdk && \
 # Cargar entorno del SDK de QNX
 RUN echo 'source ${QNX_SDP_HOME}/qnxsdp-env.sh' >> /root/.bashrc
 
-# Configurar entorno de compilación de Rust
-RUN export build_env=' \
-    CC_aarch64-unknown-nto-qnx710=qcc \
-    CFLAGS_aarch64-unknown-nto-qnx710=-Vgcc_ntoaarch64le_cxx \
-    CXX_aarch64-unknown-nto-qnx710=qcc \
-    AR_aarch64_unknown_nto_qnx710=ntoaarch64-ar \
-    CC_x86_64-pc-nto-qnx710=qcc \
-    CFLAGS_x86_64-pc-nto-qnx710=-Vgcc_ntox86_64_cxx \
-    CXX_x86_64-pc-nto-qnx710=qcc \
-    AR_x86_64_pc_nto_qnx710=ntox86_64-ar \
-' && env $build_env
+# Overwrite config.toml to enable all targets + cargo, host & cross compiler for QNX
+RUN echo 'profile = "compiler"' >> config.toml && \
+    echo 'change-id = 115898' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[build]' >> config.toml && \
+    echo 'docs = false' >> config.toml && \
+    echo 'extended = true' >> config.toml && \
+    echo 'tools = ["cargo"]' >> config.toml && \
+    echo 'target = ["x86_64-unknown-linux-gnu","aarch64-unknown-linux-gnu","x86_64-pc-nto-qnx710","aarch64-unknown-nto-qnx710"]' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[install]' >> config.toml && \
+    echo 'prefix = "/opt/qnx-rust"' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[target.x86_64-unknown-linux-gnu]' >> config.toml && \
+    echo 'cc = "gcc"' >> config.toml && \
+    echo 'cxx = "g++"' >> config.toml && \
+    echo 'ar = "ar"' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[target.aarch64-unknown-linux-gnu]' >> config.toml && \
+    echo 'cc = "aarch64-linux-gnu-gcc"' >> config.toml && \
+    echo 'cxx = "aarch64-linux-gnu-g++"' >> config.toml && \
+    echo 'ar = "aarch64-linux-gnu-ar"' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[target.x86_64-pc-nto-qnx710]' >> config.toml && \
+    echo 'cc = "qcc"' >> config.toml && \
+    echo 'cxx = "q++"' >> config.toml && \
+    echo 'ar = "ntox86_64-ar"' >> config.toml && \
+    echo -e '\n' >> config.toml && \
+    echo '[target.aarch64-unknown-nto-qnx710]' >> config.toml && \
+    echo 'cc = "qcc"' >> config.toml && \
+    echo 'cxx = "q++"' >> config.toml && \
+    echo 'ar = "ntoaarch64-ar"' >> config.toml
 
-# Configura el compilador de rust
-ENV DESTDIR=/opt/qnx-rust
-
-# Construir el compilador y librerías
-RUN source /opt/qnx-sdk/qnxsdp-env.sh && \
-    env $build_env && \
-    ./x.py build \
-        --target x86_64-pc-nto-qnx710,aarch64-unknown-nto-qnx710,x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu \
-        rustc library/core library/alloc library/std && \
-    ./x.py install
+# Build and install everything
+RUN source /opt/qnx-sdk/qnxsdp-env.sh && ./x.py build --stage 2
+RUN source /opt/qnx-sdk/qnxsdp-env.sh && ./x.py install --stage 2
 
 # --- Runner stage (devcontainer) ---
-FROM --platform=linux/amd64 ubuntu:22.04 AS qnx-devcontainer
+FROM --platform=linux/amd64 brainflow/brainflow:5.16.0 AS qnx-devcontainer
 
 # Configurar shell a bash
 SHELL ["/bin/bash", "-c"]
 
 # Instalar dependencias y herramientas
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -yqq \
         build-essential cmake gcc g++ gdb \
         curl libssl-dev python3 python3-pip \
-        buildah openssh-client bridge-utils \
-        net-tools inetutils-ping qemu-system-aarch64 \
+        openssh-client bridge-utils net-tools \
+        inetutils-ping qemu-system-aarch64 \
         qemu-system-x86 bridge-utils iproute2 dnsmasq \
         gcc-aarch64-linux-gnu && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -83,20 +105,9 @@ RUN export QNX_SDP_HOME=/opt/qnx-sdk && \
     export QNX_TARGET="${QNX_SDP_HOME}/target/qnx" && \
     export PATH="${QNX_HOST}/usr/bin:/opt/qnx-rust/bin:${PATH}"
 
-# Configurar entorno de compilación de Rust
-RUN export build_env=' \
-    CC_aarch64-unknown-nto-qnx710=qcc \
-    CFLAGS_aarch64-unknown-nto-qnx710=-Vgcc_ntoaarch64le_cxx \
-    CXX_aarch64-unknown-nto-qnx710=qcc \
-    AR_aarch64_unknown_nto_qnx710=ntoaarch64-ar \
-    CC_x86_64-pc-nto-qnx710=qcc \
-    CFLAGS_x86_64-pc-nto-qnx710=-Vgcc_ntox86_64_cxx \
-    CXX_x86_64-pc-nto-qnx710=qcc \
-    AR_x86_64_pc_nto_qnx710=ntox86_64-ar \
-' && env $build_env
-
 # Cargar entorno del SDK de QNX
-RUN echo 'source ${QNX_SDP_HOME}/qnxsdp-env.sh' >> /root/.bashrc
+RUN echo 'source /opt/qnx-sdk/qnxsdp-env.sh' >> /root/.bashrc
+RUN echo 'PATH="/opt/qnx-rust/bin:${PATH}"' >> /root/.bashrc
 
 # Copiar Rust ya instalado
 COPY --from=builder /opt/qnx-rust /opt/qnx-rust
@@ -112,5 +123,12 @@ RUN chmod +x /usr/local/bin/docker_entrypoint.sh
 # Añadir configuración de montaje del SDK de QNX
 COPY .devcontainer/qnx-license /root/.qnx
 
+# Configurar entorno de compilación
+ENV CARGO_TARGET_X86_64_PC_NTO_QNX710_LINKER=qcc
+ENV CARGO_TARGET_AARCH64_UNKNOWN_NTO_QNX710_LINKER=qcc
+ENV CARGO_TARGET_X86_64_PC_NTO_QNX710_RUSTFLAGS="-C linker-flavor=gcc"
+ENV CARGO_TARGET_AARCH64_UNKNOWN_NTO_QNX710_RUSTFLAGS="-C linker-flavor=gcc"
+
 # Comando por defecto para systemd
 ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
+        
