@@ -1,0 +1,34 @@
+From 23b36a4b15e0cb996f119b811548968489f40fc6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sergio=20Mart=C3=ADnez?=
+ <7413024+Neirth@users.noreply.github.com>
+Date: Fri, 17 Jan 2025 11:51:01 +0100
+Subject: [PATCH] Update backtrace.rs
+
+---
+ library/std/src/sys/backtrace.rs | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+diff --git a/library/std/src/sys/backtrace.rs b/library/std/src/sys/backtrace.rs
+index 4d939e175cf2e..5ff7af71cdb01 100644
+--- a/library/std/src/sys/backtrace.rs
++++ b/library/std/src/sys/backtrace.rs
+@@ -110,19 +110,6 @@ unsafe fn _print_fmt(fmt: &mut fmt::Formatter<'_>, print_fmt: PrintFmt) -> fmt::
+                     res = bt_fmt.frame().symbol(frame, symbol);
+                 }
+             });
+-            #[cfg(target_os = "nto")]
+-            if libc::__my_thread_exit as *mut libc::c_void == frame.ip() {
+-                if !hit && start {
+-                    use crate::backtrace_rs::SymbolName;
+-                    res = bt_fmt.frame().print_raw(
+-                        frame.ip(),
+-                        Some(SymbolName::new("__my_thread_exit".as_bytes())),
+-                        None,
+-                        None,
+-                    );
+-                }
+-                return false;
+-            }
+             if !hit && start {
+                 res = bt_fmt.frame().print_raw(frame.ip(), None, None, None);
+             }
