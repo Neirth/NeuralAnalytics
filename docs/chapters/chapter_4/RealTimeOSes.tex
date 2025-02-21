@@ -18,188 +18,181 @@ En algunos casos, estos requisitos de fiabilidad y predictibilidad temporal se e
 
 Un ejemplo paradigmático son los dispositivos médicos implantables, donde la fiabilidad y predictibilidad temporal son requisitos fundamentales para garantizar la seguridad del paciente. Esta expansión ha llevado al desarrollo de estrictos marcos regulatorios y procesos de certificación específicos para cada sector de aplicación.
 
-
 \newpage
 \section{Taxonomía de Sistemas en Tiempo Real}
-
-La clasificación de los sistemas operativos en tiempo real se fundamenta principalmente en la criticidad de sus restricciones temporales. Esta taxonomía, establecida inicialmente por Liu y Layland en 1973 \cite{Siewert_Pratt_2016}, ha evolucionado para adaptarse a las necesidades modernas de la computación en tiempo real. La distinción fundamental se establece entre sistemas estrictos (\textit{hard real-time}) y flexibles (\textit{soft real-time}), aunque algunos autores reconocen una categoría intermedia denominada \textit{firm real-time}.
+    La clasificación de los sistemas operativos en tiempo real se fundamenta principalmente en la criticidad de sus restricciones temporales. Esta taxonomía, establecida inicialmente por Liu y Layland en 1973 \cite{Siewert_Pratt_2016}, ha evolucionado para adaptarse a las necesidades modernas de la computación en tiempo real. La distinción fundamental se establece entre sistemas estrictos (\textit{hard real-time}) y flexibles (\textit{soft real-time}), aunque algunos autores reconocen una categoría intermedia denominada \textit{firm real-time}.
 
     \subsection{Sistemas de Tiempo Real Estricto}
-    Los sistemas de tiempo real estricto (\textbf{hard real-time}) se caracterizan por la intolerancia absoluta a desviaciones temporales. En estos sistemas, el incumplimiento de un plazo temporal se considera un fallo catastrófico del sistema. La expresión matemática que define su comportamiento es:
+        Los sistemas de tiempo real estricto (\textbf{hard real-time}) se caracterizan por la intolerancia absoluta a desviaciones temporales. En estos sistemas, el incumplimiento de un plazo temporal se considera un fallo catastrófico del sistema. La expresión matemática que define su comportamiento es:
 
-    \begin{equation}
-    \forall t \in T: R(t) \leq D(t)
-    \end{equation}
+        \begin{equation}
+        \forall t \in T: R(t) \leq D(t)
+        \end{equation}
 
-    donde $R(t)$ representa el tiempo de respuesta y $D(t)$ el plazo temporal máximo permitido.
+        donde $R(t)$ representa el tiempo de respuesta y $D(t)$ el plazo temporal máximo permitido.
 
-    Ejemplos paradigmáticos incluyen:
-    \begin{itemize}
-        \item \textbf{Sistemas de control nuclear}: Donde los tiempos de respuesta deben ser absolutamente predecibles para garantizar la seguridad
-        \item \textbf{Mecanismos de frenado electrónico}: El ABS debe responder en microsegundos para prevenir accidentes
-        \item \textbf{Sistemas quirúrgicos robotizados}: Requieren sincronización precisa para operaciones de alta precisión
-    \end{itemize}
+        Ejemplos paradigmáticos incluyen:
+        \begin{itemize}
+            \item \textbf{Sistemas de control nuclear}: Donde los tiempos de respuesta deben ser absolutamente predecibles para garantizar la seguridad
+            \item \textbf{Mecanismos de frenado electrónico}: El ABS debe responder en microsegundos para prevenir accidentes
+            \item \textbf{Sistemas quirúrgicos robotizados}: Requieren sincronización precisa para operaciones de alta precisión
+        \end{itemize}
 
     Su implementación requiere sistemas de planificación \textbf{preemptivos} con prioridades estáticas, donde el tiempo máximo de ejecución (WCET) debe ser predecible y verificable. La planificación típicamente se basa en el algoritmo Rate Monotonic (RM) o Earliest Deadline First (EDF).
 
     \newpage
     \subsection{Sistemas de Tiempo Real Flexible}
-    Los sistemas de tiempo real flexible (\textbf{soft real-time}) toleran cierta variabilidad en el cumplimiento de plazos temporales, operando bajo un modelo probabilístico donde:
+        Los sistemas de tiempo real flexible (\textbf{soft real-time}) toleran cierta variabilidad en el cumplimiento de plazos temporales, operando bajo un modelo probabilístico donde:
 
-    \begin{equation}
-    P(R(t) \leq D(t)) \geq p_{min}
-    \end{equation}
+        \begin{equation}
+        P(R(t) \leq D(t)) \geq p_{min}
+        \end{equation}
 
-    siendo $p_{min}$ el nivel mínimo aceptable de cumplimiento temporal.
+        siendo $p_{min}$ el nivel mínimo aceptable de cumplimiento temporal.
 
-    Ejemplos representativos incluyen:
-    \begin{itemize}
-        \item \textbf{Plataformas de streaming multimedia}: Donde ocasionales pérdidas de frames son aceptables
-        \item \textbf{Redes de monitorización industrial}: Con tolerancia a retrasos ocasionales en la actualización de datos
-        \item \textbf{Sistemas de trading automatizado}: Donde el rendimiento promedio es más importante que garantías absolutas
-    \end{itemize}
+        Ejemplos representativos incluyen:
+        \begin{itemize}
+            \item \textbf{Plataformas de streaming multimedia}: Donde ocasionales pérdidas de frames son aceptables
+            \item \textbf{Redes de monitorización industrial}: Con tolerancia a retrasos ocasionales en la actualización de datos
+            \item \textbf{Sistemas de trading automatizado}: Donde el rendimiento promedio es más importante que garantías absolutas
+        \end{itemize}
 
-    Estos sistemas utilizan habitualmente planificadores basados en \textbf{tiempo compartido} con prioridades dinámicas, priorizando la optimización del rendimiento promedio sobre las garantías temporales absolutas. Las políticas de planificación suelen incluir variantes de Round Robin y planificación por prioridades dinámicas.
+        Estos sistemas utilizan habitualmente planificadores basados en \textbf{tiempo compartido} con prioridades dinámicas, priorizando la optimización del rendimiento promedio sobre las garantías temporales absolutas. Las políticas de planificación suelen incluir variantes de Round Robin y planificación por prioridades dinámicas.
 
     \subsection{Consideraciones de Implementación}
-    La elección entre implementaciones estrictas y flexibles debe considerar:
-    \begin{itemize}
-        \item \textbf{Análisis de Riesgos}: Evaluación de consecuencias por fallos temporales
-        \item \textbf{Recursos Disponibles}: Capacidad de procesamiento y memoria
-        \item \textbf{Costes}: Balance entre garantías temporales y complejidad del sistema
-        \item \textbf{Certificación}: Requisitos regulatorios del dominio de aplicación
-    \end{itemize}
+        La elección entre implementaciones estrictas y flexibles debe considerar:
+        \begin{itemize}
+            \item \textbf{Análisis de Riesgos}: Evaluación de consecuencias por fallos temporales
+            \item \textbf{Recursos Disponibles}: Capacidad de procesamiento y memoria
+            \item \textbf{Costes}: Balance entre garantías temporales y complejidad del sistema
+            \item \textbf{Certificación}: Requisitos regulatorios del dominio de aplicación
+        \end{itemize}
 
 \newpage
 \section{Soluciones Comerciales para Hard Real-Time}
 
     \subsection{VxWorks (Wind River Systems)}
-    VxWorks, desarrollado por Wind River Systems, representa el estándar industrial en sistemas embebidos críticos, especialmente en sectores como la aviónica, espacial y médico. Sus características principales incluyen:
+        VxWorks, desarrollado por Wind River Systems, representa el estándar industrial en sistemas embebidos críticos, especialmente en sectores como la aviónica, espacial y médico. Sus características principales incluyen:
 
         \subsubsection{Certificaciones y Cumplimiento Normativo}
-        \begin{itemize}
-            \item DO-178C Level A para sistemas aeroespaciales
-            \item IEC 62304 para dispositivos médicos
-            \item ISO 26262 ASIL D para automoción
-        \end{itemize}
-
+            \begin{itemize}
+                \item DO-178C Level A para sistemas aeroespaciales
+                \item IEC 62304 para dispositivos médicos
+                \item ISO 26262 ASIL D para automoción
+            \end{itemize}
         \subsubsection{Características Técnicas}
-        \begin{itemize}
-            \item \textbf{Kernel}: Microkernel determinista con tiempos de interrupción $\le$ 50 ns
-            \item \textbf{Memoria}: MMU con protección y aislamiento de espacios de memoria
-            \item \textbf{Scheduling}: Planificador con 256 niveles de prioridad y herencia de prioridad
-            \item \textbf{IPC}: Mecanismos de comunicación con latencia determinista
-            \item \textbf{Multiprocesamiento}: Soporte para SMP y AMP con aislamiento de cores
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Kernel}: Microkernel determinista con tiempos de interrupción $\le$ 50 ns
+                \item \textbf{Memoria}: MMU con protección y aislamiento de espacios de memoria
+                \item \textbf{Scheduling}: Planificador con 256 niveles de prioridad y herencia de prioridad
+                \item \textbf{IPC}: Mecanismos de comunicación con latencia determinista
+                \item \textbf{Multiprocesamiento}: Soporte para SMP y AMP con aislamiento de cores
+            \end{itemize}
 
     \subsection{QNX Neutrino (BlackBerry)}
-    QNX Neutrino, adquirido por BlackBerry, destaca por su arquitectura de microkernel distribuido y su alto nivel de fiabilidad:
+        QNX Neutrino, adquirido por BlackBerry, destaca por su arquitectura de microkernel distribuido y su alto nivel de fiabilidad:
 
         \subsubsection{Arquitectura}
-        \begin{itemize}
-            \item \textbf{Microkernel}: Núcleo de menos de 100KB
-            \item \textbf{Servicios}: Arquitectura modular con servicios en espacio de usuario
-            \item \textbf{IPC}: Sistema de mensajería síncrona y asíncrona con copy-on-write
-            \item \textbf{Recuperación}: Capacidad de reinicio de componentes sin afectar al sistema
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Microkernel}: Núcleo de menos de 100KB
+                \item \textbf{Servicios}: Arquitectura modular con servicios en espacio de usuario
+                \item \textbf{IPC}: Sistema de mensajería síncrona y asíncrona con copy-on-write
+                \item \textbf{Recuperación}: Capacidad de reinicio de componentes sin afectar al sistema
+            \end{itemize}
 
         \subsubsection{Características Avanzadas}
-        \begin{itemize}
-            \item \textbf{Tiempo Real}: Garantías temporales con latencias $\le$ 100 $\mu$s
-            \item \textbf{Seguridad}: Modelo de seguridad adaptativo con ASLR
-            \item \textbf{Certificaciones}: IEC 61508 SIL3, IEC 62304 Clase C
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Tiempo Real}: Garantías temporales con latencias $\le$ 100 $\mu$s
+                \item \textbf{Seguridad}: Modelo de seguridad adaptativo con ASLR
+                \item \textbf{Certificaciones}: IEC 61508 SIL3, IEC 62304 Clase C
+            \end{itemize}
 
     \newpage
     \subsection{Zephyr RTOS (Linux Foundation)}
-    Zephyr representa la alternativa open-source para sistemas embebidos críticos:
+        Zephyr representa la alternativa open-source para sistemas embebidos críticos:
 
         \subsubsection{Diseño y Arquitectura}
-        \begin{itemize}
-            \item \textbf{Kernel}: Monolítico o microkernel configurable
-            \item \textbf{Footprint}: Desde 8KB hasta configuraciones completas de 512KB
-            \item \textbf{Scheduling}: Planificador configurable con hasta 32 niveles de prioridad
-            \item \textbf{Certificación}: Proceso de certificación para IEC 61508 SIL 3/4
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Kernel}: Monolítico o microkernel configurable
+                \item \textbf{Footprint}: Desde 8KB hasta configuraciones completas de 512KB
+                \item \textbf{Scheduling}: Planificador configurable con hasta 32 niveles de prioridad
+                \item \textbf{Certificación}: Proceso de certificación para IEC 61508 SIL 3/4
+            \end{itemize}
 
         \subsubsection{Características Destacadas}
-        \begin{itemize}
-            \item \textbf{Drivers}: Más de 350 drivers para diferentes periféricos
-            \item \textbf{Networking}: Soporte nativo para protocolos IoT (BLE, Thread, LoRaWAN)
-            \item \textbf{Seguridad}: Subsistema de seguridad con aislamiento de memoria
-            \item \textbf{Desarrollo}: Herramientas de desarrollo y depuración avanzadas
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Drivers}: Más de 350 drivers para diferentes periféricos
+                \item \textbf{Networking}: Soporte nativo para protocolos IoT (BLE, Thread, LoRaWAN)
+                \item \textbf{Seguridad}: Subsistema de seguridad con aislamiento de memoria
+                \item \textbf{Desarrollo}: Herramientas de desarrollo y depuración avanzadas
+            \end{itemize}
 
 \newpage
 \section{Soluciones Comerciales para Soft Real-Time}
-
     \subsection{Wind River Linux (Wind River Systems)}
-    Wind River Linux representa una solución empresarial certificada, basada en el Proyecto Yocto, específicamente diseñada para el desarrollo de sistemas embebidos que requieren garantías temporales flexibles:
+        Wind River Linux representa una solución empresarial certificada, basada en el Proyecto Yocto, específicamente diseñada para el desarrollo de sistemas embebidos que requieren garantías temporales flexibles:
 
         \subsubsection{Características Principales}
-        \begin{itemize}
-            \item \textbf{Base}: Kernel Linux 5.10 LTS con parche PREEMPT\_RT
-            \item \textbf{Certificaciones}: ISO 9001:2015 y precertificación IEC 62304
-            \item \textbf{Seguridad}: Monitorización continua de CVEs y mitigación
-            \item \textbf{Cumplimiento}: Documentación SBOM y Open Chain 2.1
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Base}: Kernel Linux 5.10 LTS con parche PREEMPT\_RT
+                \item \textbf{Certificaciones}: ISO 9001:2015 y precertificación IEC 62304
+                \item \textbf{Seguridad}: Monitorización continua de CVEs y mitigación
+                \item \textbf{Cumplimiento}: Documentación SBOM y Open Chain 2.1
+            \end{itemize}
 
         \subsubsection{Capacidades Industriales}
-        \begin{itemize}
-            \item \textbf{Soporte}: Mantenimiento garantizado de 5 años con extensión LTS
-            \item \textbf{Actualizaciones}: Sistema OTA seguro mediante OSTree
-            \item \textbf{Validación}: Más de 60.000 casos de prueba automatizados
-            \item \textbf{Servicios}: Soporte profesional y consultoría disponible
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Soporte}: Mantenimiento garantizado de 5 años con extensión LTS
+                \item \textbf{Actualizaciones}: Sistema OTA seguro mediante OSTree
+                \item \textbf{Validación}: Más de 60.000 casos de prueba automatizados
+                \item \textbf{Servicios}: Soporte profesional y consultoría disponible
+            \end{itemize}
 
     \subsection{Poky Linux (Proyecto Yocto)}
-    Poky constituye la distribución de referencia del Proyecto Yocto, proporcionando una base para el desarrollo de sistemas Linux embebidos con capacidades de tiempo real flexible:
+        Poky constituye la distribución de referencia del Proyecto Yocto, proporcionando una base para el desarrollo de sistemas Linux embebidos con capacidades de tiempo real flexible:
 
         \subsubsection{Características Técnicas}
-        \begin{itemize}
-            \item \textbf{Kernel}: Linux con soporte opcional para PREEMPT\_RT
-            \item \textbf{Tiempo Real}: Latencias configurables según necesidades
-            \item \textbf{Optimización}: Control fino sobre el tamaño y rendimiento
-            \item \textbf{Personalización}: Capacidad de eliminar componentes innecesarios
-        \end{itemize}
+            \begin{itemize}
+                \item \textbf{Kernel}: Linux con soporte opcional para PREEMPT\_RT
+                \item \textbf{Tiempo Real}: Latencias configurables según necesidades
+                \item \textbf{Optimización}: Control fino sobre el tamaño y rendimiento
+                \item \textbf{Personalización}: Capacidad de eliminar componentes innecesarios
+            \end{itemize}
 
         \subsubsection{Consideraciones de Desarrollo}
-        \begin{itemize}
-            \item \textbf{Mantenimiento}: Actualización manual de parches de seguridad
-            \item \textbf{Soporte}: Basado en la comunidad, sin garantías comerciales
-            \item \textbf{Certificación}: Requiere proceso de certificación propio
-            \item \textbf{Validación}: Necesidad de desarrollar pruebas específicas
-        \end{itemize}
-
-
+            \begin{itemize}
+                \item \textbf{Mantenimiento}: Actualización manual de parches de seguridad
+                \item \textbf{Soporte}: Basado en la comunidad, sin garantías comerciales
+                \item \textbf{Certificación}: Requiere proceso de certificación propio
+                \item \textbf{Validación}: Necesidad de desarrollar pruebas específicas
+            \end{itemize}
 
 \newpage
 \section{Elección de RTOS para el Proyecto}
-
     La elección de Wind River Linux como sistema operativo para este proyecto se fundamenta en varios factores críticos:
 
     \subsection{Requisitos Temporales del Sistema}
-    El proyecto requiere un sistema de tiempo real flexible (\textbf{soft real-time}), ya que:
-    \begin{itemize}
-        \item La detección de patrones cerebrales para la identificación de colores (rojo/verde) no requiere garantías temporales estrictas
-        \item Las consecuencias de un retraso en la respuesta no comprometen la seguridad del usuario
-        \item El control de iluminación mediante TP-Link Tapo tolera latencias moderadas
-    \end{itemize}
+        El proyecto requiere un sistema de tiempo real flexible (\textbf{soft real-time}), ya que:
+        \begin{itemize}
+            \item La detección de patrones cerebrales para la identificación de colores (rojo/verde) no requiere garantías temporales estrictas
+            \item Las consecuencias de un retraso en la respuesta no comprometen la seguridad del usuario
+            \item El control de iluminación mediante TP-Link Tapo tolera latencias moderadas
+        \end{itemize}
 
     \subsection{Consideraciones Técnicas}
-    Wind River Linux ofrece ventajas significativas para nuestro caso de uso:
-    \begin{itemize}
-        \item \textbf{Compatibilidad}: Garantiza el funcionamiento correcto del SDK de Brainflow
-        \item \textbf{PREEMPT\_RT}: El parche de tiempo real proporciona las garantías temporales necesarias
-        \item \textbf{Actualizaciones}: Sistema OTA que facilita el mantenimiento del software
-    \end{itemize}
+        Wind River Linux ofrece ventajas significativas para nuestro caso de uso:
+        \begin{itemize}
+            \item \textbf{Compatibilidad}: Garantiza el funcionamiento correcto del SDK de Brainflow
+            \item \textbf{PREEMPT\_RT}: El parche de tiempo real proporciona las garantías temporales necesarias
+            \item \textbf{Actualizaciones}: Sistema OTA que facilita el mantenimiento del software
+        \end{itemize}
 
     \subsection{Aspectos Regulatorios}
-    La precertificación IEC 62304 de Wind River Linux resulta crucial dado que:
-    \begin{itemize}
-        \item Reduce significativamente el esfuerzo de certificación del producto final
-        \item Proporciona documentación regulatoria necesaria para el sector médico
-        \item Garantiza el cumplimiento de estándares de seguridad y calidad
-    \end{itemize}
+        La precertificación IEC 62304 de Wind River Linux resulta crucial dado que:
+        \begin{itemize}
+            \item Reduce significativamente el esfuerzo de certificación del producto final
+            \item Proporciona documentación regulatoria necesaria para el sector médico
+            \item Garantiza el cumplimiento de estándares de seguridad y calidad
+        \end{itemize}
 
     Esta combinación de factores hace que Wind River Linux sea la opción más adecuada para nuestro proyecto, proporcionando un equilibrio óptimo entre rendimiento, fiabilidad y cumplimiento normativo.

@@ -1,3 +1,57 @@
 \chapter{Modelos de Deep Learning}\label{ch:deep_learning_models}
 
-\lipsum[1-8]
+\section{Conceptos Fundamentales}
+
+\subsection{Ventanas Temporales}
+Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En nuestro caso, estas ventanas capturan patrones de actividad cerebral asociados con el pensamiento de diferentes colores. La longitud de la ventana temporal es crucial ya que debe ser lo suficientemente larga para capturar los patrones relevantes, pero lo suficientemente corta para permitir una clasificación en tiempo real.
+
+\subsection{One-Hot Encoding}
+El One-Hot Encoding es una técnica de preprocesamiento que utilizamos para transformar las etiquetas categóricas (colores) en vectores binarios. Por ejemplo, para tres colores:
+\begin{itemize}
+    \item Rojo = [1, 0, 0]
+    \item Verde = [0, 1, 0]
+    \item Azul = [0, 0, 1]
+\end{itemize}
+
+\section{Arquitectura del Modelo}
+
+\subsection{Función de Activación ReLU}
+La función ReLU (Rectified Linear Unit) es fundamental en nuestro modelo por sus características:
+\begin{equation}
+    f(x) = max(0, x)
+\end{equation}
+Esta función ayuda a introducir no-linealidad en el modelo mientras mantiene gradientes estables durante el entrenamiento, evitando el problema del desvanecimiento del gradiente.
+
+\subsection{LSTM (Long Short-Term Memory)}
+Las redes LSTM son especialmente útiles en nuestro caso por su capacidad de:
+\begin{itemize}
+    \item Mantener información relevante durante largos períodos
+    \item Detectar patrones temporales en las señales EEG
+    \item Manejar dependencias a largo plazo en los datos
+\end{itemize}
+
+\subsection{Función Softmax}
+La capa de salida utiliza la función Softmax para convertir las puntuaciones del modelo en probabilidades:
+\begin{equation}
+    \sigma(z)_i = \frac{e^{z_i}}{\sum_{j=1}^K e^{z_j}}
+\end{equation}
+Donde $z_i$ representa la puntuación para cada clase (color) y $K$ es el número total de clases.
+
+\section{Evaluación del Modelo}
+
+\subsection{Métricas de Evaluación}
+Para evaluar el rendimiento del modelo utilizamos:
+\begin{itemize}
+    \item \textbf{Accuracy}: Proporción de predicciones correctas sobre el total
+    \item \textbf{Matriz de Confusión}: Visualización detallada de aciertos y errores por clase
+    \item \textbf{F1-Score}: Media armónica entre precisión y recall
+    \item \textbf{ROC-AUC}: Área bajo la curva ROC para evaluación multiclase
+\end{itemize}
+
+\subsection{Validación Cruzada}
+Implementamos validación cruzada k-fold para:
+\begin{itemize}
+    \item Evaluar la robustez del modelo
+    \item Detectar posible sobreajuste
+    \item Obtener estimaciones más confiables del rendimiento
+\end{itemize}
