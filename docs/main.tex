@@ -2,7 +2,7 @@
 
 % Essential packages
 \usepackage[utf8]{inputenc}                     % UTF-8 encoding
-\usepackage[english]{babel}                     % English language
+\usepackage[spanish]{babel}                     % English language
 \usepackage{amsmath,amssymb,amsthm}             % For math
 \usepackage{graphicx}                           % For images
 \usepackage{listings}                           % For code snippets
@@ -13,22 +13,22 @@
 \usepackage{xcolor}                             % For colors
 \usepackage{authoraftertitle}                   % For author and title
 \usepackage{lipsum}                             % For dummy text
-\usepackage{natbib}                             % For citations
 \usepackage{nomencl}                            % For nomenclature
+
 \makenomenclature
-\bibliographystyle{plain}                       % Bibliography style
+\bibliographystyle{plain}                       % APA style for bibliography
 \setlength{\headheight}{14.49998pt}             % Adjust head height
 
-\title{Neural Analytics: A brief research about Neuroscience and AI}
+\title{Neural Analytics: una herramienta software basada en redes neuronales de procesado de EEGs}
 \author{Sergio Martínez Aznar}                  
 
 % Header and footer configuration
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\MyTitle}                         % Left header
+\fancyhead[L]{Neural Analytics}                 % Left header
 \setlength{\headwidth}{16cm}                    % Header width
 \fancyhead[R]{\thepage}                         % Right header (page number)
-\fancyfoot[C]{Author: Sergio Martinez Aznar}    % Centered footer
+\fancyfoot[C]{Autor: Sergio Martinez Aznar}     % Centered footer
 \geometry{margin=2.5cm}                         % Margin settings
 
 % Code configuration
@@ -64,17 +64,27 @@
 
 % Chapters
 \mainmatter
-    \part{Theoretical Framework}
-        \include{chapters/chapter_1/Introduction}
 
-    \part{Practical Framework}
-        \include{chapters/chapter_2/LoremIpsum}
+    \include{chapters/chapter_1/Introduction}
+
+    \part{Marco Teórico}
+        \include{chapters/chapter_2/RegulatoryFramework}
+        \include{chapters/chapter_3/BrainRegions}
+        \include{chapters/chapter_4/RealTimeOSes}
+        \include{chapters/chapter_5/DeepLearningModels}
+
+    \part{Revisión Hardware \& Software}
+        \include{chapters/chapter_6/Brainbit_Device}
+        \include{chapters/chapter_7/RaspberryPi}
+
+    \part{Marco Practico}
+
 
 % End chapters
 \backmatter
     \include{chapters/chapter_end/Conclusions}
     \include{chapters/chapter_end/Acknowledgments}
-    % \include{chapters/chapter_end/Bibliography}
-    % \include{chapters/chapter_end/AlphabeticIndex}
+    \include{chapters/chapter_end/Bibliography}
+    %\include{chapters/chapter_end/AlphabeticIndex}
 
 \end{document}

@@ -1,4 +1,58 @@
-% Chapter 2: Introduction
-\chapter{Introduction}
+% Chapter 2: Introducción
+\chapter{Introducción}
 
-\lipsum[1-8]
+El presente trabajo aborda el diseño y desarrollo de un innovador sistema de automatización del hogar que integra tecnología de interfaz cerebro-computadora (BCI) con sistemas de iluminación inteligentes. La finalidad principal consiste en desarrollar una solución no invasiva que facilite el control del entorno doméstico mediante la lectura e interpretación de ondas cerebrales, empleando dispositivos de iluminación TP-Link Tapo como elementos de control.
+
+La implementación de este proyecto se fundamenta en dos pilares: el procesamiento de señales electroencefalográficas (EEG) mediante aprendizaje profundo y el cumplimiento de la normativa UNE-EN 62304 para dispositivos médicos. Para garantizar la respuesta en tiempo real del sistema, se utiliza Wind River Linux como sistema operativo base.
+
+\section{Motivación}
+Desde que inicié mi formación en ingeniería, siempre he sentido una profunda fascinación por las interfaces cerebro-computadora (BCI) y sus posibles aplicaciones. Este proyecto representa una perfecta síntesis de mis pasiones: la tecnología, la medicina y la innovación. La oportunidad de trabajar en un sistema que combine el procesamiento de señales cerebrales con el control domótico me permite explorar un campo que considero revolucionario para la interacción persona-máquina.
+
+La decisión de trabajar con actuadores domóticos comunes, específicamente bombillas inteligentes, no es casual. Permite demostrar de manera sencilla y visual el funcionamiento del sistema BCI, haciendo tangible una tecnología que a menudo puede parecer abstracta o inalcanzable. Además, este enfoque práctico facilita la comprensión del sistema y su potencial impacto en la vida cotidiana.
+
+El aspecto normativo del proyecto, aunque técnicamente desafiante, representa para mí una oportunidad única de entender cómo llevar una idea innovadora desde el concepto hasta un producto viable en el mercado médico. El proceso de cumplir con la normativa UNE-EN 62304, implementar un sistema en tiempo real y desarrollar una metodología robusta, lejos de ser una limitación, ha enriquecido significativamente mi comprensión de lo que significa desarrollar tecnología médica responsable y segura.
+
+\section{Objetivos}
+Este proyecto tiene como finalidad principal el desarrollo de un sistema de control domótico basado en interfaces cerebro-computadora, buscando hacer más accesible esta tecnología en entornos cotidianos. 
+
+Para alcanzar esta meta, se han establecido los siguientes objetivos específicos:
+
+\begin{itemize}
+    \item \textbf{Cumplimiento del estándar UNE-EN 62304}: Crear una solución que cumpla con la normativa UNE-EN 62304, garantizando la seguridad y fiabilidad del software médico mediante una metodología de desarrollo rigurosa y documentada.
+    
+    \item \textbf{Implementar un clasificador de señales EEG}: Implementar un modelo de aprendizaje profundo para la clasificación de señales EEG, utilizando PyTorch como framework de desarrollo y centrándose en la detección de patrones asociados a la visualización de colores.
+    
+    \item \textbf{Desarrollar un sistema de control BCI}: Crear un sistema que permita el control de dispositivos de iluminación inteligente mediante señales EEG, utilizando la diadema Brainbit como dispositivo de adquisición de señales.
+    
+    \item \textbf{Generar una imagen para la RPi4}: Generar una imagen de sistema operativo personalizada basada en Wind River Linux, asegurando un entorno de ejecución con garantías de tiempo real blando para el procesamiento de señales EEG.
+\end{itemize}
+
+Estos objetivos se han definido considerando tanto los aspectos técnicos como normativos del proyecto, buscando un equilibrio entre la innovación tecnológica y la viabilidad práctica en entornos reales.
+
+\newpage
+\section{Metodología}
+El desarrollo del proyecto sigue una metodología estructurada en varias fases:
+
+\subsection{Fase de Investigación}
+\begin{itemize}
+    \item Estudio de la literatura sobre procesamiento de señales EEG
+    \item Análisis de requisitos normativos para dispositivos médicos
+    \item Evaluación de tecnologías y frameworks disponibles
+\end{itemize}
+
+\subsection{Fase de Desarrollo}
+\begin{itemize}
+    \item Implementación del modelo de clasificación en PyTorch
+    \item Desarrollo del motor de inferencia en Rust
+    \item Integración con el SDK de BrainFlow
+    \item Creación de la imagen personalizada de Wind River Linux
+\end{itemize}
+
+\subsection{Fase de Validación}
+\begin{itemize}
+    \item Pruebas de rendimiento y fiabilidad
+    \item Verificación del cumplimiento normativo
+    \item Evaluación de la usabilidad del sistema
+\end{itemize}
+
+La vertiente práctica del proyecto comprende una descripción exhaustiva del proceso de desarrollo, incluyendo el entrenamiento del modelo de aprendizaje profundo, su incorporación al sistema global y la creación de una imagen personalizada para la Raspberry Pi 4.
