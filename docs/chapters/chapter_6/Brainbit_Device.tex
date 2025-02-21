@@ -1,0 +1,45 @@
+\chapter{BrainBit Headset}
+
+\section{Introducci\'on}
+En este capítulo se describe la implementación del dispositivo \textbf{BrainBit} \cite{brainbit} en nuestro proyecto, centrándonos específicamente en la detección y análisis de la actividad neuronal del \textbf{lóbulo occipital} para distinguir entre la visualización mental de los colores \textbf{rojo y verde}.
+
+\section{Características Técnicas del Dispositivo}
+El BrainBit representa una solución portátil para la electroencefalografía (EEG), destacando por su capacidad de registro mediante \textbf{electrodos secos}. Entre sus especificaciones destacan:
+
+    \begin{itemize}
+        \item \textbf{Canales EEG}: 4 canales (T3, T4, O1, O2).
+        \item \textbf{Frecuencia de muestreo}: 250 Hz.
+        \item \textbf{Interfaz de comunicación}: Bluetooth Low Energy (BLE).
+        \item \textbf{Tiempo de uso continuo}: Hasta 12 horas.
+        \item \textbf{Ubicación de electrodos}: Conforme al sistema 10-20, con sensores en \textbf{O1 y O2} para capturar actividad occipital.
+    \end{itemize}
+
+\section{Relevancia del Lóbulo Occipital en el Procesamiento Visual}
+La corteza occipital constituye el centro neurológico principal para el procesamiento visual. En el Capítulo~\ref{ch:brain_regions}. se profundizó en la correlación entre la visualización mental de colores y la actividad cerebral en esta región, respaldado por investigaciones neurocientíficas relevantes.
+
+\newpage
+
+\section{Metodologías para la Adquisición y Procesamiento}
+La implementación del sistema sigue un protocolo estructurado en tres fases:
+
+    \subsection{Captación de Señales}
+    La colocación precisa de los electrodos \textbf{O1 y O2} sobre la región occipital permite la adquisición de señales. El SDK proporciona herramientas para la captura en tiempo real, incorporando filtrado para minimizar interferencias musculares (EMG) y ambientales.
+
+    \subsection{Acondicionamiento de Señales}
+    Las señales EEG atraviesan una etapa de preprocesamiento mediante filtros digitales, eliminando artefactos y ruido que podrían interferir con el análisis posterior.
+
+    \subsection{Análisis mediante Aprendizaje Profundo}
+    La implementación incorpora modelos de \textbf{aprendizaje profundo} especializados en el análisis de series temporales EEG. Estos sistemas se entrenan para reconocer patrones específicos asociados con la visualización mental de los colores rojo y verde. Los detalles técnicos de estos modelos se expusieron en el Capítulo~\ref{ch:deep_learning_models}..
+
+\section{Campos de Aplicación}
+Esta tecnología encuentra aplicación en diversos sectores:
+
+    \begin{itemize}
+        \item Desarrollo de interfaces cerebro-máquina para asistencia a personas con diversidad funcional
+        \item Sistemas de control en entornos estériles médicos e industriales
+        \item Innovación en sistemas de realidad aumentada y virtual
+    \end{itemize}
+
+\section{Aplicación en este proyecto}
+La aplicación del BrainBit en la discriminación de colores mediante actividad occipital representa un enfoque innovador en interfaces cerebro-computadora. Los resultados iniciales sugieren la viabilidad de identificar patrones EEG distintivos, abriendo nuevas posibilidades para desarrollos futuros.
+
