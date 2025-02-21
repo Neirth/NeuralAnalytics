@@ -35,18 +35,6 @@
       },
       "args": [],
       "cwd": "${workspaceFolder}/packages/neural_analytics_gui"
-    },
-    {
-      "type": "qnx-gdb",
-      "request": "launch",
-      "name": "QNX: Proyecto_Final",
-      "gdb": "gdb",
-      "program": "${command:qnx.autodetectBinary}",
-      "remotePath": "Proyecto_Final",
-      "qnxtarget": "default",
-      "upload": true,
-      "stopAtEntry": true,
-      "preLaunchTask": "${defaultBuildTask}"
     }
   ]
 }
