@@ -23,5 +23,7 @@
             "year": "2025"
         }
     },
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "cSpell.language": "en,es",
+    "editor.formatOnSave": true
 }

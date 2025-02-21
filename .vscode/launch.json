@@ -1,40 +1,52 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug Neural Analytics CLI",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--package=neural_analytics_cli"
-                ]
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/packages/neural_analytics_cli"
-        },
-        {
-            "type": "debugpy",
-            "request": "launch",
-            "name": "Debug Neural Analytics Model Builder",
-            "program": "${workspaceFolder}/packages/neural_analytics_model/src/main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "cwd": "${workspaceFolder}/packages/neural_analytics_model"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug Neural Analytics GUI",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--package=neural_analytics_gui"
-                ]
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/packages/neural_analytics_gui"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Neural Analytics CLI",
+      "cargo": {
+        "args": [
+          "build",
+          "--package=neural_analytics_cli"
+        ]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}/packages/neural_analytics_cli"
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Debug Neural Analytics Model Builder",
+      "program": "${workspaceFolder}/packages/neural_analytics_model/src/main.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/packages/neural_analytics_model"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Neural Analytics GUI",
+      "cargo": {
+        "args": [
+          "build",
+          "--package=neural_analytics_gui"
+        ]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}/packages/neural_analytics_gui"
+    },
+    {
+      "type": "qnx-gdb",
+      "request": "launch",
+      "name": "QNX: Proyecto_Final",
+      "gdb": "gdb",
+      "program": "${command:qnx.autodetectBinary}",
+      "remotePath": "Proyecto_Final",
+      "qnxtarget": "default",
+      "upload": true,
+      "stopAtEntry": true,
+      "preLaunchTask": "${defaultBuildTask}"
+    }
+  ]
 }
