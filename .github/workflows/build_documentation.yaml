@@ -1,0 +1,32 @@
+name: Build Documentation
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up LaTeX
+      run: sudo apt-get update && sudo apt-get install -y texlive-full
+
+    - name: Build documentation
+      run: |
+        cd docs
+        pdflatex main.tex
+        pdflatex main.tex  # Run twice to ensure proper cross-referencing
+
+    - name: Archive documentation
+      uses: actions/upload-artifact@v2
+      with:
+        name: documentation
+        path: docs/main.pdf
