@@ -1,7 +1,7 @@
 {
     "name": "Bachellor's Degree DevContainer",
     "build": {
-        "dockerfile": "Dockerfile.shell",
+        "dockerfile": "Dockerfile",
         "context": ".."
     },
     "customizations": {
@@ -9,12 +9,8 @@
             "terminal.integrated.shell.linux": "/bin/bash"
         }
     },
-    "mounts": [
-        "source=${localEnv:HOME}/.local/sdks/qnx-800-raspberrypi4b/,target=/opt/qnx-sdk,type=bind"
-    ],
     "overrideCommand": false,
 	"privileged": true,
-    "postCreateCommand": "bash -c 'source /opt/qnx-sdk/qnxsdp-env.sh'",
     "runArgs": [
         "--privileged",
         "--net=host",
