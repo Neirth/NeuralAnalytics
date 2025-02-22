@@ -25,9 +25,16 @@ Un ejemplo paradigmático son los dispositivos médicos implantables, donde la f
     \subsection{Sistemas de Tiempo Real Estricto}
         Los sistemas de tiempo real estricto (\textbf{hard real-time}) se caracterizan por la intolerancia absoluta a desviaciones temporales. En estos sistemas, el incumplimiento de un plazo temporal se considera un fallo catastrófico del sistema. La expresión matemática que define su comportamiento es:
 
-        \begin{equation}
-        \forall t \in T: R(t) \leq D(t)
-        \end{equation}
+
+
+        \begin{figure}[h!]
+            \centering
+            \begin{equation}
+                \forall t \in T: R(t) \leq D(t)
+            \end{equation}
+            \caption{Ecuación de sistemas de tiempo real estricto.}
+            \label{fig:hard_real_time_equation}
+        \end{figure}
 
         donde $R(t)$ representa el tiempo de respuesta y $D(t)$ el plazo temporal máximo permitido.
 
@@ -44,9 +51,15 @@ Un ejemplo paradigmático son los dispositivos médicos implantables, donde la f
     \subsection{Sistemas de Tiempo Real Flexible}
         Los sistemas de tiempo real flexible (\textbf{soft real-time}) toleran cierta variabilidad en el cumplimiento de plazos temporales, operando bajo un modelo probabilístico donde:
 
-        \begin{equation}
-        P(R(t) \leq D(t)) \geq p_{min}
-        \end{equation}
+  
+
+        \begin{figure}[h!]
+            \centering
+            \begin{equation}
+                P(R(t) \leq D(t)) \geq p_{min}
+            \end{equation}            \caption{Ecuación de sistemas de tiempo real flexible.}
+            \label{fig:soft_real_time_equation}
+        \end{figure}
 
         siendo $p_{min}$ el nivel mínimo aceptable de cumplimiento temporal.
 
