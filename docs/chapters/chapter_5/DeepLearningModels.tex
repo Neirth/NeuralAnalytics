@@ -1,41 +1,122 @@
 \chapter{Modelos de Deep Learning}\label{ch:deep_learning_models}
 
+A través de este capitulo se describen los modelos de Deep Learning \cite{raschka2022machine} utilizados en el proyecto, así como los conceptos fundamentales y la arquitectura de cada uno de ellos. Además, se detallan las métricas de evaluación y la validación cruzada implementada para evaluar el rendimiento de los modelos.
+
+Esto nos permitirá comprender cómo se han diseñado y entrenado los modelos para clasificar señales EEG en tiempo real, y cómo se han evaluado para garantizar su eficacia y fiabilidad.
+
 \section{Conceptos Fundamentales}
 
 \subsection{Ventanas Temporales}
 Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En nuestro caso, estas ventanas capturan patrones de actividad cerebral asociados con el pensamiento de diferentes colores. La longitud de la ventana temporal es crucial ya que debe ser lo suficientemente larga para capturar los patrones relevantes, pero lo suficientemente corta para permitir una clasificación en tiempo real.
 
 \subsection{One-Hot Encoding}
-El One-Hot Encoding es una técnica de preprocesamiento que utilizamos para transformar las etiquetas categóricas (colores) en vectores binarios. Por ejemplo, para tres colores:
-\begin{itemize}
-    \item Rojo = [1, 0, 0]
-    \item Verde = [0, 1, 0]
-    \item Azul = [0, 0, 1]
-\end{itemize}
+El One-Hot Encoding \cite{raschka2022machine} es una técnica de preprocesamiento que utilizamos para transformar las etiquetas categóricas (colores) en vectores binarios. Por ejemplo, para tres colores:
+
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{c|c}
+        Color & Vector One-Hot \\
+        \hline
+        Rojo & [1, 0, 0] \\
+        Verde & [0, 1, 0] \\
+        Azul & [0, 0, 1]
+    \end{tabular}
+    \caption{Ejemplo de One-Hot Encoding para tres colores.}
+    \label{fig:one_hot_encoding}
+\end{figure}
+
+Esta técnica es crucial cuando trabajamos con datos categóricos que no tienen una relación ordinal entre sí. A diferencia de la codificación de etiquetas ordinales, donde asignamos un valor numérico a cada categoría basándonos en un orden predefinido, One-Hot Encoding crea una columna nueva para cada categoría posible.
+
+Por ejemplo, si tuviéramos una columna de "color" con las opciones "rojo", "verde" y "azul", One-Hot Encoding transformaría esta columna en tres columnas nuevas: "rojo", "verde" y "azul". Cada fila tendría un 1 en la columna correspondiente a su color y 0 en las demás.
+
+Esta representación es especialmente útil para algoritmos de machine learning, ya que evita que el modelo interprete erróneamente una relación ordinal entre las categorías. En nuestro caso, nos aseguramos de que el modelo no asuma que un color es "mayor" o "menor" que otro.
+
+Es importante tener en cuenta que One-Hot Encoding puede aumentar la dimensionalidad de los datos, especialmente si hay muchas categorías posibles. Sin embargo, en nuestro caso, el número de colores es limitado, por lo que este aumento no representa un problema significativo.
 
 \section{Arquitectura del Modelo}
 
 \subsection{Función de Activación ReLU}
 La función ReLU (Rectified Linear Unit) es fundamental en nuestro modelo por sus características:
-\begin{equation}
-    f(x) = max(0, x)
-\end{equation}
-Esta función ayuda a introducir no-linealidad en el modelo mientras mantiene gradientes estables durante el entrenamiento, evitando el problema del desvanecimiento del gradiente.
 
-\subsection{LSTM (Long Short-Term Memory)}
-Las redes LSTM son especialmente útiles en nuestro caso por su capacidad de:
+\begin{figure}[h!]
+    \centering
+    \begin{equation}
+        f(x) = max(0, x)
+    \end{equation}
+    \caption{Ecuación de la función ReLU.}
+    \label{fig:relu_equation}
+\end{figure}
+
+ReLU es una función de activación no lineal que resuelve el problema del desvanecimiento del gradiente presente en otras funciones de activación como tanh o sigmoide. Este problema ocurre cuando, por ejemplo, para valores de entrada grandes ($z_1 = 20$ y $z_2 = 25$), las funciones tanh y sigmoide producen salidas prácticamente idénticas ($\sigma(z_1) \approx \sigma(z_2) \approx 1.0$) debido a su comportamiento asintótico.
+
+Las principales ventajas de ReLU son:
+
 \begin{itemize}
-    \item Mantener información relevante durante largos períodos
-    \item Detectar patrones temporales en las señales EEG
-    \item Manejar dependencias a largo plazo en los datos
+    \item \textbf{Gradiente Constante}: Para valores positivos de entrada, la derivada es siempre 1, lo que evita el problema del desvanecimiento del gradiente.
+    \item \textbf{Computacionalmente Eficiente}: Su implementación es simple y rápida, ya que solo requiere una comparación con cero.
+    \item \textbf{No Linealidad}: A pesar de su simplicidad, mantiene la capacidad de aprender funciones complejas.
+    \item \textbf{Sparse Activation}: Produce activaciones dispersas, ya que cualquier entrada negativa se convierte en cero.
 \end{itemize}
 
-\subsection{Función Softmax}
-La capa de salida utiliza la función Softmax para convertir las puntuaciones del modelo en probabilidades:
+Esta función ayuda a introducir no-linealidad en el modelo mientras mantiene gradientes estables durante el entrenamiento, haciéndola especialmente adecuada para redes neuronales profundas.
+
+\subsection{LSTM (Long Short-Term Memory)}
+
+Las LSTM fueron diseñadas para superar el problema del desvanecimiento del gradiente, que es común en las redes neuronales recurrentes (RNN) estándar. Este problema ocurre debido a la multiplicación repetida de los gradientes durante la retropropagación a través del tiempo (BPTT), lo que puede hacer que los gradientes se vuelvan extremadamente pequeños (desvanecimiento) o extremadamente grandes (explosión).
+
+Para entender mejor este problema, consideremos una RNN con solo una unidad oculta. La derivada de la función de pérdida con respecto a la entrada neta tiene un factor multiplicativo que puede volverse muy pequeño o muy grande dependiendo del valor del peso recurrente. Si el peso recurrente es menor que 1, el gradiente se desvanece; si es mayor que 1, el gradiente explota.
+
+Las LSTM abordan este problema mediante el uso de celdas de memoria que pueden mantener información durante largos períodos. Cada celda de memoria tiene una estructura interna que incluye tres tipos de puertas: la puerta de olvido, la puerta de entrada y la puerta de salida.
+
+\begin{itemize}
+    \item \textbf{Puerta de Olvido (Forget Gate)}: Decide qué información descartar de la celda de memoria. Se calcula como:
+    \begin{equation}
+        f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)
+    \end{equation}
+    \item \textbf{Puerta de Entrada (Input Gate)}: Decide qué nueva información almacenar en la celda de memoria. Se calcula como:
+    \begin{equation}
+        i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)
+    \end{equation}
+    \item \textbf{Valor Candidato (Candidate Value)}: Representa la nueva información que se puede agregar a la celda de memoria. Se calcula como:
+    \begin{equation}
+        \tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)
+    \end{equation}
+    \item \textbf{Puerta de Salida (Output Gate)}: Decide qué parte de la celda de memoria se utilizará para calcular la salida. Se calcula como:
+    \begin{equation}
+        o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)
+    \end{equation}
+\end{itemize}
+
+La celda de memoria se actualiza de la siguiente manera:
 \begin{equation}
-    \sigma(z)_i = \frac{e^{z_i}}{\sum_{j=1}^K e^{z_j}}
+    C_t = f_t \cdot C_{t-1} + i_t \cdot \tilde{C}_t
 \end{equation}
-Donde $z_i$ representa la puntuación para cada clase (color) y $K$ es el número total de clases.
+
+Y la salida de la celda LSTM se calcula como:
+\begin{equation}
+    h_t = o_t \cdot \tanh(C_t)
+\end{equation}
+
+Esta estructura permite a las LSTM mantener gradientes estables durante el entrenamiento, lo que las hace especialmente adecuadas para modelar dependencias a largo plazo en secuencias de datos.
+
+\newpage
+\subsection{Función Softmax}
+La función Softmax es una forma suavizada de la función argmax; en lugar de dar un único índice de clase, proporciona la probabilidad de cada clase. Esto permite calcular probabilidades significativas de clase en configuraciones multiclase (regresión logística multinomial).
+
+En Softmax, la probabilidad de que una muestra con entrada neta $z$ pertenezca a la clase $i$ se puede calcular con un término de normalización en el denominador, que es la suma de las funciones lineales ponderadas exponencialmente:
+
+\begin{figure}[h!]
+    \centering
+    \begin{equation}
+        p(z) = \sigma(z) = \frac{e^{z_i}}{\sum_{j=1}^M e^{z_j}}
+    \end{equation}
+    \caption{Ecuación de la función Softmax.}
+    \label{fig:softmax_equation}
+\end{figure}
+
+Las probabilidades de clase predichas ahora suman 1, como se esperaría. También es notable que la etiqueta de clase predicha es la misma que cuando aplicamos la función argmax a la salida logística.
+
+Podemos pensar en el resultado de la función Softmax como una salida normalizada que es útil para obtener predicciones significativas de pertenencia a clases en configuraciones multiclase. Por lo tanto, cuando construimos un modelo de clasificación multiclase, podemos usar la función Softmax para estimar las probabilidades de pertenencia a cada clase para un lote de ejemplos de entrada.
 
 \section{Evaluación del Modelo}
 
@@ -46,12 +127,4 @@ Para evaluar el rendimiento del modelo utilizamos:
     \item \textbf{Matriz de Confusión}: Visualización detallada de aciertos y errores por clase
     \item \textbf{F1-Score}: Media armónica entre precisión y recall
     \item \textbf{ROC-AUC}: Área bajo la curva ROC para evaluación multiclase
-\end{itemize}
-
-\subsection{Validación Cruzada}
-Implementamos validación cruzada k-fold para:
-\begin{itemize}
-    \item Evaluar la robustez del modelo
-    \item Detectar posible sobreajuste
-    \item Obtener estimaciones más confiables del rendimiento
 \end{itemize}
