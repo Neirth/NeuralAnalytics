@@ -7,6 +7,8 @@
 \usepackage{graphicx}                           % For images
 \usepackage{listings}                           % For code snippets
 \usepackage{hyperref}                           % For clickable links and references
+\usepackage{bookmark}                           % For bookmarks
+\usepackage{makeidx}
 \usepackage{geometry}                           % For margins
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
@@ -16,6 +18,7 @@
 \usepackage{nomencl}                            % For nomenclature
 
 \makenomenclature
+\makeindex
 \bibliographystyle{apalike}                     % APA style for bibliography
 \setlength{\headheight}{14.49998pt}             % Adjust head height
 
@@ -78,13 +81,19 @@
         \include{chapters/chapter_7/RaspberryPi}
 
     \part{Marco Practico}
+        \include{chapters/chapter_8/PracticalAnalytics}
+        \include{chapters/chapter_9/TemporalScheduling}
+        \include{chapters/chapter_10/ModelTraining}
+        \include{chapters/chapter_11/CoreImplementing}
+        \include{chapters/chapter_12/PrototypeTesting}
 
 
 % End chapters
+\bookmarksetup{startatroot}
 \backmatter
     \include{chapters/chapter_end/Conclusions}
     \include{chapters/chapter_end/Acknowledgments}
     \include{chapters/chapter_end/Bibliography}
-    %\include{chapters/chapter_end/AlphabeticIndex}
+    \include{chapters/chapter_end/AlphabeticIndex}
 
 \end{document}
