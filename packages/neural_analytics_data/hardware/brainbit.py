@@ -4,16 +4,20 @@ from brainflow.board_shim import BoardShim, BoardIds, BrainFlowInputParams
 
 from config.settings import BRAINBIT_MAC_DEFAULT, IMPEDANCE_MAP
 
-def configure_board(mac_address=None):
+def configure_board(mac_address: str = None) -> BoardShim:
     """
     Inicializa y configura la conexión con el dispositivo BrainBit.
     """
-    params = BrainFlowInputParams()
-    params.mac_address = mac_address or BRAINBIT_MAC_DEFAULT
-    params.timeout = 20
-    
-    board = BoardShim(BoardIds.BRAINBIT_BOARD, params)
-    return board
+    try:
+        params = BrainFlowInputParams()
+        params.mac_address = mac_address or BRAINBIT_MAC_DEFAULT
+        params.timeout = 20
+        
+        board = BoardShim(BoardIds.BRAINBIT_BOARD, params)
+        return board
+    except Exception as e:
+        print(f"Error configurando BrainBit: {str(e)}")
+        raise
 
 def get_resistance_values(board, electrodes):
     """
