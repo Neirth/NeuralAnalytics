@@ -37,7 +37,7 @@ def main():
     )
     
     # Argumentos disponibles
-    parser.add_argument('--type', choices=['red', 'green'], default='red',
+    parser.add_argument('--type', choices=['red', 'green', 'trash'], default='red',
                       help='Tipo de escenario (red/green)')
     parser.add_argument('--mac',
                       help='Dirección MAC del BrainBit (formato: "A0:B1:C2:D3:E4:F5")')
