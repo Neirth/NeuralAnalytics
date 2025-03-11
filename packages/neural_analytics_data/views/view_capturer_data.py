@@ -46,7 +46,7 @@ def view_capture_screen(term, data_provider, history, state_info, control_event=
         
         # Calcular dimensiones de los gráficos basadas en el tamaño actual
         graph_width = width // 2 - 4
-        graph_height = (height - 10) // 2
+        graph_height = (height - 14) // 2  # Reducido de -10 a -14 para mayor consistencia
         
         # Calcular margen lateral para centrado
         margin_x = (width - graph_width * 2) // 3
@@ -55,8 +55,8 @@ def view_capture_screen(term, data_provider, history, state_info, control_event=
         positions = [
             (margin_x, 5, graph_width, graph_height),                         
             (margin_x * 2 + graph_width, 5, graph_width, graph_height),       
-            (margin_x, 5 + graph_height + 2, graph_width, graph_height),      
-            (margin_x * 2 + graph_width, 5 + graph_height + 2, graph_width, graph_height)
+            (margin_x, 5 + graph_height + 1, graph_width, graph_height),      # Reducido de +2 a +1
+            (margin_x * 2 + graph_width, 5 + graph_height + 1, graph_width, graph_height)  # Reducido de +2 a +1
         ]
             
         # Limpiar pantalla
@@ -96,7 +96,7 @@ def view_capture_screen(term, data_provider, history, state_info, control_event=
             progress = (capture_count, NUM_SAMPLES)
         
         # Mostrar barra de estado
-        view_status_bar(term, height - 5, app_state, message, countdown, progress)
+        view_status_bar(term, height - 7, app_state, message, countdown, progress)  # Cambiado de -5 a -7
         
         # Comprobar input del usuario
         inp = term.inkey(timeout=0.1)

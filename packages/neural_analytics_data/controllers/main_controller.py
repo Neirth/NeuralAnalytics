@@ -18,7 +18,7 @@ from config.settings import (
     CHANNEL_MAP, INITIAL_DELAY, NUM_SAMPLES, WINDOW_SECONDS
 )
 
-from hardware.brainbit import configure_board, get_resistance_values
+from hardware.brainbit import configure_board
 from processing.impedance import ohm_to_kohm
 from views.view_impedance_data import view_impedance_screen
 from views.view_capturer_data import view_capture_screen
