@@ -5,6 +5,8 @@ los valores de impedancia para garantizar un buen contacto de los electrodos.
 """
 
 import time
+import io
+import sys
 from collections import deque
 
 from config.settings import (
@@ -37,7 +39,7 @@ def view_impedance_screen(term, board, history, control_event=None, data_provide
         if f"{electrode}_imp" not in history:
             history[f"{electrode}_imp"] = deque(maxlen=MAX_HISTORY)
     
-    # Contador para actualización periódica (estado estático entre renderizados)
+    # Contador para actualización periódica
     if 'update_count' not in history:
         history['update_count'] = 0
     update_count = history['update_count']
@@ -54,7 +56,7 @@ def view_impedance_screen(term, board, history, control_event=None, data_provide
         
         # Calcular dimensiones de los gráficos basados en el tamaño actual
         graph_width = width // 2 - 4
-        graph_height = (height - 10) // 2
+        graph_height = (height - 14) // 2  # Reducido de 10 a 14 para dejar más espacio
         
         # Calcular margen para mejor centrado
         margin_x = (width - graph_width * 2) // 3
@@ -63,34 +65,35 @@ def view_impedance_screen(term, board, history, control_event=None, data_provide
         positions = {
             "T3": (margin_x, 5),
             "T4": (margin_x * 2 + graph_width, 5),
-            "O1": (margin_x, 5 + graph_height + 2),
-            "O2": (margin_x * 2 + graph_width, 5 + graph_height + 2)
+            "O1": (margin_x, 5 + graph_height + 1),  # Reducido de +2 a +1
+            "O2": (margin_x * 2 + graph_width, 5 + graph_height + 1)  # Reducido de +2 a +1
         }
-            
-        # Limpiar pantalla
-        print(term.clear)
         
-        # Mostrar encabezado
+        # Redirigir stdout temporalmente para capturar salida
+        old_stdout = sys.stdout
+        buffer = io.StringIO()
+        sys.stdout = buffer
+        
+        # Dibujar todos los elementos en el buffer
+        print(term.home + term.clear_eos, end='')
         view_header(term, y_start=1)
         
-        # Obtener valores de impedancia - usar data_provider si está disponible
+        # Obtener valores de impedancia
         if data_provider:
             _, resistance_values = data_provider()
         else:
-            # Fallback al método directo si no hay data_provider
             resistance_values = get_resistance_values(board, electrodes)
             
-        # Verificar si todos los electrodos tienen buena impedancia
+        # Verificar estado de impedancias
         all_ok = all(get_impedance_status(resistance_values[e])[1] <= 2 for e in electrodes)
         
-        # Mensaje según el estado de los electrodos
+        # Mensaje según el estado
         if all_ok:
             status_msg = "¡Todos los electrodos tienen buen contacto! Presione ENTER para continuar"
         else:
             status_msg = "Ajuste los electrodos hasta que todos tengan contacto EXCELENTE o ACEPTABLE"
         
-        # Dibujar gráficos de impedancia para cada electrodo
-        need_sound = False
+        # Dibujar gráficos de impedancia
         for electrode in electrodes:
             value = resistance_values[electrode]
             x, y = positions[electrode]
@@ -100,60 +103,40 @@ def view_impedance_screen(term, board, history, control_event=None, data_provide
                 electrode, value, history, APP_STATE_SETUP
             )
             
-            # Para electrodos con mal contacto (nivel > 2), emitir alerta cada 10 actualizaciones
-            if level > 2 and update_count % 10 == 0:
-                need_sound = True
-                
-        # Emitir alerta de sonido si es necesario (una sola vez por renderizado)
-        if need_sound:
-            play_sound("Mal contacto")
+            # Actualizar historial para este electrodo
+            if f"{electrode}_imp" in history:
+                history[f"{electrode}_imp"].append(value)
         
-        # Mostrar barra de estado
-        view_status_bar(term, height - 5, APP_STATE_SETUP, status_msg)
+        # Barra de estado
+        view_status_bar(term, height - 7, APP_STATE_SETUP, status_msg)
+        
+        # Restaurar stdout y enviar todo el buffer de una vez
+        sys.stdout = old_stdout
+        print(buffer.getvalue(), end='', flush=True)
         
         # Comprobar input del usuario
         key = term.inkey(timeout=0.1, esc_delay=0)
 
         if key:
-            # Imprimir información detallada sobre la tecla presionada
-            key_info = f"Tecla: {repr(key)}, "
-            if hasattr(key, 'code'):
-                key_info += f"Código: {key.code}, "
-            if hasattr(key, 'name'):
-                key_info += f"Nombre: {key.name}, "
-            key_info += f"All OK: {all_ok}"
-            
-            print(term.move_xy(2, height - 3) + term.clear_eol + key_info)
-            
-            # Detectar ENTER de múltiples formas posibles
-            is_enter = (key == '\n' or key == '\r' or 
-                       (hasattr(key, 'name') and key.name == 'KEY_ENTER') or
-                       (hasattr(key, 'code') and key.code == 13))
+            # Imprimir información sobre la tecla
+            debug_msg = f"Tecla: {repr(key)}, código: {key.code if hasattr(key, 'code') else 'N/A'}"
+            print(term.move_xy(2, height - 2) + term.clear_eol + debug_msg, end='', flush=True)
             
             # ENTER: Continuar solo si la impedancia es correcta
-            if is_enter:
-                if all_ok:
-                    print(term.move_xy(2, height - 2) + term.clear_eol + "¡ENTER detectado con buena impedancia!")
-                    play_sound("Impedancia correcta, continuar")
-                    return {'event': 'enter_pressed', 'impedance_ok': True}
-                else:
-                    print(term.move_xy(2, height - 2) + term.clear_eol + "ENTER detectado pero impedancia NO es correcta")
-                    play_sound("Impedancia incorrecta")
+            is_enter = (key.code == term.KEY_ENTER or key == '\n' or key == '\r')
+            if is_enter and all_ok:
+                print(term.move_xy(2, height - 3) + term.clear_eol + "¡ENTER detectado! Avanzando...", end='', flush=True)
+                play_sound("Impedancia correcta, continuar")
+                return {'event': 'key_press', 'key': 'enter', 'impedance_ok': True}
             
-            # ESC o Q: Cancelar en cualquier momento
-            is_escape = (key == 'q' or key == 'Q' or
-                        (hasattr(key, 'code') and key.code == term.KEY_ESCAPE))
-            
-            if is_escape:
-                print(term.move_xy(2, height - 2) + term.clear_eol + "ESC/Q detectado - Cancelando")
+            # ESC o Q: Cancelar
+            elif key.code == term.KEY_ESCAPE or key == 'q' or key == 'Q':
                 play_sound("Operación cancelada")
-                return {'event': 'cancel'}
+                return {'event': 'key_press', 'key': 'escape'}
         
     except Exception as e:
         print(term.move_xy(1, 1) + term.clear + term.bold_red(f"Error: {str(e)}"))
-        view_status_bar(term, height - 5, APP_STATE_ERROR, f"Error al obtener datos de impedancia: {str(e)}")
         time.sleep(3)
         return False
         
-    # Devolver None si no hay eventos especiales
     return None
