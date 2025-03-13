@@ -1,6 +1,6 @@
 ## Neural Analytics - Real-time brain signal analysis with deep learning
 
-![Neural Analytics](https://via.placeholder.com/800x200/0073e6/ffffff?text=Interfaz+BrainFlow)
+![Neural Analytics](https://placehold.co/800x200/ffd433/000000?text=Neural+Analytics&font=raleway)
 
 ## Project Description
 
@@ -31,17 +31,15 @@ This project develops a system for real-time analysis of electroencephalographic
 ## Requirements
 
 - Raspberry Pi 4 Model B (8GB)
-- BrainBit device
-- Tapo Smart Bulb
-- Specific software dependencies (see documentation)
+- BrainBit device and Tapo Smart Bulb
 - Basic knowledge of real-time systems and deep learning.
 
 ## Installation
 
 1. Clone this repository:
      ```
-     git clone https://github.com/username/brainflow-interface.git
-     cd brainflow-interface
+     git clone https://github.dev/Neirth/NeuralAnalytics
+     cd NeuralAnalytics
      ```
 
 2. Configure the BrainBit device according to the documentation provided.
