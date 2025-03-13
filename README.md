@@ -64,10 +64,10 @@ NeuralAnalytics/
 ├── docs/                           # Complete documentation.
 ├── packages/                       # Source code.
 │   ├─── neural_analytics_core/     # Core implementation.
-│   ├─── neural_analytics_data/     # Deep learning models.
-│   ├─── neural_analytics_gui/      # Signal acquisition.
-│   └─── neural_analytics_model/    # General utilities.
-├─── LICENSE.md                     # project license
+│   ├─── neural_analytics_data/     # Data Capturer.
+│   ├─── neural_analytics_gui/      # GUI of Signal acquisition.
+│   └─── neural_analytics_model/    # Model building.
+├─── LICENSE.md                     # Project license
 └─── README.md                      # This file.
 ```
 
