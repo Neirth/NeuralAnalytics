@@ -1,6 +1,4 @@
-## Neural Analytics
-
-## Real-time brain signal analysis with deep learning
+## Neural Analytics - Real-time brain signal analysis with deep learning
 
 ![Neural Analytics](https://via.placeholder.com/800x200/0073e6/ffffff?text=Interfaz+BrainFlow)
 
@@ -68,7 +66,7 @@ NeuralAnalytics/
 │   ├─── neural_analytics_core/     # Core implementation.
 │   ├─── neural_analytics_data/     # Deep learning models.
 │   ├─── neural_analytics_gui/      # Signal acquisition.
-│   └── neural_analytics_model/     # General utilities.
+│   └─── neural_analytics_model/    # General utilities.
 ├─── LICENSE.md                     # project license
 └─── README.md                      # This file.
 ```
