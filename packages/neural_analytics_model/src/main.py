@@ -60,7 +60,7 @@ def main():
         model,
         device,
         input_size=(1, WINDOW_SIZE, 4),
-        output_path='./build/neural_analytics.onnx'
+        output_path='../build/neural_analytics.onnx'
     )
 
     # Close the training log

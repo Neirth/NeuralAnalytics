@@ -1,0 +1,8 @@
+[package]
+name = "neural_analytics_model"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sergio Martinez <7413024+Neirth@users.noreply.github.com>"]
+description = "Model builder interface for Neural Analytics project"
+
+[dependencies]

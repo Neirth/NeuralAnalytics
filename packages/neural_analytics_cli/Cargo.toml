@@ -1,0 +1,8 @@
+[package]
+name = "neural_analytics_cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sergio Martinez <7413024+Neirth@users.noreply.github.com>"]
+description = "CLI tool for neural network analytics"
+
+[dependencies]
