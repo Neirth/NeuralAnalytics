@@ -1,19 +1,33 @@
+# Copyright (C) 2025 Sergio Martínez Aznar
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-Sistema de Captura EEG con BrainBit
-Punto de entrada principal para la aplicación.
+EEG Capture System with BrainBit
+Main entry point for the application.
 
-Este script inicializa el controlador principal que gestiona todo el flujo
-de captura de datos EEG, desde la configuración del dispositivo hasta
-el almacenamiento de los datos capturados.
+This script initializes the main controller that manages the entire flow
+of EEG data capture, from device configuration to
+storage of captured data.
 
-Ejemplos de uso:
-    # Captura con escenario rojo (predeterminado)
+Usage examples:
+    # Capture with red scenario (default)
     python main.py 
     
-    # Captura con escenario verde
+    # Capture with green scenario
     python main.py --type green
     
-    # Especificar MAC personalizada
+    # Specify custom MAC address
     python main.py --mac C8:8F:B6:6D:E1:E2
 """
 
@@ -25,55 +39,55 @@ from controllers.main_controller import NeuralCaptureController
 
 def main():
     """
-    Función principal para iniciar la aplicación de captura EEG.
-    Procesa los argumentos de línea de comandos y ejecuta el controlador.
+    Main function to start the EEG capture application.
+    Processes command line arguments and executes the controller.
     """
-    print("Iniciando Sistema de Captura EEG con BrainBit...\n")
+    print("Starting EEG Capture System with BrainBit...\n")
     
-    # Configurar parser para argumentos de línea de comandos
+    # Configure parser for command line arguments
     parser = argparse.ArgumentParser(
         prog="Neural Capturer",
-        description="Sistema de Captura EEG con BrainBit"
+        description="EEG Capture System with BrainBit"
     )
     
-    # Argumentos disponibles
+    # Available arguments
     parser.add_argument('--type', choices=['red', 'green', 'trash'], default='red',
-                      help='Tipo de escenario (red/green)')
+                      help='Type of scenario (red/green)')
     parser.add_argument('--mac',
-                      help='Dirección MAC del BrainBit (formato: "A0:B1:C2:D3:E4:F5")')
+                      help='MAC address of BrainBit (format: "A0:B1:C2:D3:E4:F5")')
     
-    # Parsear argumentos
+    # Parse arguments
     args = parser.parse_args()
     
     try:
-        # Crear controlador con los parámetros especificados
+        # Create controller with specified parameters
         controller = NeuralCaptureController(
             scenario_type=args.type,
             mac_address=args.mac
         )
         
-        # Ejecutar el flujo principal de captura
-        print(f"Iniciando captura con escenario: {args.type.upper()}")
+        # Execute the main capture flow
+        print(f"Starting capture with scenario: {args.type.upper()}")
         if args.mac:
-            print(f"Usando dirección MAC personalizada: {args.mac}")
+            print(f"Using custom MAC address: {args.mac}")
         
         success = controller.run()
         
-        # Mostrar resultado
+        # Show result
         if success:
-            print("\n[✓] Captura completada con éxito.")
-            print("    Los archivos se han guardado en el directorio data/")
+            print("\n[✓] Capture completed successfully.")
+            print("    Files have been saved to the data/ directory")
             return 0
         else:
-            print("\n[!] La captura se canceló o no se completó correctamente.")
+            print("\n[!] The capture was canceled or not completed correctly.")
             return 1
             
     except KeyboardInterrupt:
-        print("\n\n[!] Operación cancelada por el usuario (Ctrl+C).")
+        print("\n\n[!] Operation canceled by user (Ctrl+C).")
         return 1
     except Exception as e:
-        print(f"\n[!] Error inesperado: {str(e)}")
-        print("\nDetalles del error:")
+        print(f"\n[!] Unexpected error: {str(e)}")
+        print("\nError details:")
         traceback.print_exc()
         return 2
 
