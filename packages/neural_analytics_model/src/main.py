@@ -28,42 +28,42 @@ import os
 import torch
 
 BATCH_SIZE = 64
-DATA_FILE = os.path.join(os.getcwd(), './assets/AUSTRIA_2015_2021.csv')
+WINDOW_SIZE = 19
+DATASET_FOLDER = os.path.join(os.getcwd(), '../' 'dataset')
 
 def main():
-    # Notify about the intention of this module
+    # Notify about the purpose of this module
     print(f'[*] Training module for the {NeuralAnalyticsModel.__name__} model')
 
-    # We try to use the best device as possible
+    # Select the best available device
     device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu')
     torch.set_default_dtype(torch.float32)
-
     print(f'[*] The device to be used will be "{device}"')
 
-    # Prepare dataset
-    dataset = NeuralAnalyticsDataset(DATA_FILE, device)
+    # Prepare the dataset from the folder with class subfolders
+    dataset = NeuralAnalyticsDataset(DATASET_FOLDER, WINDOW_SIZE, device)
     train_dataset, val_dataset = train_test_split(dataset, test_size=0.2, random_state=42)
 
-    # Load the dataset into PyTorch
+    # Load the dataset in PyTorch
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)  # No need to shuffle during validation
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)  # No shuffle in validation
 
-    # Prepare to capture data in TensorBoard
+    # Configure TensorBoard
     writer = SummaryWriter(log_dir="./runs")
 
-    # Train and Test Model
+    # Train and evaluate the model
     model = train_model(train_loader, device, writer)
     evaluate_model(model, val_loader, device, writer)
 
-    # Export Model
+    # Export the model
     export_model(
         model,
         device,
-        input_size=(1, 19, 3),
+        input_size=(1, WINDOW_SIZE, 4),
         output_path='./build/neural_analytics.onnx'
     )
 
-    # Close the training report
+    # Close the training log
     writer.close()
 
 if __name__ == "__main__":

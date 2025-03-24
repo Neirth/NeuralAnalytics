@@ -20,98 +20,85 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-def r2_score_torch(y_true, y_pred):
+def accuracy_torch(outputs, targets):
     """
-    Calculates R^2 using PyTorch.
-
-    :param y_true: Tensor of true values.
-    :param y_pred: Tensor of predicted values.
-    :return: R^2 value.
+    Calculates accuracy using PyTorch.
+    
+    :param outputs: Tensor with model predictions (probabilities)
+    :param targets: Tensor with true labels (in one-hot format)
+    :return: Accuracy value
     """
-    # Calculate the mean of the true values
-    y_true_mean = torch.mean(y_true)
-
-    # Calculate the residual sum of squares and the total sum of squares
-    ss_res = torch.sum((y_true - y_pred) ** 2)  # Residual sum of squares
-    ss_tot = torch.sum((y_true - y_true_mean) ** 2)  # Total sum of squares
-
-    # Calculate R^2
-    r2 = 1 - (ss_res / ss_tot)
-    return r2.item()  # Return as a scalar value
+    # Get the indices of predicted classes
+    _, predicted = torch.max(outputs, dim=1)
+    
+    # Convert targets from one-hot to class indices
+    if len(targets.shape) > 1 and targets.shape[1] > 1:  # if one-hot
+        targets = torch.argmax(targets, dim=1)
+    
+    # Calculate accuracy
+    correct = (predicted == targets).sum().item()
+    total = targets.size(0)
+    
+    return correct / total
 
 def train_model(train_loader, device, writer, epochs=50, learning_rate=0.001):
     """
-    Trains the next value prediction model in the electrical grid using sliding windows.
-
+    Trains the neural analytics classification model.
+    
     :param train_loader: DataLoader for the training set.
-    :param device: Device (CPU or GPU) to train the model.
-    :param writer: TensorBoard writer to log the loss.
+    :param device: Device (CPU or GPU) for training the model.
+    :param writer: TensorBoard writer to log metrics.
     :param epochs: Number of epochs for training.
     :param learning_rate: Learning rate for the optimizer.
     :return: The trained model.
     """
-    # Create a model
+    # Create the model
     model = NeuralAnalyticsModel()
-    model.to(device)  # Move the model to the device
+    model.to(device)  # Move model to device
 
-    # Define the loss function and optimizer
-    criterion = nn.MSELoss()  # Use MSELoss for regression
+    # Define loss function and optimizer
+    criterion = nn.CrossEntropyLoss()  # Use CrossEntropyLoss for classification
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     start_time = time.time()  # Measure training time
 
     # Training
     for epoch in range(epochs):
-        epoch_loss = 0.0  # To store the accumulated loss in each epoch
-        all_outputs = []
-        all_targets = []
-
-        for i, element in enumerate(train_loader):
-            # Unpack the data
-            x = element['window_stack'].to(device)
-            y = element['next_value'].to(device)
-
+        model.train()
+        epoch_loss = 0.0  # To store cumulative loss in each epoch
+        epoch_accuracy = 0.0  # To store cumulative accuracy in each epoch
+        
+        for batch in train_loader:
+            # Unpack data
+            x = batch['window_features'].to(device)
+            y = batch['class'].to(device)
+            
             # Forward pass
             outputs = model(x)
-
-            # Ensure outputs and y have the same shape
-            outputs = torch.squeeze(outputs)
-
-            # Calculate the loss
-            loss = criterion(outputs, y)
-
+            
+            # Calculate loss
+            loss = criterion(outputs, torch.argmax(y, dim=1))
+            
             # Backward pass and optimization
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
             epoch_loss += loss.item()
-
-            # Save predicted and true values to calculate R²
-            all_outputs.append(outputs.detach())
-            all_targets.append(y.detach())
-
-        # Concatenate the lists to get tensors
-        all_outputs = torch.cat(all_outputs)
-        all_targets = torch.cat(all_targets)
-
-        # Average loss per epoch
+            epoch_accuracy += accuracy_torch(outputs, y)
+        
+        # Epoch averages
         avg_loss = epoch_loss / len(train_loader)
-
-        # Calculate R² using the defined function
-        r2 = r2_score_torch(all_targets, all_outputs)
-
-        # Export loss and R² to TensorBoard
+        avg_accuracy = epoch_accuracy / len(train_loader)
+        
+        # Export metrics to TensorBoard
         writer.add_scalar('Loss/train', avg_loss, epoch)
-        writer.add_scalar('R2/train', r2, epoch)
-
-        # Log each epoch with loss and R²
-        print(f'[#] Epoch [{epoch + 1}/{epochs}] -> Loss: {avg_loss:.4f}; R²: {r2:.4f}')
-
+        writer.add_scalar('Accuracy/train', avg_accuracy, epoch)
+        
+        # Log each epoch with loss and accuracy
+        print(f'[#] Epoch [{epoch+1}/{epochs}] -> Loss: {avg_loss:.4f}; Accuracy: {avg_accuracy:.4f}')
+    
     total_time = time.time() - start_time
     print(f'[*] Training completed in {total_time:.2f} seconds.')
-
-    # Close the SummaryWriter
-    writer.close()
-
+    
     return model
