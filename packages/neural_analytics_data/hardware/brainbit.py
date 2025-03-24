@@ -1,4 +1,17 @@
-import math
+# Copyright (C) 2025 Sergio Martínez Aznar
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
 from brainflow.board_shim import BoardShim, BoardIds, BrainFlowInputParams
 
@@ -8,7 +21,7 @@ from processing.impedance import ohm_to_kohm
 
 def configure_board(mac_address=None):
     """
-    Inicializa y configura la conexión con el dispositivo BrainBit.
+    Initializes and configures the connection with the BrainBit device.
     """
     params = BrainFlowInputParams()
     params.mac_address = mac_address or BRAINBIT_MAC_DEFAULT
@@ -19,11 +32,11 @@ def configure_board(mac_address=None):
 
 def get_resistance_values(board, electrodes):
     """
-    Obtiene las medidas de resistencia de los electrodos del BrainBit.
-    NOTA: Esta función asume que el dispositivo ya está en modo de impedancia.
+    Gets the resistance measurements from the BrainBit electrodes.
+    NOTE: This function assumes that the device is already in impedance mode.
     """
     try:
-        # Obtener datos de impedancia (asumiendo que ya estamos en modo impedancia)
+        # Get impedance data (assuming we are already in impedance mode)
         data = board.get_board_data(100)
         
         values = {}
@@ -31,25 +44,25 @@ def get_resistance_values(board, electrodes):
             for electrode in electrodes:
                 imp_channel = IMPEDANCE_MAP[electrode]
                 if imp_channel < data.shape[0]:
-                    # Obtener valores absolutos de resistencia en Ohm
+                    # Get absolute resistance values in Ohm
                     resistance_values_ohm = np.abs(data[imp_channel])
                     
-                    # Convertir a kOhm para el filtrado y procesamiento
+                    # Convert to kOhm for filtering and processing
                     resistance_values_kohm = ohm_to_kohm(resistance_values_ohm)
                     
-                    # Filtrar valores válidos (ahora en kOhm)
+                    # Filter valid values (now in kOhm)
                     valid_values = resistance_values_kohm[(resistance_values_kohm > 1) & (resistance_values_kohm < 5000)]
                     
                     if len(valid_values) > 0:
                         values[electrode] = np.mean(valid_values)
                     else:
-                        values[electrode] = 3000 # Valor por defecto en kOhm
+                        values[electrode] = 3000 # Default value in kOhm
                 else:
-                    values[electrode] = 3000  # Valor por defecto en kOhm
+                    values[electrode] = 3000  # Default value in kOhm
         else:
             values = {electrode: 3000 for electrode in electrodes}
         
         return values
     except Exception as e:
-        print(f"Error obteniendo resistencias: {str(e)}")
+        print(f"Error getting resistances: {str(e)}")
         return {electrode: 3300 for electrode in electrodes}

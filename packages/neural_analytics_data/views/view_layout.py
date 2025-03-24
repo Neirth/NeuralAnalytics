@@ -1,7 +1,21 @@
+# Copyright (C) 2025 Sergio Martínez Aznar
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-Funciones de visualización y layout para la interfaz terminal de la aplicación EEG.
-Este módulo proporciona las funciones base para construir la interfaz de usuario
-en diferentes estados de la aplicación.
+Visualization and layout functions for the EEG application terminal interface.
+This module provides the base functions to build the user interface
+in different application states.
 """
 
 from blessed import Terminal
@@ -16,38 +30,38 @@ from config.settings import (
 from utils.helpers import get_impedance_status, get_color_for_level, get_symbol_and_message
 
 def view_header(term, y_start=1, scenario_type=None):
-    """Dibuja el encabezado de la interfaz usando blessed"""
-    title = "SISTEMA DE CAPTURA EEG - BRAINBIT"
+    """Draws the interface header using blessed"""
+    title = "EEG CAPTURE SYSTEM - BRAINBIT"
     if scenario_type:
-        title += f" - ESCENARIO {scenario_type.upper()}"
+        title += f" - SCENARIO {scenario_type.upper()}"
         
     print(term.move_y(y_start) + term.center(term.bold(title), term.width))
     print(term.move_y(y_start + 2) + term.center("=" * (term.width - 4), term.width))
  
 def view_electrode_graph(term, x_start, y_start, width, height, electrode, value, history, app_state=APP_STATE_SETUP, eeg_value=None):
     """
-    Dibuja una gráfica lineal de impedancia o datos EEG según el estado.
+    Draws a line graph of impedance or EEG data according to the state.
     
     Args:
-        term: Terminal blessed
-        x_start, y_start: Posición inicial para dibujar
-        width, height: Dimensiones de la gráfica
-        electrode: Nombre del electrodo (T3, T4, O1, O2)
-        value: Valor de impedancia actual
-        history: Diccionario con históricos de valores
-        app_state: Estado actual de la aplicación
-        eeg_value: Valor EEG actual (solo para estados no SETUP)
+        term: Blessed terminal
+        x_start, y_start: Initial position for drawing
+        width, height: Graph dimensions
+        electrode: Electrode name (T3, T4, O1, O2)
+        value: Current impedance value
+        history: Dictionary with value history
+        app_state: Current application state
+        eeg_value: Current EEG value (only for non-SETUP states)
     """
-    # Determinar si mostramos impedancia o datos EEG
+    # Determine if we show impedance or EEG data
     show_impedance = (app_state == APP_STATE_SETUP)
     
     if show_impedance:
-        # Procesamiento de impedancia (kOhm)
+        # Impedance processing (kOhm)
         status, level = get_impedance_status(value)
         color_func = get_color_for_level(term, level)
         symbol, message = get_symbol_and_message(level)
         
-        # Añadir valor actual al historial de impedancia
+        # Add current value to impedance history
         if f"{electrode}_imp" not in history:
             history[f"{electrode}_imp"] = deque(maxlen=MAX_HISTORY)
         history[f"{electrode}_imp"].append(value)
@@ -56,11 +70,11 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
         unit = "kΩ"
         current_history = history[f"{electrode}_imp"]
     else:
-        # Procesamiento de datos EEG (μV)
+        # EEG data processing (μV)
         if eeg_value is None:
             eeg_value = 0
             
-        # Añadir valor actual al historial EEG
+        # Add current value to EEG history
         if f"{electrode}_eeg" not in history:
             history[f"{electrode}_eeg"] = deque(maxlen=MAX_HISTORY)
         history[f"{electrode}_eeg"].append(eeg_value)
@@ -68,15 +82,15 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
         display_value = eeg_value
         unit = "μV"
         current_history = history[f"{electrode}_eeg"]
-        level = 1  # No hay niveles para EEG, usar 1 como predeterminado para color verde
+        level = 1  # No levels for EEG, use 1 as default for green color
     
-    # Dibujar marco con más padding
+    # Draw frame with more padding
     print(term.move_xy(x_start, y_start) + "┌" + "─" * (width - 2) + "┐")
     for i in range(height - 2):
         print(term.move_xy(x_start, y_start + i + 1) + "│" + " " * (width - 2) + "│")
     print(term.move_xy(x_start, y_start + height - 1) + "└" + "─" * (width - 2) + "┘")
     
-    # Mostrar etiqueta y valor actual con unidades apropiadas
+    # Show label and current value with appropriate units
     print(term.move_xy(x_start + 3, y_start) + term.bold(f" {electrode} "))
     
     if show_impedance:
@@ -87,37 +101,37 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
         print(term.move_xy(x_start + 3, y_start + 1) + term.clear_eol + 
             f"{display_value:.1f} {unit}")
     
-    # Configurar dimensiones de la gráfica con más padding
-    graph_width = width - 8  # Más padding lateral
-    graph_height = height - 5  # Más padding vertical
-    graph_x = x_start + 4     # Mayor padding desde el borde izquierdo
-    graph_y = y_start + 3     # Mayor padding desde el borde superior
+    # Configure graph dimensions with more padding
+    graph_width = width - 8    # More lateral padding
+    graph_height = height - 5  # More vertical padding
+    graph_x = x_start + 4      # Greater padding from left edge
+    graph_y = y_start + 3      # Greater padding from top edge
     
-    # Calcular valores min y max para escalar la gráfica
+    # Calculate min and max values to scale the graph
     if current_history:
         if show_impedance:
             max_val = max(max(current_history), IMPEDANCE_POOR * 1.1)
             min_val = max(0, min(current_history) * 0.9)
         else:
-            # Para EEG, ajustar escala dinámica
-            max_val = max(max(current_history) * 1.1, 100)  # Mínimo 100 μV de rango
+            # For EEG, adjust dynamic scale
+            max_val = max(max(current_history) * 1.1, 100)  # Minimum 100 μV range
             min_val = min(current_history) * 0.9
     else:
         if show_impedance:
             max_val = IMPEDANCE_POOR * 1.1
             min_val = 0
         else:
-            max_val = 100  # 100 μV por defecto
-            min_val = -100  # -100 μV por defecto
+            max_val = 100   # 100 μV by default
+            min_val = -100  # -100 μV by default
     
-    value_range = max(max_val - min_val, 1)  # Evitar división por cero
+    value_range = max(max_val - min_val, 1)  # Avoid division by zero
     
-    # Dibujar etiquetas de valores con unidad apropiada
+    # Draw value labels with appropriate unit
     print(term.move_xy(graph_x, graph_y + graph_height) + f"{int(min_val)} {unit}")
     print(term.move_xy(graph_x + graph_width - len(str(int(max_val))) - len(unit) - 1, 
                       graph_y + graph_height) + f"{int(max_val)} {unit}")
     
-    # Dibujar líneas de umbral solo para impedancia
+    # Draw threshold lines only for impedance
     if show_impedance:
         poor_pos = int((IMPEDANCE_POOR - min_val) / value_range * graph_width)
         if 0 <= poor_pos < graph_width:
@@ -131,20 +145,20 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
         if 0 <= excellent_pos < graph_width:
             print(term.move_xy(graph_x + excellent_pos, graph_y + graph_height + 1) + term.green(f"E({IMPEDANCE_EXCELLENT})"))
     
-    # Dibujar línea de gráfica
+    # Draw graph line
     for i, val in enumerate(current_history):
         if i >= graph_width:
             break
         
-        # Normalizar valor al rango de altura de la gráfica
+        # Normalize value to graph height range
         try:
             normalized = (val - min_val) / value_range
         except ZeroDivisionError:
-            normalized = 0.5  # Valor central predeterminado
+            normalized = 0.5  # Default center value
             
         y_pos = int(graph_y + graph_height - normalized * graph_height)
         
-        # Determinar color
+        # Determine color
         if show_impedance:
             if val < IMPEDANCE_EXCELLENT:
                 point_color = term.green
@@ -155,15 +169,15 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
             else:
                 point_color = term.red
         else:
-            # Para EEG, una escala de colores según la amplitud
+            # For EEG, a color scale according to amplitude
             point_color = term.green
         
-        # Dibujar punto en la parte superior
+        # Draw point at the top
         if graph_y <= y_pos < graph_y + graph_height:
-            # Dibujar el punto principal
+            # Draw the main point
             print(term.move_xy(graph_x + i, y_pos) + point_color('•'))
             
-            # Rellenar la parte inferior con caracteres más sutiles
+            # Fill the bottom part with more subtle characters
             for fill_y in range(y_pos + 1, graph_y + graph_height):
                 print(term.move_xy(graph_x + i, fill_y) + point_color('│'))
     
@@ -171,27 +185,27 @@ def view_electrode_graph(term, x_start, y_start, width, height, electrode, value
 
 def view_status_bar(term, y_pos, app_state, message="", countdown=None, progress=None):
     """
-    Muestra la barra de estado en la parte inferior.
+    Shows the status bar at the bottom.
     
     Args:
-        term: Terminal blessed
-        y_pos: Posición vertical para la barra de estado
-        app_state: Estado actual de la aplicación
-        message: Mensaje a mostrar
-        countdown: Tupla (tiempo_actual, tiempo_total) para mostrar cuenta regresiva
-        progress: Tupla (progreso_actual, progreso_total) para mostrar barra de progreso
+        term: Blessed terminal
+        y_pos: Vertical position for the status bar
+        app_state: Current application state
+        message: Message to display
+        countdown: Tuple (current_time, total_time) to show countdown
+        progress: Tuple (current_progress, total_progress) to show progress bar
     """
     width = term.width
     
-    # Mostrar línea divisoria
+    # Show dividing line
     print(term.move_xy(1, y_pos) + "=" * (width - 2))
     
-    # Mostrar estado actual
+    # Show current state
     state_messages = {
-        APP_STATE_SETUP: "AJUSTANDO CASCO",
-        APP_STATE_COUNTDOWN: "PREPARANDO CAPTURA",
-        APP_STATE_CAPTURE: "CAPTURANDO DATOS",
-        APP_STATE_COMPLETE: "CAPTURA COMPLETADA",
+        APP_STATE_SETUP: "ADJUSTING HEADSET",
+        APP_STATE_COUNTDOWN: "PREPARING CAPTURE",
+        APP_STATE_CAPTURE: "CAPTURING DATA",
+        APP_STATE_COMPLETE: "CAPTURE COMPLETED",
         APP_STATE_ERROR: "ERROR"
     }
     
@@ -203,31 +217,31 @@ def view_status_bar(term, y_pos, app_state, message="", countdown=None, progress
         APP_STATE_ERROR: term.red
     }
     
-    state_text = state_messages.get(app_state, "DESCONOCIDO")
+    state_text = state_messages.get(app_state, "UNKNOWN")
     color_func = state_colors.get(app_state, lambda x: x)
     
     print(term.move_xy(2, y_pos + 1) + term.clear_eol + 
-          f"Estado: {color_func(term.bold(state_text))} - {message}")
+          f"State: {color_func(term.bold(state_text))} - {message}")
     
-    # Mostrar barra de progreso si es necesario
+    # Show progress bar if needed
     if countdown is not None:
         bar_width = 20
         filled = int((countdown[0] / countdown[1]) * bar_width)
         bar = '■' * filled + '░' * (bar_width - filled)
         print(term.move_xy(width - bar_width - 15, y_pos + 1) + 
-              f"Tiempo: [{bar}] {countdown[0]}s")
+              f"Time: [{bar}] {countdown[0]}s")
     
     elif progress is not None:
         bar_width = 20
         filled = int((progress[0] / progress[1]) * bar_width)
         bar = '■' * filled + '░' * (bar_width - filled)
         print(term.move_xy(width - bar_width - 15, y_pos + 1) + 
-              f"Progreso: [{bar}] {progress[0]}/{progress[1]}")
+              f"Progress: [{bar}] {progress[0]}/{progress[1]}")
     
-    # Mostrar instrucciones
+    # Show instructions
     if app_state == APP_STATE_SETUP:
         print(term.move_xy(2, y_pos + 2) + term.clear_eol + 
-              "Presione ENTER cuando esté listo para comenzar o ESC para cancelar")
+              "Press ENTER when ready to start or ESC to cancel")
     else:
         print(term.move_xy(2, y_pos + 2) + term.clear_eol + 
-              "ESC para cancelar la captura")
+              "ESC to cancel capture")

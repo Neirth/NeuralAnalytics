@@ -1,18 +1,32 @@
+# Copyright (C) 2025 Sergio Martínez Aznar
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-Configuración para el sistema de captura EEG.
+Configuration for the EEG capture system.
 """
 
-# Parámetros de captura
-NUM_SAMPLES = 100              # Número total de muestras a capturar
-WINDOW_SECONDS = 10            # Duración de cada ventana de captura (segundos)
-INITIAL_DELAY = 30             # Retraso inicial antes de comenzar la captura (segundos)
-BEEP_FREQ = 1000               # Frecuencia del sonido de alerta (Hz)
-MAX_HISTORY = 50               # Número máximo de puntos en el historial de gráficas
+# Capture parameters
+NUM_SAMPLES = 100              # Total number of samples to capture
+WINDOW_SECONDS = 10            # Duration of each capture window (seconds)
+INITIAL_DELAY = 30             # Initial delay before starting capture (seconds)
+BEEP_FREQ = 1000               # Alert sound frequency (Hz)
+MAX_HISTORY = 50               # Maximum number of points in the graph history
 
-# Configuración del dispositivo BrainBit
-BRAINBIT_MAC_DEFAULT = "C8:8F:B6:6D:E1:E2"  # Dirección MAC por defecto
+# BrainBit device configuration
+BRAINBIT_MAC_DEFAULT = "C8:8F:B6:6D:E1:E2"  # Default MAC address
 
-# Mapeo de canales EEG
+# EEG channel mapping
 CHANNEL_MAP = {
     "timestamp": 10,
     "T3": 1,
@@ -21,7 +35,7 @@ CHANNEL_MAP = {
     "O2": 4
 }
 
-# Mapeo de canales de impedancia
+# Impedance channel mapping
 IMPEDANCE_MAP = {
     "T3": 5,
     "T4": 6,
@@ -29,22 +43,22 @@ IMPEDANCE_MAP = {
     "O2": 8
 }
 
-# Límites de impedancia (kΩ)
-IMPEDANCIA_TOO_LOW = 200      # Impedancia mínima aceptable (kΩ)
-IMPEDANCE_EXCELLENT = 800     # Impedancia en contacto óptimo (kΩ)
-IMPEDANCE_ACCEPTABLE = 1500   # Impedancia aceptable (kΩ)
-IMPEDANCE_POOR = 2000         # Impedancia con mala conexión (kΩ)
+# Impedance limits (kΩ)
+IMPEDANCE_TOO_LOW = 200      # Minimum acceptable impedance (kΩ)
+IMPEDANCE_EXCELLENT = 800    # Optimal contact impedance (kΩ)
+IMPEDANCE_ACCEPTABLE = 1500  # Acceptable impedance (kΩ)
+IMPEDANCE_POOR = 2000        # Poor connection impedance (kΩ)
 
-# Estados de la aplicación
-APP_STATE_SETUP = "setup"         # Configuración/inicialización del casco
-APP_STATE_COUNTDOWN = "countdown"  # Cuenta regresiva previa a la captura
-APP_STATE_CAPTURE = "capture"      # Captura de datos EEG
-APP_STATE_COMPLETE = "complete"    # Captura completada
-APP_STATE_ERROR = "error"          # Error en la captura
+# Application states
+APP_STATE_SETUP = "setup"          # Headset configuration/initialization
+APP_STATE_COUNTDOWN = "countdown"  # Countdown before capture
+APP_STATE_CAPTURE = "capture"      # EEG data capture
+APP_STATE_COMPLETE = "complete"    # Capture completed
+APP_STATE_ERROR = "error"          # Capture error
 
 if __name__ == "__main__":
-    # Prueba simple de la configuración
-    print("Configuración del sistema de captura EEG:")
+    # Simple configuration test
+    print("EEG capture system configuration:")
     print(f"NUM_SAMPLES = {NUM_SAMPLES}")
     print(f"WINDOW_SECONDS = {WINDOW_SECONDS}")
     print(f"INITIAL_DELAY = {INITIAL_DELAY}")

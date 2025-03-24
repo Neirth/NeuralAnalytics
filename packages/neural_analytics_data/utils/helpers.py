@@ -1,8 +1,22 @@
+# Copyright (C) 2025 Sergio Martínez Aznar
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 
-# Importar configuración
+# Import configuration
 from config.settings import (
-    IMPEDANCIA_TOO_LOW,
+    IMPEDANCE_TOO_LOW,
     IMPEDANCE_EXCELLENT,
     IMPEDANCE_ACCEPTABLE,
     IMPEDANCE_POOR
@@ -14,38 +28,38 @@ def play_sound(message=""):
     pass
 
 def get_impedance_status(value):
-    """Devuelve el estado según el valor de impedancia"""
-    if value < IMPEDANCIA_TOO_LOW:
-        return "CRÍTICO BAJO", 5  # Rojo (contacto demasiado fuerte/cortocircuito)
+    """Returns status based on impedance value"""
+    if value < IMPEDANCE_TOO_LOW:
+        return "CRITICAL LOW", 5  # Red (contact too strong/short circuit)
     elif value < IMPEDANCE_EXCELLENT:
-        return "EXCELENTE", 1  # Verde
+        return "EXCELLENT", 1  # Green
     elif value < IMPEDANCE_ACCEPTABLE:
-        return "ACEPTABLE", 2  # Amarillo
+        return "ACCEPTABLE", 2  # Yellow
     elif value < IMPEDANCE_POOR:
-        return "REVISAR", 3  # Naranja
+        return "CHECK", 3  # Orange
     else:
-        return "CRÍTICO ALTO", 4  # Rojo (mal contacto)
+        return "CRITICAL HIGH", 4  # Red (poor contact)
 
 def get_color_for_level(term, level):
-    """Devuelve el color apropiado según el nivel de impedancia"""
+    """Returns the appropriate color based on impedance level"""
     if level == 1:
         return term.green
     elif level == 2:
         return term.yellow
     elif level == 3:
         return term.magenta
-    else:  # level == 4 o level == 5
+    else:  # level == 4 or level == 5
         return term.red
 
 def get_symbol_and_message(level):
-    """Devuelve el símbolo y mensaje según el nivel de impedancia"""
+    """Returns symbol and message based on impedance level"""
     if level == 1:
-        return "✓", "Contacto óptimo"
+        return "✓", "Optimal contact"
     elif level == 2:
-        return "⚠", "Contacto aceptable"
+        return "⚠", "Acceptable contact"
     elif level == 3:
-        return "!", "Ajustar posición"
+        return "!", "Adjust position"
     elif level == 4:
-        return "✗", "Mal contacto, recolocar"
+        return "✗", "Poor contact, reposition"
     else:  # level == 5
-        return "✗", "Contacto demasiado fuerte o cortocircuito"
+        return "✗", "Contact too strong or short-circuit"
