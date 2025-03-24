@@ -6,7 +6,7 @@ use std::io;
 fn install_requirements(project_root: &Path) {
     let requirements_path = project_root.join("requirements.txt");
     
-    if (!requirements_path.exists()) {
+    if !requirements_path.exists() {
         panic!("[!] Requirements.txt file not found in project directory");
     }
 
@@ -17,7 +17,7 @@ fn install_requirements(project_root: &Path) {
         .output()
         .expect("[!] Error executing pip");
 
-    if (!output.status.success()) {
+    if !output.status.success() {
         panic!(
             "[!] Error installing dependencies: {}",
             String::from_utf8_lossy(&output.stderr)
@@ -33,6 +33,7 @@ fn build_model(script_path: &Path, build_file_path: &Path) -> io::Result<()> {
 
     if !build_file_path.exists() {
         let output = Command::new("python3")
+            .current_dir(script_path.parent().unwrap())
             .arg(script_path)
             .output()?;
 
