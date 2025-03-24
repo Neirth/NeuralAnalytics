@@ -24,6 +24,15 @@
       "cwd": "${workspaceFolder}/packages/neural_analytics_model"
     },
     {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Debug Neural Analytics Data Capturer",
+      "program": "${workspaceFolder}/packages/neural_analytics_data/main.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/packages/neural_analytics_data"
+    },
+    {
       "type": "lldb",
       "request": "launch",
       "name": "Debug Neural Analytics GUI",

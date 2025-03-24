@@ -292,7 +292,7 @@ class NeuralCaptureController:
                         # While we have enough data, save files of 100 rows
                         while len(buffer_data) >= 100:
                             # Prepare directory for saving
-                            base_dir = f"data/{self.scenario_type}/"
+                            base_dir = f"../dataset/{self.scenario_type}/"
                             os.makedirs(base_dir, exist_ok=True)
                             timestamp = time.strftime("%Y%m%d-%H%M%S")
                             filename = f"{base_dir}{self.scenario_type}_{timestamp}_{capture_count:03d}.csv"
