@@ -1,0 +1,62 @@
+import { VerticalBox, GroupBox, HorizontalBox } from "std-widgets.slint";
+import { ElectrodeFeedback, MorphicBackground, PageComponent } from "../components/index.slint";
+
+export component HeadsetCalibrationView inherits PageComponent {
+    public function update_electrode_status(t3: int, t4: int, o1: int, o2: int) {
+        t3_electrode.update_status(calculate_electrode_status(t3));
+        t4_electrode.update_status(calculate_electrode_status(t4));
+        o1_electrode.update_status(calculate_electrode_status(o1));
+        o2_electrode.update_status(calculate_electrode_status(o2));
+    }
+
+    pure function calculate_electrode_status(impedance: int) -> string {
+        if (impedance > 2000) {
+            return "ERROR";
+        } else if (impedance >= 1000 && impedance <= 2000) {
+            return "WARNING";
+        } else {
+            return "OK";
+        }
+    }
+
+    VerticalBox {
+        padding: 100px;
+        alignment: center;
+
+        HorizontalBox {
+            alignment: center;
+            Text {
+                text: "Headset Calibration";
+                font-family: "Source Sans Pro";
+                font-size: 50px;
+                color: #000000;
+            }
+        }
+
+        HorizontalBox {
+            alignment: center;
+
+            t3_electrode := ElectrodeFeedback {
+                electrode: "T3";
+
+            }
+        
+            t4_electrode := ElectrodeFeedback {
+                electrode: "T4";
+            }
+        }
+
+        HorizontalBox {
+            alignment: center;
+
+            o1_electrode := ElectrodeFeedback {
+                electrode: "O1";
+            
+            }
+        
+            o2_electrode := ElectrodeFeedback {
+                electrode: "O2";
+            }
+        }
+    }
+}

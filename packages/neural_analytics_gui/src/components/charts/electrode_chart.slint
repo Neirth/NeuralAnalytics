@@ -1,0 +1,11 @@
+export component ElectrodeChart inherits Rectangle {
+    border-color: #000000;
+
+    pure callback render_electrode_plot(width: length, height: length) -> image;    
+
+    Image {
+        source: root.render_electrode_plot(root.width, root.height);
+        width: root.width;
+        height: root.height;
+    }
+}

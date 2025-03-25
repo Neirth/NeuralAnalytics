@@ -1,14 +1,9 @@
 import { VerticalBox, GroupBox, HorizontalBox } from "std-widgets.slint";
-import { MorphicBackground, UserFeedback } from "../components/index.slint";
+import { MorphicBackground, UserFeedback, PageComponent } from "../components/index.slint";
 
-export component WelcomeUserView inherits Window {
-    MorphicBackground {
-        preferred-width: parent.width;
-        preferred-height: parent.height;
-    }
-
+export component WelcomeUserView inherits PageComponent {
     UserFeedback {
         icon: @image-url("../../assets/images/eeg.png");
-        message: "Turn on the EEG and put it on your head";
+        message: "Turn on the EEG Headband and put it on your head.";
     }
 }

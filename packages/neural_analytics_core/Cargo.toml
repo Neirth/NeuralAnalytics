@@ -13,3 +13,4 @@ tapo = "0.8.0"
 chrono = "0.4.38"
 statig = { version = "0.3.0", features = ["serde", "std"] }
 # brainflow = { path = "/root/brainflow/rust_package/brainflow" }
+tract = "0.21.9"

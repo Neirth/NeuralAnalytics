@@ -1,0 +1,114 @@
+export component MorphicBackground inherits Rectangle {
+    // Properties to customize the background
+    in property <color> primary-color: #ff9a9e;
+    in property <color> secondary-color: #ffdde1;
+    in property <color> accent-color: #fad0c4;
+    
+    // Properties for gradient opacity
+    in property <float> gradient-opacity: 0.8;
+    in property <float> overlay-opacity: 0.6;
+
+    animate background {
+        duration: 3000ms;
+        easing: ease-in-out-sine;
+    }
+    
+    // Main background
+    background: @linear-gradient(40deg, primary-color, secondary-color);
+
+    // g1: Movement with sine waves
+    Rectangle {
+        width: parent.width * 1.2;
+        height: parent.height * 1.2;
+        background: @radial_gradient(circle, rgba(accent-color.red, accent-color.green, accent-color.blue, gradient-opacity), transparent 50%);
+
+        x: (parent.width - self.width) / 2;
+
+        y: (parent.height - self.height) / 2 + sin(animation-tick() / 5s * 360deg) * (parent.height * 0.1) + sin(animation-tick() / 13s * 360deg) * (parent.height * 0.04);
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+
+    // g2: Movement with combined sine and cosine
+    Rectangle {
+        width: parent.width * 1.2;
+        height: parent.height * 1.2;
+        background: @radial_gradient(circle, rgba(primary-color.red, primary-color.green, primary-color.blue, gradient-opacity), transparent 50%);
+
+        x: (parent.width - self.width) / 2 + cos(animation-tick() / 7s * 360deg) * (parent.width * 0.08) + cos(animation-tick() / 11s * 360deg) * (parent.width * 0.04);
+
+        y: (parent.height - self.height) / 2 + sin(animation-tick() / 7s * 360deg) * (parent.height * 0.08) + sin(animation-tick() / 9s * 360deg) * (parent.height * 0.03);
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+
+    // g3: Movement with radial gradient
+    Rectangle {
+        width: parent.width * 1.2;
+        height: parent.height * 1.2;
+        background: @radial_gradient(circle, rgba(secondary-color.red, secondary-color.green, secondary-color.blue, gradient-opacity), transparent 50%);
+
+        x: (parent.width - self.width) / 2 - (parent.width * 0.2) + sin(animation-tick() / 6s * 360deg) * (parent.width * 0.15) + sin(animation-tick() / 17s * 360deg) * (parent.width * 0.04);
+
+        y: (parent.height - self.height) / 2 + (parent.height * 0.08) + sin(animation-tick() / 15s * 360deg) * (parent.height * 0.04);
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+
+    // g4: Movement with combined sine and cosine
+    Rectangle {
+        width: parent.width * 1.2;
+        height: parent.height * 1.2;
+        background: @radial_gradient(circle, rgba(accent-color.red, accent-color.green, accent-color.blue, gradient-opacity), transparent 50%);
+
+        x: (parent.width - self.width) / 2 + sin(animation-tick() / 8s * 360deg) * (parent.width * 0.12) + sin(animation-tick() / 23s * 360deg) * (parent.width * 0.06);
+
+        y: (parent.height - self.height) / 2 + cos(animation-tick() / 4s * 360deg) * (parent.height * 0.07) + cos(animation-tick() / 19s * 360deg) * (parent.height * 0.03);
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+
+    // g5: Element with radial gradient and combined sine and cosine
+    Rectangle {
+        width: parent.width * 1.2;
+        height: parent.height * 1.2;
+        background: @radial_gradient(circle, rgba(255, 255, 255, 0.5), transparent 60%);
+
+        x: (parent.width - self.width) / 2 + sin(animation-tick() / 7.3s * 360deg) * (parent.width * 0.1) + cos(animation-tick() / 13.7s * 360deg) * (parent.width * 0.07);
+
+        y: (parent.height - self.height) / 2 + sin(animation-tick() / 11.9s * 360deg) * (parent.height * 0.08) + cos(animation-tick() / 6.5s * 360deg) * (parent.height * 0.05);
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+
+    // Interactive overlay: covers full background
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: @radial_gradient(circle, rgba(primary-color.red, primary-color.green, primary-color.blue, overlay-opacity), transparent 50%);
+
+        x: 0;
+
+        y: 0;
+
+        animate background {
+            duration: 3000ms;
+            easing: ease-in-out-sine;
+        }
+    }
+}

@@ -7,7 +7,14 @@ description = "GUI interface for Neural Analytics project"
 
 [dependencies]
 # GUI dependencies
-slint = { version = "1.3", default-features = false, features = ["compat-1-2", "unsafe-single-threaded", "libm", "renderer-software"] }
+slint = { version = "1.10.0", default-features = true, features = ["renderer-skia"] }
 
 # Workspace dependencies
 neural_analytics_core = { path = "../neural_analytics_core" }
+
+[build-dependencies]
+slint-build = "1.10.0"
+
+[[bin]]
+name = "neural_analytics_gui"
+path = "src/main.rs"
