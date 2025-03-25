@@ -1,0 +1,89 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import "../../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
+
+export component ElectrodeFeedback inherits Rectangle {
+    in property <string> electrode: "T3";
+    property <string> status: "UNKNOWN";
+    property <image> displayed-icon;
+    property <color> status-color;
+    width: 400px;
+    height: 200px;
+    background: transparent;
+
+    public function update_status(status: string) {
+        self.status = status;
+
+        if (self.status == "OK") {
+            displayed-icon = @image-url("../../../assets/images/check.png");
+            status-color = #4CAF50;
+        } else {
+            displayed-icon = @image-url("../../../assets/images/error.png");
+            status-color = #F44336;
+        }
+    }
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: transparent;
+
+        HorizontalBox {
+            alignment: center;
+            width: parent.width;
+            height: parent.height;
+
+            VerticalBox {
+                alignment: center;
+
+                Image {
+                    source: displayed-icon;
+                    width: 60px;
+                    height: 60px;
+                    preferred-width: 60px;
+                    preferred-height: 60px;
+                }
+            }
+
+            VerticalBox {
+                alignment: center;
+                spacing: 0px;
+
+                Text {
+                    text: "Electrode: " + electrode;
+                    color: #000000;
+                    font-size: 24px;
+                    font-weight: 700;
+                    font-family: "Source Sans Pro";
+                    horizontal-alignment: center;
+                }
+
+                HorizontalBox {
+                    alignment: center;
+
+                    Text {
+                        text: "Status: ";
+                        color: #000000;
+                        font-size: 18px;
+                        font-weight: 500;
+                        font-family: "Source Sans Pro";
+                        horizontal-alignment: center;
+                    }
+    
+                    Text {
+                        text: status;
+                        color: status-color;
+                        font-size: 18px;
+                        font-weight: 500;
+                        font-family: "Source Sans Pro";
+                        horizontal-alignment: center;
+                    }
+                }
+
+            }
+        }
+    }
+
+    init => {
+        update-status("UNKNOWN");
+    }
+}
