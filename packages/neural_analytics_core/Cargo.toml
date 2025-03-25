@@ -11,5 +11,5 @@ neural_analytics_model = { path = "../neural_analytics_model" }
 
 tapo = "0.8.0"
 chrono = "0.4.38"
+statig = { version = "0.3.0", features = ["serde", "std"] }
 # brainflow = { path = "/root/brainflow/rust_package/brainflow" }
-burn = { version = "0.16.0", default-features = false, features = ["ndarray"] }
