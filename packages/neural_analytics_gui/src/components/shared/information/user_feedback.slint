@@ -1,0 +1,34 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+export component UserFeedback {
+    // Propiedades personalizables
+    in property <image> icon: @image-url("../../../../assets/images/eeg.png");
+    in property <string> message: "Turn on the EEG and put it on your head";
+    property <length> icon-width: 100px;
+    property <length> icon-height: 100px;
+    property <length> text-width: 200px;
+    property <int> font-size: 20px / 1px;
+
+    VerticalBox {
+        alignment: center;
+
+        HorizontalBox {
+            alignment: center;
+
+            Image {
+                source: root.icon;
+                width: root.icon-width;
+                height: root.icon-height;
+            }
+
+            Text {
+                vertical-alignment: center;
+                text: root.message;
+                font-family: "Roboto Light";
+                wrap: word-wrap;
+                color: #000000;
+                font-size: root.font-size * 1px;
+                width: root.text-width;
+            }
+        }
+    }
+}
