@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-    "packages/neural_analytics_cli",
     "packages/neural_analytics_core",
     "packages/neural_analytics_gui",
     "packages/neural_analytics_model",

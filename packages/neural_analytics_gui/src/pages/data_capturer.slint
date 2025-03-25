@@ -1,0 +1,117 @@
+import { VerticalBox, GroupBox, HorizontalBox } from "std-widgets.slint";
+import { ElectrodeFeedback, MorphicBackground, PageComponent, ElectrodeChart } from "../components/index.slint";
+
+export component DataCapturerView inherits PageComponent {
+    // Properties
+    property <int> update-counter: 0;
+
+    // Callbacks for plot the chart
+    pure callback render_t3_plot(width: length, height: length) -> image;
+    pure callback render_t4_plot(width: length, height: length) -> image;
+    pure callback render_o1_plot(width: length, height: length) -> image;
+    pure callback render_o2_plot(width: length, height: length) -> image;
+
+    // Callback for get the thinking color
+    pure callback thinking_color_class() -> string;
+
+    // Pure functions for pass to color the correct class
+    pure function get_rgb_class_color(color: string) -> color {
+        if (color == "RED" ) {
+            return #FF0000;
+        } else if (color == "GREEN") {
+            return #00FF00;
+        } else {
+            return #FF00FF;
+        }
+    }
+    
+    VerticalBox {
+        padding: 100px;
+        alignment: start;
+
+        Text {
+            text: "Data Capturer Metrics";
+            font-family: "Source Sans Pro";
+            font-size: 50px;
+            color: #000000;
+        }
+
+        HorizontalBox {
+            alignment: center;
+
+            VerticalBox {
+                alignment: center;
+
+                HorizontalBox {
+                    alignment: center;
+
+                     ElectrodeChart {
+                        width: 300px;
+                        height: 300px;
+
+                        render_electrode_plot(width, height) => {
+                            return render_t3_plot(width, height);
+                        }
+                     }
+
+                     ElectrodeChart {
+                        width: 300px;
+                        height: 300px;
+                        
+                        render_electrode_plot(width, height) => {
+                            return render_t4_plot(width, height);
+                        }
+                     }
+                }
+
+                HorizontalBox {
+                    alignment: center;
+
+                     ElectrodeChart {
+                        width: 300px;
+                        height: 300px;
+
+                        render_electrode_plot(width, height) => {
+                            return render_o1_plot(width, height);
+                        }
+                     }
+
+                     ElectrodeChart {
+                        width: 300px;
+                        height: 300px;
+                        
+                        render_electrode_plot(width, height) => {
+                            return render_o2_plot(width, height);
+                        }
+                     }
+                }
+            }
+        }
+
+        HorizontalBox {
+            alignment: start;
+
+            Text {
+                text: "Thinking color: ";
+                font-family: "Source Sans Pro";
+                font-size: 20px;
+                color: #000000;
+            }
+
+            Text {
+                text: thinking_color_class();
+                font-family: "Source Sans Pro";
+                font-size: 20px;
+                color: get_rgb_class_color(thinking_color_class());
+            }
+        }
+    }
+
+    Timer {
+        interval: 100ms;
+        running: true;
+        triggered => {
+            root.update-counter += 1;
+        }
+    }
+}

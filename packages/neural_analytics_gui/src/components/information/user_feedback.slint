@@ -1,0 +1,35 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import "../../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
+
+export component UserFeedback {
+    in property <image> icon: @image-url("../../../assets/images/eeg.png");
+    in property <string> message: "Turn on the EEG Headband and put it on your head.";
+    property <length> icon-width: 100px;
+    property <length> icon-height: 100px;
+    property <length> text-width: 200px;
+    property <length> font-size: 25px;
+    
+    VerticalBox {
+        alignment: center;
+
+        HorizontalBox {
+            alignment: center;
+
+            Image {
+                source: root.icon;
+                width: root.icon-width;
+                height: root.icon-height;
+            }
+
+            Text {
+                vertical-alignment: center;
+                text: root.message;
+                font-family: "Source Sans Pro";
+                wrap: word-wrap;
+                color: #000000;
+                font-size: root.font-size;
+                width: root.text-width;
+            }
+        }
+    }
+}
