@@ -1,0 +1,60 @@
+import { PageComponent } from "../components/index.slint";
+import "../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
+
+export component LoadingApplicationView inherits PageComponent {
+    // Properties of typing effect
+    property<[string]> project-name: ["N", "e", "u", "r", "a", "l", " ", "A", "n", "a", "l", "y", "t", "i", "c", "s"];
+    property<string> visible-text: "";
+    property<int> current-char: 0;
+    property<duration> typing-speed: 150ms;
+    property<duration> initial-delay: 1500ms;
+    property<bool> delay-finished: false;
+    property<bool> cursor-visible: true;
+
+    callback on-delay-finished;
+    
+    // Timers for the typing effect
+    initial-timer := Timer {
+        running: !delay-finished;
+        interval: initial-delay;
+        triggered => {
+            delay-finished = true;
+            on-delay-finished();
+        }
+    }
+    
+    // Timers for the typing effect
+    timer := Timer {
+        running: delay-finished && current-char < project-name.length;
+        interval: typing-speed;
+        triggered => {
+            if (current-char < project-name.length) {
+                visible-text += project-name[current-char];
+                current-char += 1;
+            }
+        }
+    }
+
+    // Timers for the cursor effect
+    cursor-timer := Timer {
+        running: true;
+        interval: 500ms;
+        triggered => {
+            cursor-visible = !cursor-visible && current-char < project-name.length;
+        }
+    }
+
+    // Render the view
+    VerticalLayout {
+        alignment: center;
+        
+        Text {
+            text: visible-text + (cursor-visible ? "|" : "");
+            font-size: 32px;
+            font-weight: 700;
+            font-family: "Source Sans Pro";
+            horizontal-alignment: center;
+            color: #000000;
+        }
+    }
+}

@@ -1,18 +1,25 @@
 import { MorphicBackground } from "../components/index.slint";
-import { DataCapturerView, HeadsetCalibrationView, WelcomeUserView } from "../pages/index.slint";
+import { DataCapturerView, HeadsetCalibrationView, LoadingApplicationView, WelcomeUserView } from "../pages/index.slint";
 
 export component MainWindow inherits Window {
-    // Current view
-    property <string> current_page: "WelcomeUserView";
-    
-    // Colors for the background
-    property <color> primary_color: #7393B3;
-    property <color> secondary_color: #A7C7E7;
-    property <color> accent_color: #88D8C0;
-
     // Properties of the Window Class
     full-screen: true;
     title: "Neural Analytics - Main Window";
+
+    // Preferred size of the window
+    preferred-width: 1280px;
+    preferred-height: 720px;
+
+    // Current view
+    property <string> current_page: "LoadingApplicationView";
+    
+    // Colors for the background
+    property <color> primary-color: #000000;
+    property <color> secondary-color: #000000;
+    property <color> accent-color: #000000;
+
+    // Property for the loading state
+    property <bool> is-loading: true;
 
     // States of the main window
     states [
@@ -23,6 +30,12 @@ export component MainWindow inherits Window {
         }
 
         idle_state when (current_page == "WelcomeUserView" || current_page == "HeadsetCalibrationView"): {
+            primary-color: #7393B3;
+            secondary-color: #A7C7E7;
+            accent-color: #88D8C0;
+        }
+
+        load_complete_state when (current_page == "LoadingApplicationView" && !is_loading ): {
             primary-color: #7393B3;
             secondary-color: #A7C7E7;
             accent-color: #88D8C0;
@@ -93,6 +106,14 @@ export component MainWindow inherits Window {
 
         render_o2_plot(width, height) => {
             render_o2_plot(width, height)
+        }
+    }
+
+    loading_view := LoadingApplicationView {
+        visible: current_page == "LoadingApplicationView";
+
+        on-delay-finished => {
+            is-loading = !is-loading;
         }
     }
 
