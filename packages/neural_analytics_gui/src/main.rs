@@ -20,7 +20,7 @@ fn main() {
         // main_window.on_thinking_color(f);
 
         // Function to change view in Slint from Core Response
-        main_window.invoke_update_current_view("WelcomeUserView".into());
+        main_window.invoke_update_current_view("LoadingApplicationView".into());
 
         // Function to update impedance status from Core Responses
         main_window.invoke_update_electrode_status(0, 0, 0, 0);
