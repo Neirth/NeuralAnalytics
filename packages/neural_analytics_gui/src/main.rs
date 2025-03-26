@@ -1,4 +1,5 @@
-pub mod libs;
+pub mod constants;
+pub mod utils;
 
 slint::include_modules!();
 
