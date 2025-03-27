@@ -1,9 +1,10 @@
 // Export submodules
+pub mod commands;
 pub mod errors;
 pub mod models;
 pub mod ports;
-pub mod services;
 pub mod state_machine;
+pub mod use_cases;
 
 // Re-exports for common types
 // Uncomment and add specific re-exports as needed
