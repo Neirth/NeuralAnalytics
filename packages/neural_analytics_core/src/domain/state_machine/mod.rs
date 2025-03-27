@@ -8,7 +8,7 @@ use statig::prelude::*;
 pub struct NeuralStateMachine;
 
 pub enum Event {
-    InitializatedCore,
+    InitializedCore,
     HeadsetConnected,
     HeadsetDisconnected,
     HeadsetCalibrated,
@@ -21,7 +21,7 @@ impl NeuralStateMachine {
     #[state]
     fn initialize_application(event: &Event) -> Response<State> {
         match event {
-            Event::InitializatedCore => Transition(State::awaiting_headset_connection()),
+            Event::InitializedCore => Transition(State::awaiting_headset_connection()),
             _ => Super,
         }
     }
@@ -58,7 +58,7 @@ impl NeuralStateMachine {
 fn main() {
     let mut state_machine = NeuralStateMachine::default().state_machine();
     
-    state_machine.handle(&Event::InitializatedCore);
+    state_machine.handle(&Event::InitializedCore);
     state_machine.handle(&Event::HeadsetConnected);
     state_machine.handle(&Event::HeadsetCalibrated);
     state_machine.handle(&Event::CapturedHeadsetData);
