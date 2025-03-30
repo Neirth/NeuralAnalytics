@@ -8,6 +8,8 @@ description = "GUI interface for Neural Analytics project"
 [dependencies]
 # GUI dependencies
 slint = { version = "1.10.0", default-features = true, features = ["renderer-skia"] }
+presage = "0.3.0"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "signal"] }
 
 # Workspace dependencies
 neural_analytics_core = { path = "../neural_analytics_core" }
