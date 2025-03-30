@@ -11,6 +11,10 @@ neural_analytics_model = { path = "../neural_analytics_model" }
 
 tapo = "0.8.0"
 chrono = "0.4.38"
+blackbox_di = "0.1.1"
+presage = "0.3.0"
+async-trait = "0.1.88"
+serde = { version = "1.0", features = ["derive"] }
 statig = { version = "0.3.0", features = ["serde", "std"] }
 # brainflow = { path = "/root/brainflow/rust_package/brainflow" }
 tract = "0.21.9"
