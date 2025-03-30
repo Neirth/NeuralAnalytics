@@ -1,10 +1,9 @@
-pub mod constants;
 pub mod utils;
 
 slint::include_modules!();
 
 fn main() {
-    let main_window = MainWindow::new();
+    let main_window = MainFrame::new();
 
     if main_window.is_ok() {
         let main_window = main_window.unwrap();
