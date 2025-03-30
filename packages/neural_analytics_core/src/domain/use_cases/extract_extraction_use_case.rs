@@ -11,6 +11,7 @@ impl<C, E> CommandHandler<C, E> for ExtractGeneralistDataUseCase
         "extract-generalist-data"
     }
 
+    #[allow(unused_variables)]
     async fn handle(&self, _context: &mut C, command: BoxedCommand) -> Result<Events, E> {
         // Here you would implement the logic to stop the current mode
         // For example, you might want to send a message to the state machine
