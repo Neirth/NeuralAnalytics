@@ -50,6 +50,7 @@ export component MainFrame inherits Window {
 
     // Callbacks for get the thinking color...
     pure callback thinking_color() -> string;
+    pure callback start_core_process() -> bool;
 
     // Functions for set the status of electrodes
     public function update_electrode_status(t3: int, t4: int, o1: int, o2: int) {
@@ -114,21 +115,26 @@ export component MainFrame inherits Window {
 
         on-delay-finished => {
             is-loading = !is-loading;
+
+        }
+
+        on-loading-finished => {
+            start_core_process()
         }
     }
 
     // FIXME: This is for debug the views proposes
-    Timer {
-        interval: 10000ms;
-        running: true;
-        triggered => {
-            if (current_page == "WelcomeUserView") {
-                current_page = "HeadsetCalibrationView";
-            } else if (current_page == "HeadsetCalibrationView") {
-                current_page = "DataCapturerView";
-            } else {
-                current_page = "WelcomeUserView";
-            }
-        }
-    }
+    // Timer {
+    //     interval: 10000ms;
+    //     running: true;
+    //     triggered => {
+    //         if (current_page == "WelcomeUserView") {
+    //             current_page = "HeadsetCalibrationView";
+    //         } else if (current_page == "HeadsetCalibrationView") {
+    //             current_page = "DataCapturerView";
+    //         } else {
+    //             current_page = "WelcomeUserView";
+    //         }
+    //     }
+    // }
 }
