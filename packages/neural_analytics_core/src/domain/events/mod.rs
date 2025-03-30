@@ -1,12 +1,4 @@
-use captured_headset_data_event::CapturedHeadsetDataEvent;
-use headset_calibrated_event::HeadsetCalibratedEvent;
-use headset_calibrating_event::HeadsetCalibratingEvent;
-use headset_connected_event::HeadsetConnectedEvent;
-use headset_disconnected_event::HeadsetDisconnectedEvent;
-use initialized_core_event::InitializedCoreEvent;
-use presage::{event_handler, CommandBus, Commands, Event};
-
-use crate::{domain::models::event_data::EventData, INTERNAL_EVENT_HANDLER};
+use presage::Event;
 
 pub mod captured_headset_data_event;
 pub mod headset_calibrated_event;
@@ -15,117 +7,37 @@ pub mod headset_connected_event;
 pub mod headset_disconnected_event;
 pub mod initialized_core_event;
 
-
-#[event_handler]
-pub async fn handle_captured_headset_data_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, event: CapturedHeadsetDataEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(CapturedHeadsetDataEvent::NAME, &EventData {
-                headset_data: Some(event.headset_data),
-                color_thinking: Some(event.color_thinking),
-                impedance_data: None,
-            });
-        }
-    }
-
-    Ok(Commands::new())
+#[derive(Debug)]
+pub enum NeuralAnalyticsEvents {
+    HeadsetConnectedEvent,
+    HeadsetDisconnectedEvent,
+    HeadsetCalibratingEvent,
+    HeadsetCalibratedEvent,
+    CapturedHeadsetDataEvent,
+    InitializedCoreEvent,
 }
 
-#[event_handler]
-pub async fn handle_headset_calibrated_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, _: HeadsetCalibratedEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(HeadsetCalibratedEvent::NAME, &EventData {
-                headset_data: None,
-                color_thinking: None,
-                impedance_data: None,
-            });
+impl NeuralAnalyticsEvents {
+    pub fn to_string(&self) -> String {
+        match self {
+            NeuralAnalyticsEvents::HeadsetConnectedEvent => headset_connected_event::HeadsetConnectedEvent::NAME.to_string(),
+            NeuralAnalyticsEvents::HeadsetDisconnectedEvent => headset_disconnected_event::HeadsetDisconnectedEvent::NAME.to_string(),
+            NeuralAnalyticsEvents::HeadsetCalibratingEvent => headset_calibrating_event::HeadsetCalibratingEvent::NAME.to_string(),
+            NeuralAnalyticsEvents::HeadsetCalibratedEvent => headset_calibrated_event::HeadsetCalibratedEvent::NAME.to_string(),
+            NeuralAnalyticsEvents::CapturedHeadsetDataEvent => captured_headset_data_event::CapturedHeadsetDataEvent::NAME.to_string(),
+            NeuralAnalyticsEvents::InitializedCoreEvent => initialized_core_event::InitializedCoreEvent::NAME.to_string(),
         }
     }
 
-    Ok(Commands::new())
-}
-
-#[event_handler]
-pub async fn handle_headset_calibrating_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, event: HeadsetCalibratingEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(HeadsetCalibratingEvent::NAME, &EventData {
-                headset_data: None,
-                color_thinking: None,
-                impedance_data: Some(event.impedance_data),
-            });
+    pub fn from_string(event_name: &str) -> Option<Self> {
+        match event_name {
+            headset_connected_event::HeadsetConnectedEvent::NAME => Some(NeuralAnalyticsEvents::HeadsetConnectedEvent),
+            headset_disconnected_event::HeadsetDisconnectedEvent::NAME => Some(NeuralAnalyticsEvents::HeadsetDisconnectedEvent),
+            headset_calibrating_event::HeadsetCalibratingEvent::NAME => Some(NeuralAnalyticsEvents::HeadsetCalibratingEvent),
+            headset_calibrated_event::HeadsetCalibratedEvent::NAME => Some(NeuralAnalyticsEvents::HeadsetCalibratedEvent),
+            captured_headset_data_event::CapturedHeadsetDataEvent::NAME => Some(NeuralAnalyticsEvents::CapturedHeadsetDataEvent),
+            initialized_core_event::InitializedCoreEvent::NAME => Some(NeuralAnalyticsEvents::InitializedCoreEvent),
+            _ => None,
         }
     }
-
-    Ok(Commands::new())
-}
-
-#[event_handler]
-pub async fn handle_headset_connected_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, _: HeadsetConnectedEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(HeadsetConnectedEvent::NAME, &EventData {
-                headset_data: None,
-                color_thinking: None,
-                impedance_data: None,
-            });
-        }
-    }
-
-    Ok(Commands::new())
-}
-
-#[event_handler]
-pub async fn handle_headset_disconnected_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, _: HeadsetDisconnectedEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(HeadsetDisconnectedEvent::NAME, &EventData {
-                headset_data: None,
-                color_thinking: None,
-                impedance_data: None,
-            });
-        }
-    }
-
-    Ok(Commands::new())
-}
-
-#[event_handler]
-pub async fn handle_initialized_core_event(
-    _: &mut CommandBus<presage::Error, presage::Error>, _: InitializedCoreEvent
-) -> Result<presage::Commands, presage::Error> {
-    unsafe {
-        if INTERNAL_EVENT_HANDLER.is_some() {
-            let internal_event_handler = INTERNAL_EVENT_HANDLER.unwrap();
-
-            internal_event_handler(InitializedCoreEvent::NAME, &EventData {
-                headset_data: None,
-                color_thinking: None,
-                impedance_data: None,
-            });
-        }
-    }
-
-    Ok(Commands::new())
 }
