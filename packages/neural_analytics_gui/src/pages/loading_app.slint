@@ -12,6 +12,7 @@ export component LoadingApplicationView inherits PageComponent {
     property<bool> cursor-visible: true;
 
     callback on-delay-finished;
+    callback on-loading-finished;
     
     // Timers for the typing effect
     initial-timer := Timer {
@@ -41,6 +42,10 @@ export component LoadingApplicationView inherits PageComponent {
         interval: 500ms;
         triggered => {
             cursor-visible = !cursor-visible && current-char < project-name.length;
+
+            if (current-char >= project-name.length) {
+                on-loading-finished();
+            }
         }
     }
 
