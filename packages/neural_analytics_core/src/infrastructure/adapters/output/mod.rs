@@ -1,1 +1,1 @@
-pub mod smartbulb_tapo;
+pub mod tapo_smartbulb;
