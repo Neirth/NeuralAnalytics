@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct HeadsetCalibratingEvent {
-    pub impedance_data: HashMap<String, u8>,
+    pub impedance_data: HashMap<String, u16>,
 }
 
 impl presage::Event for HeadsetCalibratingEvent {

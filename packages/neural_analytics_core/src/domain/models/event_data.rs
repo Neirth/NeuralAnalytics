@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
+
 pub struct EventData {
-    pub headset_data: Option<Vec<Vec<u8>>>,
+    pub headset_data: Option<HashMap<String, Vec<f32>>>,
     pub color_thinking: Option<String>,
-    pub impedance_data: Option<HashMap<String, u8>>,
+    pub impedance_data: Option<HashMap<String, u16>>,
 }
