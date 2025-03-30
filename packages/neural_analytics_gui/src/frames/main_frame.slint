@@ -1,0 +1,134 @@
+import { MorphicBackground } from "../components/index.slint";
+import { DataCapturerView, HeadsetCalibrationView, LoadingApplicationView, WelcomeUserView } from "../pages/index.slint";
+
+export component MainFrame inherits Window {
+    // Properties of the Window Class
+    full-screen: true;
+    title: "Neural Analytics - Main Frame";
+
+    // Preferred size of the window
+    preferred-width: 1280px;
+    preferred-height: 720px;
+
+    // Current view
+    property <string> current_page: "LoadingApplicationView";
+    
+    // Colors for the background
+    property <color> primary-color: #000000;
+    property <color> secondary-color: #000000;
+    property <color> accent-color: #000000;
+
+    // Property for the loading state
+    property <bool> is-loading: true;
+
+    // States of the main window
+    states [
+        capturer_state when (current_page == "DataCapturerView"): {
+            primary-color: #ff9a9e;
+            secondary-color: #ffdde1;
+            accent-color: #fad0c4;
+        }
+
+        idle_state when (current_page == "WelcomeUserView" || current_page == "HeadsetCalibrationView"): {
+            primary-color: #7393B3;
+            secondary-color: #A7C7E7;
+            accent-color: #88D8C0;
+        }
+
+        load_complete_state when (current_page == "LoadingApplicationView" && !is_loading ): {
+            primary-color: #7393B3;
+            secondary-color: #A7C7E7;
+            accent-color: #88D8C0;
+        }
+    ]
+
+    // Callbacks for Render Plots
+    pure callback render_t3_plot(width: length, height: length) -> image;
+    pure callback render_t4_plot(width: length, height: length) -> image;
+    pure callback render_o1_plot(width: length, height: length) -> image;
+    pure callback render_o2_plot(width: length, height: length) -> image;
+
+    // Callbacks for get the thinking color...
+    pure callback thinking_color() -> string;
+
+    // Functions for set the status of electrodes
+    public function update_electrode_status(t3: int, t4: int, o1: int, o2: int) {
+        if current_page == "HeadsetCalibrationView" {
+            headset_view.update_electrode_status(t3, t4, o1, o2);
+        }
+    }
+
+    public function update_current_view(current_view: string) {
+        current_page = current_view;
+    }
+
+    // Elements to Render
+    MorphicBackground {
+        preferred-width: parent.width;
+        preferred-height: parent.height;
+
+        primary-color: primary-color;
+        secondary-color: secondary-color;
+        accent-color: accent-color;
+        
+        gradient-opacity: 0.75;
+        overlay-opacity: 0.55;
+    }
+
+    welcome_view := WelcomeUserView {
+        preferred-width: parent.width;
+        preferred-height: parent.height;
+        visible: current_page == "WelcomeUserView";
+    }
+
+    headset_view := HeadsetCalibrationView {
+        preferred-width: parent.width;
+        preferred-height: parent.height;
+        visible: current_page == "HeadsetCalibrationView";
+    }
+
+    capturer_view := DataCapturerView {
+        preferred-width: parent.width;
+        preferred-height: parent.height;
+        visible: current_page == "DataCapturerView";
+
+        render_t3_plot(width, height) => {
+            render_t3_plot(width, height)
+        }
+
+        render_t4_plot(width, height) => {
+            render_t4_plot(width, height)
+        }
+
+        render_o1_plot(width, height) => {
+            render_o1_plot(width, height)
+        }
+
+        render_o2_plot(width, height) => {
+            render_o2_plot(width, height)
+        }
+    }
+
+    loading_view := LoadingApplicationView {
+        visible: current_page == "LoadingApplicationView";
+
+        on-delay-finished => {
+            is-loading = !is-loading;
+        }
+    }
+
+    // FIXME: This is for debug the views proposes
+    Timer {
+        interval: 10000ms;
+        running: true;
+        triggered => {
+            if (current_page == "WelcomeUserView") {
+                current_page = "HeadsetCalibrationView";
+            } else if (current_page == "HeadsetCalibrationView") {
+                current_page = "DataCapturerView";
+            } else {
+                current_page = "WelcomeUserView";
+            }
+        }
+    }
+}
