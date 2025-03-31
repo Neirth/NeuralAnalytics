@@ -4,6 +4,7 @@ import { DataCapturerView, HeadsetCalibrationView, LoadingApplicationView, Welco
 export component MainFrame inherits Window {
     // Properties of the Window Class
     full-screen: true;
+    no-frame: true;
     title: "Neural Analytics - Main Frame";
 
     // Preferred size of the window
@@ -43,13 +44,9 @@ export component MainFrame inherits Window {
     ]
 
     // Callbacks for Render Plots
-    pure callback render_t3_plot(width: length, height: length) -> image;
-    pure callback render_t4_plot(width: length, height: length) -> image;
-    pure callback render_o1_plot(width: length, height: length) -> image;
-    pure callback render_o2_plot(width: length, height: length) -> image;
+    pure callback render_signal_plot(name: string, values: [float], width: length, height: length) -> image;
 
     // Callbacks for get the thinking color...
-    pure callback thinking_color() -> string;
     pure callback start_core_process() -> bool;
 
     // Functions for set the status of electrodes
@@ -61,6 +58,18 @@ export component MainFrame inherits Window {
 
     public function update_current_view(current_view: string) {
         current_page = current_view;
+    }
+
+    public function update_headset_data(t3: [float], t4: [float], o1: [float], o2: [float]) {
+        if current_page == "DataCapturerView" {
+            capturer_view.update_headset_data(t3, t4, o1, o2);
+        }
+    }
+
+    public function update_thinking_color(color: string) {
+        if current_page == "DataCapturerView" {
+            capturer_view.update_thinking_color(color);
+        }
     }
 
     // Elements to Render
@@ -93,20 +102,8 @@ export component MainFrame inherits Window {
         preferred-height: parent.height;
         visible: current_page == "DataCapturerView";
 
-        render_t3_plot(width, height) => {
-            render_t3_plot(width, height)
-        }
-
-        render_t4_plot(width, height) => {
-            render_t4_plot(width, height)
-        }
-
-        render_o1_plot(width, height) => {
-            render_o1_plot(width, height)
-        }
-
-        render_o2_plot(width, height) => {
-            render_o2_plot(width, height)
+        render_signal_plot(name, values, width, height) => {
+            return root.render_signal_plot(name, values, width, height);
         }
     }
 

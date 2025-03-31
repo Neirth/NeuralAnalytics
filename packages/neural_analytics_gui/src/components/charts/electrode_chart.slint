@@ -1,10 +1,17 @@
 export component ElectrodeChart inherits Rectangle {
+    property <string> name;
+    property <[float]> values: [0.0];
     border-color: #000000;
 
-    pure callback render_electrode_plot(width: length, height: length) -> image;    
+    pure callback render_signal_plot(name: string, values: [float], width: length, height: length) -> image;    
+
+    public function update_electrode_data(name: string, values: [float]) {
+        root.name = name;
+        root.values = values;
+    }
 
     Image {
-        source: root.render_electrode_plot(root.width, root.height);
+        source: root.render_signal_plot(root.name, root.values, root.width, root.height);
         width: root.width;
         height: root.height;
     }

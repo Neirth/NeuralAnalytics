@@ -4,15 +4,12 @@ import { ElectrodeFeedback, MorphicBackground, PageComponent, ElectrodeChart } f
 export component DataCapturerView inherits PageComponent {
     // Properties
     property <int> update-counter: 0;
+    property <string> thinking_color_class: "RED";
+    property <color> thinking_color_reference: #FF0000;
 
     // Callbacks for plot the chart
-    pure callback render_t3_plot(width: length, height: length) -> image;
-    pure callback render_t4_plot(width: length, height: length) -> image;
-    pure callback render_o1_plot(width: length, height: length) -> image;
-    pure callback render_o2_plot(width: length, height: length) -> image;
+    pure callback render_signal_plot(name: string, values: [float], width: length, height: length) -> image;
 
-    // Callback for get the thinking color
-    pure callback thinking_color_class() -> string;
 
     // Pure functions for pass to color the correct class
     pure function get_rgb_class_color(color: string) -> color {
@@ -23,6 +20,37 @@ export component DataCapturerView inherits PageComponent {
         } else {
             return #FF00FF;
         }
+    }
+
+    // Public function for set the thinking color or data
+    public function update_headset_data(t3: [float], t4: [float], o1: [float], o2: [float]) {
+        if (t3.length > 0) {
+            t3_electrode.update_electrode_data("T3", t3);
+        }
+
+        if (t4.length > 0) {
+            t4_electrode.update_electrode_data("T4", t4);
+        }
+
+        if (o1.length > 0) {
+            o1_electrode.update_electrode_data("O1", o1);
+        }
+
+        if (o2.length > 0) {
+            o2_electrode.update_electrode_data("O2", o2);
+        }
+    }
+
+    public function update_thinking_color(color: string) {
+        if (color == "RED") {
+            root.thinking_color_class = "RED";
+        } else if (color == "GREEN") {
+            root.thinking_color_class = "GREEN";
+        } else {
+            root.thinking_color_class = "PURPLE";
+        }
+
+        root.thinking_color_reference = get_rgb_class_color(thinking_color_class);
     }
     
     VerticalBox {
@@ -45,21 +73,21 @@ export component DataCapturerView inherits PageComponent {
                 HorizontalBox {
                     alignment: center;
 
-                     ElectrodeChart {
+                     t3_electrode := ElectrodeChart {
                         width: 300px;
                         height: 300px;
 
-                        render_electrode_plot(width, height) => {
-                            return render_t3_plot(width, height);
+                        render_signal_plot(name, values, width, height) => {
+                            return render_signal_plot(name, values, width, height);
                         }
                      }
 
-                     ElectrodeChart {
+                     t4_electrode := ElectrodeChart {
                         width: 300px;
                         height: 300px;
                         
-                        render_electrode_plot(width, height) => {
-                            return render_t4_plot(width, height);
+                        render_signal_plot(name, values, width, height) => {
+                            return render_signal_plot(name, values, width, height);
                         }
                      }
                 }
@@ -67,21 +95,21 @@ export component DataCapturerView inherits PageComponent {
                 HorizontalBox {
                     alignment: center;
 
-                     ElectrodeChart {
+                     o1_electrode := ElectrodeChart {
                         width: 300px;
                         height: 300px;
 
-                        render_electrode_plot(width, height) => {
-                            return render_o1_plot(width, height);
+                        render_signal_plot(name, values, width, height) => {
+                            return render_signal_plot(name, values, width, height);
                         }
                      }
 
-                     ElectrodeChart {
+                     o2_electrode := ElectrodeChart {
                         width: 300px;
                         height: 300px;
                         
-                        render_electrode_plot(width, height) => {
-                            return render_o2_plot(width, height);
+                        render_signal_plot(name, values, width, height) => {
+                            return render_signal_plot(name, values, width, height);
                         }
                      }
                 }
@@ -99,10 +127,10 @@ export component DataCapturerView inherits PageComponent {
             }
 
             Text {
-                text: thinking_color_class();
+                text: root.thinking_color_class;
                 font-family: "Source Sans Pro";
                 font-size: 20px;
-                color: get_rgb_class_color(thinking_color_class());
+                color: root.thinking_color_reference;
             }
         }
     }
