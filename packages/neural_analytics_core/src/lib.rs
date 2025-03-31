@@ -56,17 +56,13 @@ where
     F: Fn(&String, &EventData) -> Result<(), String> + 'static + Send,
 {
     // Define the state machine
-    let mut raw_state_machine = MainStateMachine::default().state_machine();
+    let raw_state_machine = MainStateMachine::default().state_machine();
 
-
-    // Set the event handler
     unsafe {
         // Set the event handler to the static variable
         INTERNAL_STATE_MACHINE = Some(raw_state_machine);
         INTERNAL_EVENT_HANDLER = Some(Box::new(event_handler));
-    }
 
-    unsafe {
         // Initialize the state machine
         INTERNAL_STATE_MACHINE.as_mut().unwrap().handle(&NeuralAnalyticsCoreEvents::InitializeCore).await;
     }
