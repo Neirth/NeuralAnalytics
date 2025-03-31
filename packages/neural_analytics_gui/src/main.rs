@@ -1,7 +1,9 @@
 use neural_analytics_core::{domain::events::NeuralAnalyticsEvents, initialize_core};
 use neural_analytics_core::domain::models::event_data::EventData;
+use utils::render_signal_plot;
 use std::sync::{Mutex, LazyLock};
-use slint::{Weak, SharedString};
+use std::vec;
+use slint::{ModelRc, SharedString, Weak};
 
 pub mod utils;
 
@@ -22,7 +24,7 @@ static MAIN_WINDOW_WEAK: LazyLock<Mutex<Option<Weak<MainFrame>>>> = LazyLock::ne
 /// # Returns
 /// - `Result<(), String>`: Returns `Ok(())` if the event is handled successfully, or an error message if it fails.
 fn event_handler(event: &String, data: &EventData) -> Result<(), String> {
-    // Clona los valores necesarios para el closure
+    // Clone the event name to avoid borrowing issues
     let event_name = event.clone();
     
     // Clone the data to avoid borrowing issues
@@ -65,15 +67,24 @@ fn event_handler(event: &String, data: &EventData) -> Result<(), String> {
                 main_window.invoke_update_current_view(SharedString::from("DataCapturerView"));
             },
             val if val == NeuralAnalyticsEvents::CapturedHeadsetDataEvent.to_string() => {
-                // TODO: Implement the logic to update the UI with the headset data
-                // if let (Some(headset_data), Some(color_thinking)) = (&data.headset_data, &data.color_thinking) {
-                //     main_window.invoke_update_headset_data(headset_data.clone());
-                //     main_window.invoke_update_thinking_color(color_thinking.clone());
-                // }
+                if let Some(headset_data) = &headset_data_clone {
+                    main_window.invoke_update_headset_data(
+                        ModelRc::from(&headset_data.get("T3").cloned().unwrap_or(vec![0.0])[..]),
+                        ModelRc::from(&headset_data.get("T4").cloned().unwrap_or(vec![0.0])[..]),
+                        ModelRc::from(&headset_data.get("O1").cloned().unwrap_or(vec![0.0])[..]),
+                        ModelRc::from(&headset_data.get("O2").cloned().unwrap_or(vec![0.0])[..]),
+                    );
+                }
+
+                if let Some(color_thinking) = &color_thinking_clone {
+                    main_window.invoke_update_thinking_color(
+                        SharedString::from(color_thinking),
+                    );
+                }
             },
             _ => {}
         }
-    }).map_err(|e| format!("UI thread error: {:?}", e))?;
+    }).map_err(|e| format!("BUG: UI thread error; {:?}", e))?;
     
     Ok(())
 }
@@ -87,6 +98,7 @@ async fn main() {
     let main_window = MainFrame::new();
 
     if main_window.is_ok() {
+        // Initialize the main window
         let main_window = main_window.unwrap();
         
         // Store a weak reference to our window globally
@@ -103,6 +115,9 @@ async fn main() {
             });
             true
         });
+
+        // Set up the signal plot rendering
+        main_window.on_render_signal_plot(render_signal_plot);
 
         // Run the application
         main_window.run().unwrap();
