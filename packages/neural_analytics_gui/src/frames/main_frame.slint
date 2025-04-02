@@ -86,20 +86,20 @@ export component MainFrame inherits Window {
     }
 
     welcome_view := WelcomeUserView {
-        preferred-width: parent.width;
-        preferred-height: parent.height;
+        preferred-width: root.width;
+        preferred-height: root.height;
         visible: current_page == "WelcomeUserView";
     }
 
     headset_view := HeadsetCalibrationView {
-        preferred-width: parent.width;
-        preferred-height: parent.height;
+        preferred-width: root.width;
+        preferred-height: root.height;
         visible: current_page == "HeadsetCalibrationView";
     }
 
     capturer_view := DataCapturerView {
-        preferred-width: parent.width;
-        preferred-height: parent.height;
+        preferred-width: root.width;
+        preferred-height: root.height;
         visible: current_page == "DataCapturerView";
 
         render_signal_plot(name, values, width, height) => {

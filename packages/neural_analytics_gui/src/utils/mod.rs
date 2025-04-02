@@ -19,7 +19,7 @@ pub fn render_signal_plot(
     data: ModelRc<f32>,
     width: f32,
     height: f32,
-) -> slint::Image {
+) -> slint::Image {    
     let width_px = width as u32;
     let height_px = height as u32;
     
