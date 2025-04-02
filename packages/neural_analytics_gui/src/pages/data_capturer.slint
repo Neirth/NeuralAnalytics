@@ -1,19 +1,19 @@
-import { VerticalBox, GroupBox, HorizontalBox } from "std-widgets.slint";
+import { VerticalBox, GroupBox, HorizontalBox, GridBox } from "std-widgets.slint";
 import { ElectrodeFeedback, MorphicBackground, PageComponent, ElectrodeChart } from "../components/index.slint";
+import "../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
 
 export component DataCapturerView inherits PageComponent {
     // Properties
     property <int> update-counter: 0;
-    property <string> thinking_color_class: "RED";
+    property <string> thinking_color_class: "UNKNOWN";
     property <color> thinking_color_reference: #FF0000;
 
     // Callbacks for plot the chart
     pure callback render_signal_plot(name: string, values: [float], width: length, height: length) -> image;
 
-
     // Pure functions for pass to color the correct class
     pure function get_rgb_class_color(color: string) -> color {
-        if (color == "RED" ) {
+        if (color == "RED") {
             return #FF0000;
         } else if (color == "GREEN") {
             return #00FF00;
@@ -27,15 +27,12 @@ export component DataCapturerView inherits PageComponent {
         if (t3.length > 0) {
             t3_electrode.update_electrode_data("T3", t3);
         }
-
         if (t4.length > 0) {
             t4_electrode.update_electrode_data("T4", t4);
         }
-
         if (o1.length > 0) {
             o1_electrode.update_electrode_data("O1", o1);
         }
-
         if (o2.length > 0) {
             o2_electrode.update_electrode_data("O2", o2);
         }
@@ -52,87 +49,96 @@ export component DataCapturerView inherits PageComponent {
 
         root.thinking_color_reference = get_rgb_class_color(thinking_color_class);
     }
-    
+
     VerticalBox {
         padding: 100px;
         alignment: start;
 
-        Text {
-            text: "Data Capturer Metrics";
-            font-family: "Source Sans Pro";
-            font-size: 50px;
-            color: #000000;
-        }
-
         HorizontalBox {
-            alignment: center;
-
-            VerticalBox {
-                alignment: center;
-
-                HorizontalBox {
-                    alignment: center;
-
-                     t3_electrode := ElectrodeChart {
-                        width: 300px;
-                        height: 300px;
-
-                        render_signal_plot(name, values, width, height) => {
-                            return render_signal_plot(name, values, width, height);
-                        }
-                     }
-
-                     t4_electrode := ElectrodeChart {
-                        width: 300px;
-                        height: 300px;
-                        
-                        render_signal_plot(name, values, width, height) => {
-                            return render_signal_plot(name, values, width, height);
-                        }
-                     }
-                }
-
-                HorizontalBox {
-                    alignment: center;
-
-                     o1_electrode := ElectrodeChart {
-                        width: 300px;
-                        height: 300px;
-
-                        render_signal_plot(name, values, width, height) => {
-                            return render_signal_plot(name, values, width, height);
-                        }
-                     }
-
-                     o2_electrode := ElectrodeChart {
-                        width: 300px;
-                        height: 300px;
-                        
-                        render_signal_plot(name, values, width, height) => {
-                            return render_signal_plot(name, values, width, height);
-                        }
-                     }
-                }
-            }
-        }
-
-        HorizontalBox {
-            alignment: start;
+            spacing: 830px;
 
             Text {
-                text: "Thinking color: ";
+                text: "Data Capturer Metrics";
                 font-family: "Source Sans Pro";
-                font-size: 20px;
+                font-size: 50px;
                 color: #000000;
             }
 
-            Text {
-                text: root.thinking_color_class;
-                font-family: "Source Sans Pro";
-                font-size: 20px;
-                color: root.thinking_color_reference;
+            HorizontalBox {
+                alignment: start;
+
+                Text {
+                    text: "Thinking color: ";
+                    font-family: "Source Sans Pro";
+                    font-size: 20px;
+                    color: #000000;
+                    vertical-alignment: center;
+                }
+    
+                Text {
+                    text: root.thinking_color_class;
+                    font-family: "Source Sans Pro";
+                    font-size: 20px;
+                    color: root.thinking_color_reference;
+                    vertical-alignment: center;
+                }
             }
         }
+
+        GridBox {
+            spacing-horizontal: 15px;
+            spacing-vertical: 15px;
+            width: 750px;
+            height: 325px;
+
+            padding: 5px;
+            
+            Row {
+                t3_electrode := ElectrodeChart {
+                    width: 100%;
+                    height: 100%;
+                    visible: root.visible;
+
+                    render_signal_plot(name, values, width, height) => {
+                        return render_signal_plot(name, values, width, height);
+                    }
+                }
+
+                t4_electrode := ElectrodeChart {
+                    width: 100%;
+                    height: 100%;
+                    visible: root.visible;
+
+                    render_signal_plot(name, values, width, height) => {
+                        return render_signal_plot(name, values, width, height);
+                    }
+                }
+            }
+
+            Row {
+                o1_electrode := ElectrodeChart {
+                    width: 100%;
+                    height: 100%;
+                    visible: root.visible;
+
+                    render_signal_plot(name, values, width, height) => {
+                        return render_signal_plot(name, values, width, height);
+                    }
+                }
+
+                o2_electrode := ElectrodeChart {
+                    width: 100%;
+                    height: 100%;
+                    visible: root.visible;
+
+                    render_signal_plot(name, values, width, height) => {
+                        return render_signal_plot(name, values, width, height);
+                    }
+                }
+            }
+        }
+
+
     }
 
     Timer {

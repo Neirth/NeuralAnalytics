@@ -103,9 +103,11 @@ async fn main() {
         
         // Store a weak reference to our window globally
         *MAIN_WINDOW_WEAK.lock().unwrap() = Some(main_window.as_weak());
+        
+        // Set up the signal plot rendering
+        main_window.on_render_signal_plot(render_signal_plot);
 
-        // Set initial view
-        main_window.invoke_update_current_view(SharedString::from("LoadingApplicationView"));
+        // Set up the event handler
         main_window.on_start_core_process(|| {
             tokio::spawn(async {
                 // Initialize the core with the event handler
@@ -116,12 +118,12 @@ async fn main() {
             true
         });
 
-        // Set up the signal plot rendering
-        main_window.on_render_signal_plot(render_signal_plot);
+        // Set initial view
+        main_window.invoke_update_current_view(SharedString::from("LoadingApplicationView"));
 
         // Run the application
         main_window.run().unwrap();
     } else {
-        panic!("Failed to create the main window.");
+        panic!("BUG: Failed to create the main window.");
     }
 }
