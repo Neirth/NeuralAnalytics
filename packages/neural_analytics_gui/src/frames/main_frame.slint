@@ -1,5 +1,6 @@
 import { MorphicBackground } from "../components/index.slint";
 import { DataCapturerView, HeadsetCalibrationView, LoadingApplicationView, WelcomeUserView } from "../pages/index.slint";
+import "../../assets/fonts/SourceSansPro-ExtraLight.ttf";
 
 export component MainFrame inherits Window {
     // Properties of the Window Class
@@ -22,6 +23,8 @@ export component MainFrame inherits Window {
     // Property for the loading state
     property <bool> is-loading: true;
 
+    property <float> scale-factor: 0.90;
+
     // States of the main window
     states [
         capturer_state when (current_page == "DataCapturerView"): {
@@ -36,7 +39,7 @@ export component MainFrame inherits Window {
             accent-color: #88D8C0;
         }
 
-        load_complete_state when (current_page == "LoadingApplicationView" && !is_loading ): {
+        load_complete_state when (current_page == "LoadingApplicationView" && !is_loading): {
             primary-color: #7393B3;
             secondary-color: #A7C7E7;
             accent-color: #88D8C0;
@@ -74,8 +77,8 @@ export component MainFrame inherits Window {
 
     // Elements to Render
     MorphicBackground {
-        preferred-width: parent.width;
-        preferred-height: parent.height;
+        preferred-width: root.width;
+        preferred-height: root.height;
 
         primary-color: primary-color;
         secondary-color: secondary-color;
@@ -86,20 +89,20 @@ export component MainFrame inherits Window {
     }
 
     welcome_view := WelcomeUserView {
-        preferred-width: root.width;
-        preferred-height: root.height;
+        width: root.width * parent.scale-factor;
+        height: root.height * parent.scale-factor;
         visible: current_page == "WelcomeUserView";
     }
 
     headset_view := HeadsetCalibrationView {
-        preferred-width: root.width;
-        preferred-height: root.height;
+        width: root.width * parent.scale-factor;
+        height: root.height * parent.scale-factor;
         visible: current_page == "HeadsetCalibrationView";
     }
 
     capturer_view := DataCapturerView {
-        preferred-width: root.width;
-        preferred-height: root.height;
+        width: root.width * parent.scale-factor;
+        height: root.height * parent.scale-factor;
         visible: current_page == "DataCapturerView";
 
         render_signal_plot(name, values, width, height) => {
@@ -112,11 +115,10 @@ export component MainFrame inherits Window {
 
         on-delay-finished => {
             is-loading = !is-loading;
-
         }
 
         on-loading-finished => {
-            start_core_process()
+            start_core_process();
         }
     }
 
