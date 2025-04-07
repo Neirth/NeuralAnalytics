@@ -1,5 +1,7 @@
+import "../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
+
 export component ElectrodeChart inherits Rectangle {
-    property <string> name;
+    property <string> name: "Unknown";
     property <[float]> values: [];
     property <image> rendered_image: values.length > 0 ? render_signal_plot(name, values, self.width, self.height) : @image-url("");
     property <bool> is_rendered: rendered_image.height > 0 && rendered_image.width > 0;
@@ -15,7 +17,6 @@ export component ElectrodeChart inherits Rectangle {
         source: rendered_image;
         width: 100%;
         height: 100%;
-        padding: 8px;
     }
 
     if !is_rendered: VerticalLayout {
@@ -57,15 +58,6 @@ export component ElectrodeChart inherits Rectangle {
     }
 
     changed width => {
-        if values.length > 0 {
-            root.rendered_image = render_signal_plot(name, values, self.width, self.height);
-            is_rendered = root.rendered_image.height > 0 && root.rendered_image.width > 0;
-        } else {
-            is_rendered = false;
-        }
-    }
-
-    changed height => {
         if values.length > 0 {
             root.rendered_image = render_signal_plot(name, values, self.width, self.height);
             is_rendered = root.rendered_image.height > 0 && root.rendered_image.width > 0;
