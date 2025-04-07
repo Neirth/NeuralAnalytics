@@ -1,5 +1,5 @@
-use plotters::prelude::*;
-use slint::{Model, ModelRc, SharedPixelBuffer};
+use plotters::{prelude::*, style::full_palette::GREY_900};
+use slint::{Model, ModelRc, SharedPixelBuffer, SharedString, Image};
 
 /// Renders a chart to visualize EEG signals
 /// 
@@ -15,98 +15,112 @@ use slint::{Model, ModelRc, SharedPixelBuffer};
 /// # Returns
 /// * `slint::Image` - Rendered image with the chart
 pub fn render_signal_plot(
-    name: slint::SharedString,
+    name: SharedString,
     data: ModelRc<f32>,
     width: f32,
     height: f32,
-) -> slint::Image {    
-    let width_px = width as u32;
-    let height_px = height as u32;
+) -> Image { 
+    // Use width and height
+    let width_px = width.round() as u32;
+    let height_px = height.round() as u32;
     
-    // Create a pixel buffer for the image
-    let mut pixel_buffer = SharedPixelBuffer::<slint::Rgba8Pixel>::new(width_px, height_px);
+    // INFO: Debug line
+    // println!("Rendering signal plot for electrode '{}' with width: {}px, height: {}px, data points: {}", 
+    //          name, width_px, height_px, data.row_count());
     
+    // Create buffer of pixels
+    let mut pixel_buffer = SharedPixelBuffer::<slint::Rgb8Pixel>::new(width_px, height_px);
+
     {
-        // Access the underlying buffer to draw with plotters
-        let plotting_area = BitMapBackend::with_buffer(
-            pixel_buffer.make_mut_bytes(), 
-            (width_px, height_px)
-        ).into_drawing_area();
+        // Create a backend for drawing in a canvas
+        let root = BitMapBackend::with_buffer(pixel_buffer.make_mut_bytes(), (width_px, height_px))
+            .into_drawing_area();
+
+        // Draw the background
+        root.fill(&GREY_900).unwrap();
+
+        // Transform data to vector
+        let data_vec: Vec<f32> = data.iter().collect();
         
-        // Set a semi-transparent background
-        plotting_area.fill(&RGBAColor(30, 30, 40, 20.0)).unwrap();
-        
-        // Convert ModelRc<f32> to Vec<f32> to facilitate iteration
-        let data_vec: Vec<f32> = data.iter()
-            .map(|value| value) // Handle possible errors
-            .collect();
-        
-        // If there's no data, return the buffer with just the background
         if data_vec.is_empty() {
-            plotting_area.present().unwrap();
-        } else {
-            // Determine data range for Y-axis
-            let min_value = data_vec.iter().fold(f32::INFINITY, |a, &b| a.min(b));
-            let max_value = data_vec.iter().fold(f32::NEG_INFINITY, |a, &b| a.max(b));
-            
-            // Add margin to the range for better visualization
-            let margin = (max_value - min_value).max(0.1) * 0.15;
-            let y_range = (min_value - margin..max_value + margin);
-            
-            // Select color based on electrode
-            let line_color = match name.as_str() {
-                "T3" => RGBAColor(0, 255, 100, 25.0),    // Green
-                "T4" => RGBAColor(255, 150, 0, 25.0),    // Orange
-                "O1" => RGBAColor(50, 150, 255, 25.0),   // Blue
-                "O2" => RGBAColor(255, 50, 255, 25.0),   // Magenta
-                _ => RGBAColor(255, 255, 255, 25.0),     // White by default
-            };
-            
-            // Configure and build the chart
-            let mut chart = ChartBuilder::on(&plotting_area)
-                .margin(10)
-                .caption(
-                    format!("Electrodo {}", name),
-                    ("sans-serif", height_px / 20, &WHITE.mix(0.9))
-                )
-                .x_label_area_size(35)
-                .y_label_area_size(40)
-                .build_cartesian_2d(0..data_vec.len(), y_range)
-                .unwrap();
-            
-            // Configure grid style
-            chart
-                .configure_mesh()
-                .light_line_style(&RGBAColor(200, 200, 200, 90.0))
-                .axis_style(ShapeStyle::from(&WHITE.mix(0.8)).stroke_width(2))
-                .y_labels(5)
-                .y_label_style(("sans-serif", height_px / 25, &WHITE.mix(0.8)))
-                .x_label_style(("sans-serif", height_px / 25, &WHITE.mix(0.8)))
-                .draw().unwrap();
-            
-            // TODO: Create and draw the point series for the EEG line
-            // let line_series = LineSeries::new(
-            //     data_vec.iter().enumerate().map(|(i, &v)| (i, v as f64)),
-            //     line_color.stroke_width(2),
-            // );
-            
-            // TODO: Draw the line series on the chart
-            // chart.draw_series(line_series).unwrap()
-            //     .label(format!("{}", name))
-            //     .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &line_color));
-            
-            // Display legend in top-right corner
-            chart.configure_series_labels()
-                .background_style(&RGBAColor(30, 30, 40, 20.0))
-                .border_style(&WHITE.mix(0.8))
-                .position(SeriesLabelPosition::UpperRight)
-                .draw().unwrap();
+            drop(root);
+            return Image::from_rgb8(pixel_buffer);
         }
         
-        // Finalize the drawing
-        plotting_area.present().unwrap();
+        // Normalize the data
+        let (normalized_data, min_value, max_value): (Vec<f32>, f32, f32) = {
+            if data_vec.len() > 1 {
+                let min_value = data_vec.iter().cloned().fold(f32::INFINITY, f32::min);
+                let max_value = data_vec.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+                
+                if (max_value - min_value).abs() < 1e-6 {
+                    (data_vec.clone(), min_value, max_value)
+                } else {
+                    (data_vec.iter().map(|&v| {
+                        2.0 * (v - min_value) / (max_value - min_value) - 1.0
+                    }).collect(), min_value, max_value)
+                }
+            } else {
+                (data_vec.clone(), 0.0, 0.0)
+            }
+        };
+
+        // Draw the title
+        let root_area = root.titled(
+            name.as_str(),
+            TextStyle::from(("Open Sans Pro", 20)).color(&WHITE)
+        ).unwrap();
+
+        // Draw the chart
+        let mut chart = ChartBuilder::on(&root_area)
+            .margin(10)
+            .set_label_area_size(LabelAreaPosition::Left, 50)
+            .set_label_area_size(LabelAreaPosition::Bottom, 40)
+            .build_cartesian_2d(1..(normalized_data.len()), min_value..max_value)
+            .unwrap();
+
+        chart.configure_mesh()
+            .axis_style(WHITE.mix(0.5))
+            .x_desc("Timeseries")
+            .y_desc("Signal Value")
+            .x_label_style(
+                ("Open Sans Pro", 15).into_text_style(&root_area).color(&WHITE)
+            )
+            .y_label_style(
+                ("Open Sans Pro", 15).into_text_style(&root_area).color(&WHITE)
+            ) // Estilo de ejes semitransparente
+            .x_label_formatter(&|v| if *v % (normalized_data.len() / 5).max(1) == 0 { 
+                format!("{}", v) 
+            } else { 
+                "".to_string() 
+            })
+            .y_label_formatter(&|v| format!("{:.1}", v))
+            .draw()
+            .unwrap();
+
+        // Draw the data in the chart
+        chart
+            .draw_series(LineSeries::new(
+                normalized_data.iter().enumerate().map(|(x, &y)| (x + 1, y)),
+                WHITE.stroke_width(2)
+            ))
+            .unwrap();
+        
+        // Add points to every point
+        if normalized_data.len() < 50 {
+            chart.draw_series(PointSeries::of_element(
+                normalized_data.iter()
+                    .enumerate()
+                    .step_by(normalized_data.len() / 5.max(1))
+                    .map(|(x, &y)| (x + 1, y)),
+                4,
+                ShapeStyle::from(&WHITE).filled(),
+                &|coord, size, style| {
+                    EmptyElement::at(coord) + Circle::new((0, 0), size, style)
+                },
+            )).unwrap();
+        }
     }
-    
-    // Convert buffer to a slint image with alpha channel
-    slint::Image::from_rgba8(pixel_buffer)
+
+    Image::from_rgb8(pixel_buffer)
 }

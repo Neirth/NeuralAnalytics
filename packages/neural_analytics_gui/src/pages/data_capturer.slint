@@ -1,12 +1,15 @@
 import { VerticalBox, GroupBox, HorizontalBox, GridBox } from "std-widgets.slint";
 import { ElectrodeFeedback, MorphicBackground, PageComponent, ElectrodeChart } from "../components/index.slint";
-import "../../../assets/fonts/SourceSansPro-ExtraLight.ttf";
+import "../../assets/fonts/SourceSansPro-ExtraLight.ttf";
 
 export component DataCapturerView inherits PageComponent {
     // Properties
     property <int> update-counter: 0;
-    property <string> thinking_color_class: "UNKNOWN";
-    property <color> thinking_color_reference: #FF0000;
+    property <string> thinking-color-class: "UNKNOWN";
+    property <color> thinking-color-reference: #FF0000;
+
+    min-width: 1280px;
+    min-height: 720px;
 
     // Callbacks for plot the chart
     pure callback render_signal_plot(name: string, values: [float], width: length, height: length) -> image;
@@ -40,22 +43,25 @@ export component DataCapturerView inherits PageComponent {
 
     public function update_thinking_color(color: string) {
         if (color == "RED") {
-            root.thinking_color_class = "RED";
+            root.thinking-color-class = "RED";
         } else if (color == "GREEN") {
-            root.thinking_color_class = "GREEN";
+            root.thinking-color-class = "GREEN";
         } else {
-            root.thinking_color_class = "PURPLE";
+            root.thinking-color-class = "PURPLE";
         }
 
-        root.thinking_color_reference = get_rgb_class_color(thinking_color_class);
+        root.thinking-color-reference = get_rgb_class_color(thinking-color-class);
     }
 
     VerticalBox {
-        padding: 100px;
+        // width: 100%;
+        // height: 100%;
+        padding: 25px;
         alignment: start;
 
         HorizontalBox {
-            spacing: 830px;
+            spacing: self.width * 55%;
+            padding: 0px;
 
             Text {
                 text: "Data Capturer Metrics";
@@ -76,10 +82,10 @@ export component DataCapturerView inherits PageComponent {
                 }
     
                 Text {
-                    text: root.thinking_color_class;
+                    text: root.thinking-color-class;
                     font-family: "Source Sans Pro";
                     font-size: 20px;
-                    color: root.thinking_color_reference;
+                    color: root.thinking-color-reference;
                     vertical-alignment: center;
                 }
             }
@@ -88,15 +94,15 @@ export component DataCapturerView inherits PageComponent {
         GridBox {
             spacing-horizontal: 15px;
             spacing-vertical: 15px;
-            width: 750px;
-            height: 325px;
+            width: 100%;
+            height: 100%;
 
             padding: 5px;
             
             Row {
                 t3_electrode := ElectrodeChart {
-                    width: 100%;
-                    height: 100%;
+                    width: 50%;
+                    height: 40%;
                     visible: root.visible;
 
                     render_signal_plot(name, values, width, height) => {
@@ -105,8 +111,8 @@ export component DataCapturerView inherits PageComponent {
                 }
 
                 t4_electrode := ElectrodeChart {
-                    width: 100%;
-                    height: 100%;
+                    width: 50%;
+                    height: 40%;
                     visible: root.visible;
 
                     render_signal_plot(name, values, width, height) => {
@@ -117,8 +123,8 @@ export component DataCapturerView inherits PageComponent {
 
             Row {
                 o1_electrode := ElectrodeChart {
-                    width: 100%;
-                    height: 100%;
+                    width: 50%;
+                    height: 40%;
                     visible: root.visible;
 
                     render_signal_plot(name, values, width, height) => {
@@ -127,8 +133,8 @@ export component DataCapturerView inherits PageComponent {
                 }
 
                 o2_electrode := ElectrodeChart {
-                    width: 100%;
-                    height: 100%;
+                    width: 50%;
+                    height: 40%;
                     visible: root.visible;
 
                     render_signal_plot(name, values, width, height) => {
@@ -137,8 +143,6 @@ export component DataCapturerView inherits PageComponent {
                 }
             }
         }
-
-
     }
 
     Timer {
