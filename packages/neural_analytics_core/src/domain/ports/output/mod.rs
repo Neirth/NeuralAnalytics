@@ -1,1 +1,1 @@
-pub mod bulb_connection;
+pub mod smart_bulb;
