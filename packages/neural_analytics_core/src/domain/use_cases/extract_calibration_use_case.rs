@@ -1,4 +1,7 @@
+use blackbox_di::injectable;
 use presage::{BoxedCommand, CommandHandler, Error, Events};
+
+#[injectable]
 
 pub struct ExtractCalibrationDataUseCase;
 
