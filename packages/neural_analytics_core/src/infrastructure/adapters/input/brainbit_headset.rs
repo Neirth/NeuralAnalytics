@@ -1,68 +1,66 @@
 // adapter.rs
+use blackbox_di::{factory, implements, injectable};
 use brainflow::{
-    board_shim::BoardShim,                               // Corrected import path
-    brainflow_input_params::BrainFlowInputParamsBuilder, // Corrected import path
-    BoardIds,
+    board_shim::BoardShim, brainflow_input_params::BrainFlowInputParamsBuilder, BoardIds,
     BrainFlowPresets,
-    LogLevels,
 };
 use std::collections::HashMap;
+use std::env;
 
 use crate::domain::{models::eeg_work_modes::WorkMode, ports::input::eeg_headset::EegHeadsetPort};
 
-// TODO: Define IMPEDANCE_MAP based on actual electrode names and resistance channel indices for BrainBit
-// Example structure, needs real data:
-// static IMPEDANCE_MAP: Lazy<HashMap<&'static str, usize>> = Lazy::new(|| {
-//     let mut m = HashMap::new();
-//     m.insert("T3", 0); // Replace 0 with actual index from get_resistance_channels
-//     m.insert("T4", 1); // Replace 1 with actual index
-//     m.insert("O1", 2); // Replace 2 with actual index
-//     m.insert("O2", 3); // Replace 3 with actual index
-//     m
-// });
-// Ensure you have `once_cell` dependency if using Lazy like this.
+// Default MAC address if environment variable is not set
+const DEFAULT_DEVICE_MAC: &str = "C8:8F:B6:6D:E1:E2"; // Or another sensible default
 
+#[injectable]
 pub struct BrainFlowAdapter {
     board: BoardShim,
     work_mode: WorkMode,
-    board_id: BoardIds, // Store BoardIds type
 }
 
-impl Default for BrainFlowAdapter {
-    fn default() -> Self {
-        // Optional: Enable logging for debugging
-        // BoardShim::set_log_level(LogLevels::LevelTrace as i32)
-        //     .expect("Failed to set log level");
-        // BoardShim::enable_dev_board_logger().expect("Failed to enable logger");
+#[implements]
+impl BrainFlowAdapter {
+    /// Factory function for creating the BrainFlowAdapter.
+    /// Reads configuration from environment variables.
+    #[factory]
+    fn new() -> Self {
+        // Logic moved from the old Default::default()
+        let mac_address = env::var("BRAINBIT_MAC_ADDRESS").unwrap_or_else(|_| {
+            println!(
+                "BRAINBIT_MAC_ADDRESS not set, using default: {}",
+                DEFAULT_DEVICE_MAC
+            );
+            DEFAULT_DEVICE_MAC.to_string()
+        });
 
-        // Use the builder pattern to set parameters
+        println!("Using MAC Address: {}", mac_address);
+
         let params = BrainFlowInputParamsBuilder::default()
-            // TODO: Replace "DC:50:6A:05:DA:07" with the actual default or make it configurable
-            .mac_address("DC:50:6A:05:DA:07".to_string())
-            .timeout(20) // Set timeout using builder method
+            .mac_address(mac_address)
+            .timeout(20)
             .build();
 
-        let board_id = BoardIds::BrainbitBoard; // Use enum directly
-
-        // Pass BoardIds enum to the constructor
+        let board_id = BoardIds::BrainbitBoard;
         let board = BoardShim::new(board_id, params)
             .map_err(|e| format!("Failed to initialize BoardShim: {}", e))
-            .expect("BoardShim initialization failed"); // Handle Result properly
-
+            .expect("BoardShim initialization failed");
         board
             .prepare_session()
             .map_err(|e| format!("Failed to prepare session: {}", e))
-            .expect("Session preparation failed"); // Handle Result properly
+            .expect("Session preparation failed");
 
-        Self {
+        let instance = Self {
             board,
-            work_mode: WorkMode::Calibration, // Start in Calibration mode perhaps?
-            board_id,                         // Store the BoardIds enum value
-        }
-    }
-}
+            work_mode: WorkMode::Calibration,
+        };
 
-impl BrainFlowAdapter {
+        // Attempt to set initial mode
+        // Consider if this initial command sending belongs in the factory or an init method
+        let _ = instance._send_board_command("CommandStartResist");
+
+        instance
+    }
+
     /// Sends a configuration command to the board and handles the result.
     fn _send_board_command(&self, command: &str) -> Result<String, String> {
         println!("Sending command to board: {}", command);
@@ -80,6 +78,7 @@ impl BrainFlowAdapter {
     }
 }
 
+#[implements]
 impl EegHeadsetPort for BrainFlowAdapter {
     fn extract_impedance_data(&self) -> Result<HashMap<String, Vec<f32>>, String> {
         if !matches!(self.work_mode, WorkMode::Calibration) {

@@ -1,5 +1,7 @@
+use blackbox_di::injectable;
 use presage::{BoxedCommand, CommandHandler, Error, Events};
 
+#[injectable]
 pub struct UpdateLightStatusUseCase;
 
 #[async_trait::async_trait]
