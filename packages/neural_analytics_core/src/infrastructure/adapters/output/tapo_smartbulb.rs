@@ -1,6 +1,5 @@
 use async_trait::async_trait;
-use blackbox_di::{factory, implements, injectable};
-use log::{error, info};
+use log::{debug, error};
 use std::env;
 use std::sync::Arc;
 use tapo::{ApiClient, LightHandler};
@@ -11,7 +10,6 @@ use crate::domain::ports::output::smart_bulb::SmartBulbPort;
 
 /// Adapter for interacting with a Tapo smart bulb using environment variables.
 /// Connection is initiated in the background when `new` is called.
-#[injectable]
 pub struct TapoSmartBulbAdapter {
     // Stores the handler after background connection. Needs Arc<Mutex> for sharing.
     device_client: Arc<Mutex<Option<LightHandler>>>,
@@ -21,14 +19,12 @@ pub struct TapoSmartBulbAdapter {
     password: String,
 }
 
-#[implements]
-impl TapoSmartBulbAdapter {
+impl Default for TapoSmartBulbAdapter {
     /// Creates a new instance and initiates connection in the background.
     /// Returns immediately. The adapter might not be connected yet.
     /// Panics if environment variables are not set.
-    #[factory]
-    pub fn new() -> Self {
-        info!("Creating TapoSmartBulbAdapter config and spawning connection task...");
+    fn default() -> Self {
+        debug!("Creating TapoSmartBulbAdapter config and spawning connection task...");
 
         let ip_address =
             env::var("TAPO_IP_ADDRESS").expect("TAPO_IP_ADDRESS environment variable not set");
@@ -47,17 +43,18 @@ impl TapoSmartBulbAdapter {
 
         // Spawn the connection logic in a background task
         tokio::spawn(async move {
-            info!(
+            debug!(
                 "Background task: Attempting connection to Tapo device at {}",
                 ip_clone
             );
             let api_client = ApiClient::new(user_clone, pass_clone);
             match api_client.l510(ip_clone.clone()).await {
                 Ok(handler) => {
-                    info!(
+                    debug!(
                         "Background task: Successfully connected to Tapo device at {}. Updating adapter state.",
                         ip_clone
                     );
+                    
                     // Lock the tokio mutex asynchronously
                     let mut client_guard = client_arc_clone.lock().await;
                     *client_guard = Some(handler);
@@ -72,7 +69,7 @@ impl TapoSmartBulbAdapter {
             }
         });
 
-        info!(
+        debug!(
             "TapoSmartBulbAdapter::new returning for IP: {}. Connection proceeds in background.",
             ip_address
         );
@@ -86,12 +83,13 @@ impl TapoSmartBulbAdapter {
     }
 }
 
+
 #[async_trait]
 impl SmartBulbPort for TapoSmartBulbAdapter {
     /// Changes the state of the smart bulb (on or off).
     /// Returns an error if the background connection hasn't completed successfully yet.
     async fn change_state(&self, state: BulbState) -> Result<(), String> {
-        info!(
+        debug!(
             "Adapter: Requesting state change for bulb {} to {:?}",
             self.ip_address, state
         );

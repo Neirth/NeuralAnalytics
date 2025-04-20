@@ -5,7 +5,6 @@ use domain::state_machine::{
 
 use statig::awaitable::{IntoStateMachineExt, StateMachine};
 
-pub mod di;
 pub mod domain;
 pub mod infrastructure;
 pub mod utils;

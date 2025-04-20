@@ -1,27 +1,34 @@
-use blackbox_di::injectable;
-use presage::{BoxedCommand, CommandHandler, Error, Events};
+use log::info;
+use presage::{command_handler, Error, Events};
+use crate::domain::{commands::update_light_status_command::UpdateLightStatusCommand, context::NeuralAnalyticsContext, models::bulb_state::BulbState};
 
-#[injectable]
-pub struct UpdateLightStatusUseCase;
+#[command_handler(error = Error)]
+pub async fn update_light_status_use_case(
+    _context: &mut NeuralAnalyticsContext,
+    command: UpdateLightStatusCommand,
+) -> Result<Events, Error> {
+    // Parse the command to extract the desired light status
+    let smart_bulb_adapter = _context.smart_bulb_adapter.as_ref();
 
-#[async_trait::async_trait]
-impl<C, E> CommandHandler<C, E> for UpdateLightStatusUseCase
-    where
-        E: From<Error>,
-{
-    fn command_name(&self) -> &'static str {
-        "update-light-status"
+    // Interact with the TapoSmartBulbAdapter to update the light status
+    match command.is_light_on {
+        true => {
+            info!("Turning the light on...");
+            smart_bulb_adapter.change_state(BulbState::BulbOn).await.map_err(
+                |e| Error::MissingCommandHandler(Box::leak(e.to_string().into_boxed_str()))
+            )?;
+        }
+        false => {
+            info!("Turning the light off...");
+            smart_bulb_adapter.change_state(BulbState::BulbOff).await.map_err(
+                |e| Error::MissingCommandHandler(Box::leak(e.to_string().into_boxed_str()))
+            )?;
+        }
+        _ => {
+            return Err(Error::MissingCommandHandler("Invalid light status").into());
+        }
     }
 
-    #[allow(unused_variables)]
-    async fn handle(&self, _context: &mut C, command: BoxedCommand) -> Result<Events, E> {
-        // Here you would implement the logic to stop the current mode
-        // For example, you might want to send a message to the state machine
-        // to stop the current mode and transition to a different state.
-
-        // This is just a placeholder implementation.
-        println!("Stopping current mode...");
-
-        Ok(Events::new())
-    }
+    // Return an empty list of events for now
+    Ok(Events::new())
 }

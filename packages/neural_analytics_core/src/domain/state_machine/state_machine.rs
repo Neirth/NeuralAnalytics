@@ -1,13 +1,8 @@
 use std::sync::Arc;
 
 // Imports needed for DI container building and types
-use crate::di::{CoreModule, InjectableCommandBus}; // Assuming di.rs is at crate root and exports these
-use blackbox_di::app::{build, BlackBoxApp, BuildParams};
-use blackbox_di::cell::Ref;
-use tokio::runtime::Runtime;
-
 use log::error;
-use presage::Event;
+use presage::{CommandBus, Configuration, Event};
 use statig::prelude::*;
 use tokio::sync::Mutex;
 
@@ -16,7 +11,6 @@ use crate::{
         commands::{
             extract_calibration_data_command::ExtractCalibrationDataCommand,
             extract_generalist_data_command::ExtractGeneralistDataCommand,
-            initialize_hardware_parts_command::InitializeHardwarePartsCommand,
             predict_color_thinking_command::PredictColorThinkingCommand,
             search_headband_command::SearchHeadbandCommand,
             update_light_status_command::UpdateLightStatusCommand,
@@ -28,7 +22,7 @@ use crate::{
             headset_connected_event::HeadsetConnectedEvent,
             headset_disconnected_event::HeadsetDisconnectedEvent,
             initialized_core_event::InitializedCoreEvent,
-        },
+        }, use_cases::{extract_calibration_use_case::extract_calibration_data_use_case, extract_extraction_use_case::extract_generalist_data_use_case, search_headband_use_case::search_headband_use_case, update_light_status_use_case::update_light_status_use_case},
     },
     EventData, INTERNAL_EVENT_HANDLER,
 };
@@ -39,8 +33,7 @@ use super::neural_events::NeuralAnalyticsCoreEvents;
 // Not injectable itself via blackbox_di attributes
 pub(crate) struct MainStateMachine {
     context: Arc<Mutex<NeuralAnalyticsContext>>,
-    // Holds the reference to the DI container built by this instance
-    di_container: Ref<BlackBoxApp>,
+    command_bus: CommandBus<NeuralAnalyticsContext, presage::Error>,
 }
 
 #[state_machine(initial = "State::initialize_application()", state(derive(Debug)))]
@@ -48,16 +41,20 @@ impl MainStateMachine {
     /// Creates a new instance of the MainStateMachine asynchronously,
     /// building the necessary DI container.
     pub async fn new() -> Self {
-        println!("MainStateMachine::new(): Building internal DI Container asynchronously...");
+        let bus = CommandBus::<NeuralAnalyticsContext, presage::Error>::new().configure(
+            Configuration::new()
+                // Pass the obtained &'static references
+                .command_handler(&extract_calibration_data_use_case)
+                .command_handler(&extract_generalist_data_use_case)
+                // .command_handler(handler3)
+                .command_handler(&search_headband_use_case)
+                .command_handler(&update_light_status_use_case),
+        );
 
-        // Build the DI container asynchronously without blocking
-        let container_ref = build::<CoreModule>(BuildParams::default()).await;
-
-        println!("MainStateMachine::new(): Internal DI Container built.");
 
         Self {
             context: Arc::new(Mutex::new(NeuralAnalyticsContext::default())),
-            di_container: container_ref, // Store the container ref
+            command_bus: bus,
         }
     }
 
@@ -74,18 +71,12 @@ impl MainStateMachine {
     async fn initialize_application(
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
-    ) -> Response<State> {
-        // Get Bus from the container stored in self
-        let bus_wrapper = self
-            .di_container
-            .get::<InjectableCommandBus>()
-            .expect("CommandBus not in DI");
+    ) -> Response<State> {        
         // Context is now accessed via self.context
         let result = {
             let mut ctx = self.context.lock().await;
-            bus_wrapper
-                .bus
-                .execute(&mut *ctx, InitializeHardwarePartsCommand)
+            self.command_bus
+                .execute(&mut *ctx, SearchHeadbandCommand)
                 .await
         };
 
@@ -122,15 +113,9 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
-        // Get Bus from the container stored in self
-        let bus_wrapper = self
-            .di_container
-            .get::<InjectableCommandBus>()
-            .expect("CommandBus not in DI");
         let search_result = {
             let mut ctx = self.context.lock().await;
-            bus_wrapper
-                .bus
+            self.command_bus
                 .execute(&mut *ctx, SearchHeadbandCommand)
                 .await
         };
@@ -178,15 +163,9 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
-        // Get Bus from the container stored in self
-        let bus_wrapper = self
-            .di_container
-            .get::<InjectableCommandBus>()
-            .expect("CommandBus not in DI");
         let calibration_result = {
             let mut ctx = self.context.lock().await;
-            bus_wrapper
-                .bus
+            self.command_bus
                 .execute(&mut *ctx, ExtractCalibrationDataCommand)
                 .await
         };
@@ -210,6 +189,7 @@ impl MainStateMachine {
 
         if let Some(data) = impedance_data {
             let needs_more_calibration = data.values().any(|&value| value > 1000);
+            
             if needs_more_calibration {
                 if let Err(e) = send_event(
                     &HeadsetCalibratingEvent::NAME.to_string(),
@@ -246,15 +226,9 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
-        // Get Bus from the container stored in self
-        let bus_wrapper = self
-            .di_container
-            .get::<InjectableCommandBus>()
-            .expect("CommandBus not in DI");
         let extract_result = {
             let mut ctx = self.context.lock().await;
-            bus_wrapper
-                .bus
+            self.command_bus
                 .execute(&mut *ctx, ExtractGeneralistDataCommand)
                 .await
         };
@@ -277,13 +251,10 @@ impl MainStateMachine {
 
         let color_prediction = {
             let mut ctx = self.context.lock().await;
-            let prediction_result = bus_wrapper
-                .bus
+            let prediction_result = self.command_bus
                 .execute(
                     &mut *ctx,
-                    PredictColorThinkingCommand {
-                        headset_data: raw_data.clone(),
-                    },
+                    PredictColorThinkingCommand {},
                 )
                 .await;
 
@@ -299,8 +270,7 @@ impl MainStateMachine {
             let is_green = color_prediction == "green";
             let mut ctx = self.context.lock().await;
 
-            if let Err(e) = bus_wrapper
-                .bus
+            if let Err(e) = self.command_bus
                 .execute(
                     &mut *ctx,
                     UpdateLightStatusCommand {
