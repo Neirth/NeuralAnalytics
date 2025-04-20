@@ -1,5 +1,4 @@
 // adapter.rs
-use blackbox_di::{factory, implements, injectable};
 use brainflow::{
     board_shim::BoardShim, brainflow_input_params::BrainFlowInputParamsBuilder, BoardIds,
     BrainFlowPresets,
@@ -12,18 +11,13 @@ use crate::domain::{models::eeg_work_modes::WorkMode, ports::input::eeg_headset:
 // Default MAC address if environment variable is not set
 const DEFAULT_DEVICE_MAC: &str = "C8:8F:B6:6D:E1:E2"; // Or another sensible default
 
-#[injectable]
 pub struct BrainFlowAdapter {
     board: BoardShim,
     work_mode: WorkMode,
 }
 
-#[implements]
-impl BrainFlowAdapter {
-    /// Factory function for creating the BrainFlowAdapter.
-    /// Reads configuration from environment variables.
-    #[factory]
-    fn new() -> Self {
+impl Default for BrainFlowAdapter {
+    fn default() -> Self {
         // Logic moved from the old Default::default()
         let mac_address = env::var("BRAINBIT_MAC_ADDRESS").unwrap_or_else(|_| {
             println!(
@@ -42,11 +36,10 @@ impl BrainFlowAdapter {
 
         let board_id = BoardIds::BrainbitBoard;
         let board = BoardShim::new(board_id, params)
-            .map_err(|e| format!("Failed to initialize BoardShim: {}", e))
             .expect("BoardShim initialization failed");
+        
         board
             .prepare_session()
-            .map_err(|e| format!("Failed to prepare session: {}", e))
             .expect("Session preparation failed");
 
         let instance = Self {
@@ -60,7 +53,9 @@ impl BrainFlowAdapter {
 
         instance
     }
+}
 
+impl BrainFlowAdapter {
     /// Sends a configuration command to the board and handles the result.
     fn _send_board_command(&self, command: &str) -> Result<String, String> {
         println!("Sending command to board: {}", command);
@@ -78,9 +73,8 @@ impl BrainFlowAdapter {
     }
 }
 
-#[implements]
 impl EegHeadsetPort for BrainFlowAdapter {
-    fn extract_impedance_data(&self) -> Result<HashMap<String, Vec<f32>>, String> {
+    fn extract_impedance_data(&self) -> Result<HashMap<String, u16>, String> {
         if !matches!(self.work_mode, WorkMode::Calibration) {
             return Err("Device not in Calibration mode. Call change_work_mode first.".to_string());
         }
@@ -121,11 +115,17 @@ impl EegHeadsetPort for BrainFlowAdapter {
             if channel_index < data.shape()[0] {
                 let resistance_values_ohm: Vec<f64> =
                     data.row(channel_index).iter().map(|&v| v.abs()).collect();
-                let resistance_values_kohm: Vec<f32> = resistance_values_ohm
+                let resistance_values_kohm: Vec<u16> = resistance_values_ohm
                     .iter()
-                    .map(|&v| (v / 1000.0) as f32)
+                    .map(|&v| (v / 1000.0) as u16)
                     .collect();
-                impedance_values.insert(electrode_name.to_string(), resistance_values_kohm);
+                // Calculate average or use first element as value
+                let avg_impedance = if !resistance_values_kohm.is_empty() {
+                    resistance_values_kohm.iter().sum::<u16>() / resistance_values_kohm.len() as u16
+                } else {
+                    0
+                };
+                impedance_values.insert(electrode_name.to_string(), avg_impedance);
             } else {
                 eprintln!(
                     "Warning: Resistance channel index {} for {} out of bounds (rows: {})",
@@ -133,7 +133,7 @@ impl EegHeadsetPort for BrainFlowAdapter {
                     electrode_name,
                     data.shape()[0]
                 );
-                impedance_values.insert(electrode_name.to_string(), vec![f32::NAN]);
+                impedance_values.insert(electrode_name.to_string(), 0); // Se utiliza 0 para dato inválido
             }
         }
 
@@ -240,6 +240,42 @@ impl EegHeadsetPort for BrainFlowAdapter {
             );
             // State remains unchanged
         }
+    }
+
+    /// Connects to the BrainBit device and prepares the session.
+    fn connect(&self) -> Result<(), String> {
+        if self.board.is_prepared().unwrap_or(false) {
+            return Err("Device is already connected.".to_string());
+        }
+
+        self.board.prepare_session().map_err(|e| {
+            let error_msg = format!("Failed to prepare session: {}", e);
+            eprintln!("{}", error_msg);
+            error_msg
+        })
+    }
+
+    /// Checks if the BrainBit device is connected.
+    fn is_connected(&self) -> bool {
+        self.board.is_prepared().unwrap_or(false)
+    }
+
+    /// Disconnects from the BrainBit device and releases the session.
+    fn disconnect(&self) -> Result<(), String> {
+        if !self.board.is_prepared().unwrap_or(false) {
+            return Err("Device is not connected.".to_string());
+        }
+
+        self.board.release_session().map_err(|e| {
+            let error_msg = format!("Failed to release session: {}", e);
+            eprintln!("{}", error_msg);
+            error_msg
+        })
+    }
+    
+    // Returns the current work mode of the device
+    fn get_work_mode(&self) -> WorkMode {
+        self.work_mode
     }
 }
 
