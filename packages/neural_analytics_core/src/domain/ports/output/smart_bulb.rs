@@ -1,10 +1,9 @@
+use async_trait::async_trait;
 use crate::domain::models::bulb_state::BulbState;
-use blackbox_di::interface;
 
 /// Defines the interface for controlling a smart bulb.
-#[interface]
 #[async_trait]
-pub trait SmartBulbPort {
+pub trait SmartBulbPort: Send + Sync + 'static {
     /// Changes the state of the smart bulb (on or off).
     ///
     /// # Arguments
