@@ -23,9 +23,11 @@ pub async fn predict_color_thinking_use_case(
         }
     };
 
+    let model = _context.model_service.read().await;
+
     // Use the inference service to predict the color
     info!("Processing EEG data for prediction...");
-    let color_result = _context.model_service.predict_color(headset_data)
+    let color_result = model.predict_color(headset_data)
         .map_err(|e| {
             let error_msg = format!("Error predicting color: {}", e);
             error!("{}", error_msg);

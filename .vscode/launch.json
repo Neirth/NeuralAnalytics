@@ -2,19 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "lldb",
-      "request": "launch",
-      "name": "Debug Neural Analytics CLI",
-      "cargo": {
-        "args": [
-          "build",
-          "--package=neural_analytics_cli"
-        ]
-      },
-      "args": [],
-      "cwd": "${workspaceFolder}/packages/neural_analytics_cli"
-    },
-    {
       "type": "debugpy",
       "request": "launch",
       "name": "Debug Neural Analytics Model Builder",
@@ -37,13 +24,20 @@
       "request": "launch",
       "name": "Debug Neural Analytics GUI",
       "cargo": {
-        "args": [
-          "build",
-          "--package=neural_analytics_gui"
-        ]
+        "args": ["build", "--package=neural_analytics_gui"],
       },
-      "args": [],
-      "cwd": "${workspaceFolder}/packages/neural_analytics_gui"
+      "env": {
+        "TAPO_USERNAME": "neirth.sergey@outlook.com",
+        "TAPO_PASSWORD": "Cyh2s6VpcSudsM",
+        "TAPO_IP_ADDRESS": "192.168.31.18",
+        "USE_MOCK_HEADSET": "false",
+        "RUST_LOG": "debug",
+        "RUST_BACKTRACE": "1",
+        "DYLD_LIBRARY_PATH": "${workspaceFolder}/target/debug/lib"
+      },
+      "program": "${workspaceFolder}/target/debug/neural_analytics_gui",
+      "cwd": "${workspaceFolder}/target/debug",
+      "sourceLanguages": ["rust"]
     }
   ]
 }

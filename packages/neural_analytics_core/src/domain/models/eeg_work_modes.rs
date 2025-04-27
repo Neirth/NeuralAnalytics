@@ -1,5 +1,6 @@
 #[derive(Debug, PartialEq, Clone, Copy)] // Added Clone, Copy for convenience
 pub enum WorkMode {
+    Initialized,
     Calibration,
     Extraction,
 }
@@ -9,6 +10,7 @@ impl WorkMode {
         match self {
             WorkMode::Calibration => "Calibration",
             WorkMode::Extraction => "Extraction",
+            WorkMode::Initialized => "Initialized",
         }
     }
 
@@ -16,6 +18,7 @@ impl WorkMode {
         match mode {
             "Calibration" => Some(WorkMode::Calibration),
             "Extraction" => Some(WorkMode::Extraction),
+            "Initialized" => Some(WorkMode::Initialized),
             _ => None,
         }
     }

@@ -7,14 +7,13 @@ pub async fn search_headband_use_case(
     _context: &mut NeuralAnalyticsContext,
     _command: SearchHeadbandCommand,
 ) -> Result<Events, Error> {
-    debug!("Starting search and connection of BrainBit device...");
+    info!("Starting search and connection of BrainBit device...");
 
     // Get the EEG headset adapter from the context
-    let headset = _context.eeg_headset_adapter.as_ref();
-    let is_connected = headset.is_connected();
+    let headset = _context.eeg_headset_adapter.read().await;
 
     // Check if already connected
-    if is_connected {
+    if headset.is_connected() {
         debug!("The device is already connected.");
         return Ok(Events::new());
     }
@@ -31,6 +30,14 @@ pub async fn search_headband_use_case(
         }
     }
 
-    // Return an empty list of events for now
-    Ok(Events::new())
+    if headset.is_connected() {
+        debug!("The device is now connected.");
+        
+        // Return an empty list of events for now
+        Ok(Events::new())
+    } else {
+        let error_msg = "Error: Device is not connected or is not sending data. Connect first.";
+        error!("{}", error_msg);
+        return Err(Error::MissingCommandHandler(error_msg).into());
+    }
 }

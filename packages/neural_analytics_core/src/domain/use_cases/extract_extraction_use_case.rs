@@ -11,8 +11,9 @@ pub async fn extract_generalist_data_use_case(
     info!("Starting raw data extraction from BrainBit device...");
 
     // Get the EEG headset adapter from the context
-    let headset: &mut dyn EegHeadsetPort = _context.eeg_headset_adapter.as_mut();
-
+    let mut headset_guard = _context.eeg_headset_adapter.write().await;
+    let headset: &mut dyn EegHeadsetPort = headset_guard.as_mut();
+    
     // Check if the device is connected
     if !headset.is_connected() {
         let error_msg = "Error: Device is not connected. Connect first.";
@@ -49,12 +50,6 @@ pub async fn extract_generalist_data_use_case(
 
 // Helper function to process the EEG data
 fn process_eeg_data(data: &HashMap<String, Vec<f32>>) {
-    // Here you can implement specific processing of EEG data
-    // For example, you could:
-    // - Save data to a file or database
-    // - Apply filters or transformations
-    // - Send data to another component for analysis
-    
     // For now, we simply show basic information about the received data
     info!("Processing EEG data:");
     for (channel, values) in data {

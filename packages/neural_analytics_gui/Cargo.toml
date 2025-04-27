@@ -1,9 +1,9 @@
 [package]
 name = "neural_analytics_gui"
 version = "0.1.0"
-edition = "2021"
 authors = ["Sergio Martinez <7413024+Neirth@users.noreply.github.com>"]
 description = "GUI interface for Neural Analytics project"
+edition = "2021"
 
 [dependencies]
 # GUI dependencies
@@ -11,6 +11,7 @@ slint = { version = "1.10.0", default-features = true, features = ["renderer-ski
 presage = "0.3.0"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "signal"] }
 plotters = "0.3.7"
+env_logger = "0.11.8"
 
 # Workspace dependencies
 neural_analytics_core = { path = "../neural_analytics_core" }

@@ -47,7 +47,9 @@ impl Default for TapoSmartBulbAdapter {
                 "Background task: Attempting connection to Tapo device at {}",
                 ip_clone
             );
+
             let api_client = ApiClient::new(user_clone, pass_clone);
+            
             match api_client.l510(ip_clone.clone()).await {
                 Ok(handler) => {
                     debug!(

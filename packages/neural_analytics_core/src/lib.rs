@@ -1,16 +1,20 @@
+use std::sync::Arc;
+
 use domain::models::event_data::EventData;
+use domain::state_machine;
 use domain::state_machine::{
     neural_events::NeuralAnalyticsCoreEvents, state_machine::MainStateMachine,
 };
 
-use statig::awaitable::{IntoStateMachineExt, StateMachine};
+use log::debug;
+use statig::awaitable::{InitializedStateMachine, IntoStateMachineExt};
 
 pub mod domain;
 pub mod infrastructure;
 pub mod utils;
 
 // Internal State Machine
-pub(crate) static mut INTERNAL_STATE_MACHINE: Option<StateMachine<MainStateMachine>> = None;
+pub(crate) static mut INTERNAL_STATE_MACHINE: Option<InitializedStateMachine<MainStateMachine>> = None;
 
 // Setted by the initialize_core function
 pub(crate) static mut INTERNAL_EVENT_HANDLER: Option<
@@ -34,7 +38,7 @@ where
 {
     // Define the state machine asynchronously
     let state_machine_instance = MainStateMachine::new().await;
-    let raw_state_machine = state_machine_instance.state_machine();
+    let raw_state_machine = state_machine_instance.uninitialized_state_machine().init().await;
 
     unsafe {
         // Set the event handler to the static variable
@@ -48,6 +52,16 @@ where
             .handle(&NeuralAnalyticsCoreEvents::InitializeCore)
             .await;
     }
+
+    tokio::spawn(async move {
+        // Run the state machine in the background
+        loop {
+            unsafe {
+                let state_machine = INTERNAL_STATE_MACHINE.as_mut().unwrap();
+                state_machine.handle(&NeuralAnalyticsCoreEvents::BackgroundTick).await;
+            }
+        }
+    });
 
     // NOTE: No returns a external Command Bus because no intents are defined in GUI.
     Ok(())

@@ -95,6 +95,8 @@ fn event_handler(event: &String, data: &EventData) -> Result<(), String> {
 /// It also sets the initial view and runs the application.
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+
     let main_window = MainFrame::new();
 
     if main_window.is_ok() {
