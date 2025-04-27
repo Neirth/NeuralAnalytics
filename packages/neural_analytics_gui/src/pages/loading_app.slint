@@ -10,6 +10,7 @@ export component LoadingApplicationView inherits PageComponent {
     property<duration> initial-delay: 1500ms;
     property<bool> delay-finished: false;
     property<bool> cursor-visible: true;
+    property<bool> loading-finished: false;
 
     callback on-delay-finished;
     callback on-loading-finished;
@@ -43,7 +44,8 @@ export component LoadingApplicationView inherits PageComponent {
         triggered => {
             cursor-visible = !cursor-visible && current-char < project-name.length;
 
-            if (current-char >= project-name.length) {
+            if (current-char >= project-name.length && !loading-finished) {
+                loading-finished = true;
                 on-loading-finished();
             }
         }

@@ -41,7 +41,7 @@ def accuracy_torch(outputs, targets):
     
     return correct / total
 
-def train_model(train_loader, device, writer, epochs=50, learning_rate=0.001):
+def train_model(train_loader, device, writer, epochs=200, learning_rate=0.001):
     """
     Trains the neural analytics classification model.
     

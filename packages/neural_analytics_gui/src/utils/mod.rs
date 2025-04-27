@@ -47,23 +47,31 @@ pub fn render_signal_plot(
             return Image::from_rgb8(pixel_buffer);
         }
         
-        // Normalize the data
-        let (normalized_data, min_value, max_value): (Vec<f32>, f32, f32) = {
-            if data_vec.len() > 1 {
-                let min_value = data_vec.iter().cloned().fold(f32::INFINITY, f32::min);
-                let max_value = data_vec.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
-                
-                if (max_value - min_value).abs() < 1e-6 {
-                    (data_vec.clone(), min_value, max_value)
-                } else {
-                    (data_vec.iter().map(|&v| {
-                        2.0 * (v - min_value) / (max_value - min_value) - 1.0
-                    }).collect(), min_value, max_value)
-                }
-            } else {
-                (data_vec.clone(), 0.0, 0.0)
-            }
+        // Data is already normalized between 0 and 1 from BrainFlowAdapter
+        // But we calculate the current range to improve visualization
+        let normalized_data = data_vec.clone();
+        
+        // Calculate current min and max values to dynamically adjust the Y range
+        let min_value = normalized_data.iter().cloned().fold(f32::INFINITY, f32::min);
+        let max_value = normalized_data.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+        
+        // Add a small margin for better visualization
+        let margin = (max_value - min_value) * 0.0001;
+        
+        // Ensure the range is within [0,1] (normalized data)
+        let display_min = (min_value - margin).max(0.0);
+        let display_max = (max_value + margin).min(1.0);
+        
+        // If the range is too small, set a minimum range for visualization
+        let (final_min, final_max) = if (display_max - display_min).abs() < 0.05 {
+            // Center a minimum range around the middle value
+            let mid = (display_min + display_max) * 0.5;
+            let half_range = 0.025;
+            ((mid - half_range).max(0.0), (mid + half_range).min(1.0))
+        } else {
+            (display_min, display_max)
         };
+
 
         // Draw the title
         let root_area = root.titled(
@@ -76,7 +84,7 @@ pub fn render_signal_plot(
             .margin(10)
             .set_label_area_size(LabelAreaPosition::Left, 50)
             .set_label_area_size(LabelAreaPosition::Bottom, 40)
-            .build_cartesian_2d(1..(normalized_data.len()), min_value..max_value)
+            .build_cartesian_2d(1..(normalized_data.len()), final_min..final_max)
             .unwrap();
 
         chart.configure_mesh()

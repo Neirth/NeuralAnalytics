@@ -15,8 +15,9 @@ pub async fn extract_calibration_data_use_case(
 ) -> Result<Events, Error> {
     log::info!("Starting calibration data extraction from BrainBit device...");
 
-    // Get the EEG headset adapter from the context
-    let headset: &mut dyn EegHeadsetPort = _context.eeg_headset_adapter.as_mut();
+    // Obtain the EEG headset adapter from the context
+    let mut headset_guard = _context.eeg_headset_adapter.write().await;
+    let headset: &mut dyn EegHeadsetPort = headset_guard.as_mut();
 
     // Check if the device is connected
     if !headset.is_connected() {
@@ -25,13 +26,10 @@ pub async fn extract_calibration_data_use_case(
         return Err(Error::MissingCommandHandler(error_msg).into());
     }
 
-    // Change to calibration mode before trying to get impedance data
     headset.change_work_mode(WorkMode::Calibration);
     
-    // Try to extract impedance data from the device
     let data = match headset.extract_impedance_data() {
         Ok(data) => {
-            // Process the extracted impedance data
             process_impedance_data(&data);
             log::info!("Calibration data successfully extracted.");
             data
@@ -43,23 +41,17 @@ pub async fn extract_calibration_data_use_case(
         }
     };
 
-    // Create event with calibration data
     let mut events = Events::new();
 
-    // Add the event to the event queue
     let _ = events.add(ReceivedCalibrationDataEvent {
         impedance_data: data,
     });
 
-    // Send the event to the event queue
     Ok(events)
 }
 
 // Helper function to process impedance data
 fn process_impedance_data(data: &HashMap<String, u16>) {
-    // Here you can implement specific processing of impedance data
-    // For example, check if electrodes are properly connected
-    
     info!("Processing electrode impedance data:");
     for (electrode, last_value) in data {            
         let status = if *last_value > 2 {

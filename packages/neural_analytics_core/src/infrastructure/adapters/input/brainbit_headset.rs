@@ -1,10 +1,11 @@
-// adapter.rs
 use brainflow::{
     board_shim::BoardShim, brainflow_input_params::BrainFlowInputParamsBuilder, BoardIds,
     BrainFlowPresets,
 };
+use log::{debug, error, info, warn};
 use std::collections::HashMap;
 use std::env;
+use std::sync::RwLock;
 
 use crate::domain::{models::eeg_work_modes::WorkMode, ports::input::eeg_headset::EegHeadsetPort};
 
@@ -14,20 +15,24 @@ const DEFAULT_DEVICE_MAC: &str = "C8:8F:B6:6D:E1:E2"; // Or another sensible def
 pub struct BrainFlowAdapter {
     board: BoardShim,
     work_mode: WorkMode,
+    // Changed from RefCell to RwLock to allow safe access between threads
+    min_values: RwLock<HashMap<String, f32>>,
+    max_values: RwLock<HashMap<String, f32>>,
 }
 
 impl Default for BrainFlowAdapter {
     fn default() -> Self {
         // Logic moved from the old Default::default()
         let mac_address = env::var("BRAINBIT_MAC_ADDRESS").unwrap_or_else(|_| {
-            println!(
+            info!(
                 "BRAINBIT_MAC_ADDRESS not set, using default: {}",
                 DEFAULT_DEVICE_MAC
             );
             DEFAULT_DEVICE_MAC.to_string()
         });
 
-        println!("Using MAC Address: {}", mac_address);
+        debug!("Using MAC Address: {}", mac_address);
+        warn!("New instance of BrainFlowAdapter created, check if the device is connected.");
 
         let params = BrainFlowInputParamsBuilder::default()
             .mac_address(mac_address)
@@ -35,41 +40,53 @@ impl Default for BrainFlowAdapter {
             .build();
 
         let board_id = BoardIds::BrainbitBoard;
-        let board = BoardShim::new(board_id, params)
-            .expect("BoardShim initialization failed");
-        
-        board
-            .prepare_session()
-            .expect("Session preparation failed");
+        let board = BoardShim::new(board_id, params).expect("BoardShim initialization failed");
 
-        let instance = Self {
+        Self {
             board,
-            work_mode: WorkMode::Calibration,
-        };
-
-        // Attempt to set initial mode
-        // Consider if this initial command sending belongs in the factory or an init method
-        let _ = instance._send_board_command("CommandStartResist");
-
-        instance
+            work_mode: WorkMode::Initialized,
+            min_values: RwLock::new(HashMap::new()),
+            max_values: RwLock::new(HashMap::new()),
+        }
     }
 }
 
 impl BrainFlowAdapter {
     /// Sends a configuration command to the board and handles the result.
     fn _send_board_command(&self, command: &str) -> Result<String, String> {
-        println!("Sending command to board: {}", command);
+        // Stabilize the device before sending commands
+        std::thread::sleep(std::time::Duration::from_millis(300));
+
+        debug!("Sending command to board: {}", command);
+
+        // Send the command to the board
         match self.board.config_board(command) {
             Ok(response) => {
-                println!("Command '{}' successful. Response: {}", command, response);
+                debug!("Command '{}' successful. Response: {}", command, response);
                 Ok(response)
             }
             Err(e) => {
                 let error_msg = format!("Error sending command '{}': {}", command, e);
-                eprintln!("{}", error_msg);
+                error!("{}", error_msg);
                 Err(error_msg)
             }
         }
+    }
+
+    /// Applies Min-Max scaling to a data series
+    ///
+    /// This function normalizes the input values according to the observed original range
+    /// using the standard Min-Max scaling formula.
+    fn _apply_min_max_scaling(&self, data: &[f32], min_orig: f32, max_orig: f32) -> Vec<f32> {
+        // Avoid division by zero
+        let range_orig = if (max_orig - min_orig).abs() < f32::EPSILON {
+            1.0
+        } else {
+            max_orig - min_orig
+        };
+
+        // Apply Min-Max normalization
+        data.iter().map(|&v| (v - min_orig) / range_orig).collect()
     }
 }
 
@@ -100,6 +117,10 @@ impl EegHeadsetPort for BrainFlowAdapter {
         .collect();
         // --- End Resistance Channel Definition ---
 
+        // Await for the device to stabilize
+        std::thread::sleep(std::time::Duration::from_millis(300));
+
+        // Send the command to get impedance data
         let data = self
             .board
             .get_board_data(Some(100), BrainFlowPresets::DefaultPreset)
@@ -113,27 +134,21 @@ impl EegHeadsetPort for BrainFlowAdapter {
 
         for (electrode_name, &channel_index) in electrode_channel_map.iter() {
             if channel_index < data.shape()[0] {
-                let resistance_values_ohm: Vec<f64> =
-                    data.row(channel_index).iter().map(|&v| v.abs()).collect();
-                let resistance_values_kohm: Vec<u16> = resistance_values_ohm
-                    .iter()
-                    .map(|&v| (v / 1000.0) as u16)
-                    .collect();
-                // Calculate average or use first element as value
-                let avg_impedance = if !resistance_values_kohm.is_empty() {
-                    resistance_values_kohm.iter().sum::<u16>() / resistance_values_kohm.len() as u16
+                let impedance = if data.row(channel_index).len() > 0 {
+                    (data.row(channel_index)[0].abs() / 1000.0) as u16
                 } else {
                     0
                 };
-                impedance_values.insert(electrode_name.to_string(), avg_impedance);
+                impedance_values.insert(electrode_name.to_string(), impedance);
             } else {
-                eprintln!(
-                    "Warning: Resistance channel index {} for {} out of bounds (rows: {})",
+                warn!(
+                    "Resistance channel index {} for {} out of bounds (rows: {})",
                     channel_index,
                     electrode_name,
                     data.shape()[0]
                 );
-                impedance_values.insert(electrode_name.to_string(), 0); // Se utiliza 0 para dato inválido
+
+                impedance_values.insert(electrode_name.to_string(), 0);
             }
         }
 
@@ -166,6 +181,10 @@ impl EegHeadsetPort for BrainFlowAdapter {
         .collect();
         // --- End EEG Channel Definition ---
 
+        // Await for the device to stabilize
+        std::thread::sleep(std::time::Duration::from_millis(300));
+
+        // Send the command to get generalist data
         let data = self
             .board
             .get_board_data(None, BrainFlowPresets::DefaultPreset)
@@ -174,7 +193,7 @@ impl EegHeadsetPort for BrainFlowAdapter {
         let mut raw_data_map = HashMap::new();
 
         if data.shape()[0] == 0 {
-            eprintln!("Warning: No new raw data returned from get_board_data.");
+            warn!("No new raw data returned from get_board_data.");
             return Ok(raw_data_map);
         }
 
@@ -183,10 +202,59 @@ impl EegHeadsetPort for BrainFlowAdapter {
                 let channel_data_f64 = data.row(channel_index);
                 let channel_data_f32: Vec<f32> =
                     channel_data_f64.iter().map(|&v| v as f32).collect();
-                raw_data_map.insert(channel_name.clone(), channel_data_f32);
+
+                // Update min values with RwLock
+                {
+                    let mut min_values = self.min_values.write().unwrap();
+                    if let Some(min_val) = channel_data_f32
+                        .iter()
+                        .cloned()
+                        .min_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
+                    {
+                        let current_min = min_values.entry(channel_name.clone()).or_insert(min_val);
+                        if min_val < *current_min {
+                            *current_min = min_val;
+                        }
+                    }
+                }
+
+                // Update max values with RwLock
+                {
+                    let mut max_values = self.max_values.write().unwrap();
+                    if let Some(max_val) = channel_data_f32
+                        .iter()
+                        .cloned()
+                        .max_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
+                    {
+                        let current_max = max_values.entry(channel_name.clone()).or_insert(max_val);
+                        if max_val > *current_max {
+                            *current_max = max_val;
+                        }
+                    }
+                }
+
+                // Obtain the original min and max values for the channel
+                let min_orig = *self
+                    .min_values
+                    .read()
+                    .unwrap()
+                    .get(channel_name)
+                    .unwrap_or(&0.0);
+                let max_orig = *self
+                    .max_values
+                    .read()
+                    .unwrap()
+                    .get(channel_name)
+                    .unwrap_or(&1.0);
+
+                // Apply Min-Max scaling using the private helper function
+                let normalized_data =
+                    self._apply_min_max_scaling(&channel_data_f32, min_orig, max_orig);
+
+                raw_data_map.insert(channel_name.clone(), normalized_data);
             } else {
-                eprintln!(
-                    "Error: EEG Channel index {} ('{}') out of bounds for data rows {}",
+                error!(
+                    "EEG Channel index {} ('{}') out of bounds for data rows {}",
                     channel_index,
                     channel_name,
                     data.shape()[0]
@@ -200,11 +268,11 @@ impl EegHeadsetPort for BrainFlowAdapter {
     fn change_work_mode(&mut self, new_mode: WorkMode) {
         // Avoid changing if already in the desired mode
         if self.work_mode == new_mode {
-            println!("Already in {:?} mode.", new_mode);
+            debug!("Already in {:?} mode.", new_mode);
             return; // Or return Ok(()) if the function returns Result
         }
 
-        println!(
+        debug!(
             "Attempting to change work mode from {:?} to {:?}",
             self.work_mode, new_mode
         );
@@ -213,11 +281,12 @@ impl EegHeadsetPort for BrainFlowAdapter {
         let stop_command = match self.work_mode {
             WorkMode::Calibration => "CommandStopSignal",
             WorkMode::Extraction => "CommandStopResist",
+            WorkMode::Initialized => "CommandStopSignal",
         };
 
         // Use the private helper function. Abort if stop command fails.
         if self._send_board_command(stop_command).is_err() {
-            eprintln!("Mode change aborted due to error stopping current mode.");
+            error!("Mode change aborted due to error stopping current mode.");
             return;
         }
 
@@ -225,16 +294,15 @@ impl EegHeadsetPort for BrainFlowAdapter {
         let start_command = match new_mode {
             WorkMode::Calibration => "CommandStartResist",
             WorkMode::Extraction => "CommandStartSignal",
+            WorkMode::Initialized => "CommandStartSignal",
         };
 
         // Use the private helper function. Update state only on success.
         if self._send_board_command(start_command).is_ok() {
-            println!("Successfully changed adapter state to {:?}", new_mode);
+            debug!("Successfully changed adapter state to {:?}", new_mode);
             self.work_mode = new_mode;
-            // Optional delay after starting
-            // std::thread::sleep(std::time::Duration::from_millis(500));
         } else {
-            eprintln!(
+            error!(
                 "Mode change failed. Adapter state remains {:?}.",
                 self.work_mode
             );
@@ -243,36 +311,92 @@ impl EegHeadsetPort for BrainFlowAdapter {
     }
 
     /// Connects to the BrainBit device and prepares the session.
+    /// If a connection is already established, it returns Ok without any changes.
     fn connect(&self) -> Result<(), String> {
+        // Check if the device is already connected
         if self.board.is_prepared().unwrap_or(false) {
-            return Err("Device is already connected.".to_string());
+            debug!("Device is already connected, ignoring connection request.");
+            return Ok(());
         }
 
-        self.board.prepare_session().map_err(|e| {
+        // Attempt to connect to the device
+        info!("Attempting to connect to BrainBit device...");
+
+        // Prepare the session with the specified parameters
+        let _ = self.board.prepare_session().map_err(|e| {
             let error_msg = format!("Failed to prepare session: {}", e);
-            eprintln!("{}", error_msg);
+            error!("{}", error_msg);
             error_msg
-        })
+        });
+
+        // Start the stream with a buffer size of 10 and no additional parameters
+        let _ = self.board.start_stream(1000, "").map_err(|e| {
+            let error_msg = format!("Failed to start stream: {}", e);
+            error!("{}", error_msg);
+            error_msg
+        })?;
+
+        if self._send_board_command("CommandStartSignal").is_ok() {
+            // Send a log message indicating successful connection
+            info!("Connection to BrainBit device established successfully.");
+            Ok(())
+        } else {
+            return Err("Failed to start signal command.".to_string());
+        }
     }
 
     /// Checks if the BrainBit device is connected.
     fn is_connected(&self) -> bool {
-        self.board.is_prepared().unwrap_or(false)
+        // Check if the device is prepared
+        if !self.board.is_prepared().unwrap_or(false) {
+            return false;
+        }
+
+        // Retreive dummy data to check if the device is sending data
+        let _ = self
+            .board
+            .get_board_data(Some(1), BrainFlowPresets::DefaultPreset);
+
+        // Stabilize the device before checking connection
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        // Try to get data from board to check if it's sending data
+        match self
+            .board
+            .get_board_data(Some(1), BrainFlowPresets::DefaultPreset)
+        {
+            Ok(data) => data.shape()[1] != 0,
+            Err(e) => {
+                debug!("Error trying to verify the connection of the device: {}", e);
+                false
+            }
+        }
     }
 
     /// Disconnects from the BrainBit device and releases the session.
-    fn disconnect(&self) -> Result<(), String> {
+    fn disconnect(&mut self) -> Result<(), String> {
         if !self.board.is_prepared().unwrap_or(false) {
             return Err("Device is not connected.".to_string());
         }
 
+        // Stop the stream and release the session
+        self.board.stop_stream().map_err(|e| {
+            let error_msg = format!("Failed to stop stream: {}", e);
+            error!("{}", error_msg);
+            error_msg
+        })?;
+
+        // Attempt to stop the stream
+        self.work_mode = WorkMode::Initialized;
+
+        // Release the session
         self.board.release_session().map_err(|e| {
             let error_msg = format!("Failed to release session: {}", e);
-            eprintln!("{}", error_msg);
+            error!("{}", error_msg);
             error_msg
         })
     }
-    
+
     // Returns the current work mode of the device
     fn get_work_mode(&self) -> WorkMode {
         self.work_mode
@@ -282,11 +406,11 @@ impl EegHeadsetPort for BrainFlowAdapter {
 // Ensure the board is stopped and released when the adapter is dropped
 impl Drop for BrainFlowAdapter {
     fn drop(&mut self) {
-        println!("Dropping BrainFlowAdapter, releasing session...");
+        debug!("Dropping BrainFlowAdapter, releasing session...");
         if self.board.is_prepared().unwrap_or(false) {
             let _ = self.board.stop_stream(); // Ignore error on stop
             if let Err(e) = self.board.release_session() {
-                eprintln!("Error releasing BrainFlow session: {}", e);
+                error!("Error releasing BrainFlow session: {}", e);
             }
         }
     }

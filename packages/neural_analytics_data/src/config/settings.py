@@ -17,7 +17,7 @@ Configuration for the EEG capture system.
 """
 
 # Capture parameters
-NUM_SAMPLES = 100              # Total number of samples to capture
+NUM_SAMPLES = 40               # Total number of samples to capture
 WINDOW_SECONDS = 10            # Duration of each capture window (seconds)
 INITIAL_DELAY = 30             # Initial delay before starting capture (seconds)
 BEEP_FREQ = 1000               # Alert sound frequency (Hz)
@@ -44,7 +44,7 @@ IMPEDANCE_MAP = {
 }
 
 # Impedance limits (kΩ)
-IMPEDANCE_TOO_LOW = 200      # Minimum acceptable impedance (kΩ)
+IMPEDANCE_TOO_LOW = 10      # Minimum acceptable impedance (kΩ)
 IMPEDANCE_EXCELLENT = 800    # Optimal contact impedance (kΩ)
 IMPEDANCE_ACCEPTABLE = 1500  # Acceptable impedance (kΩ)
 IMPEDANCE_POOR = 2000        # Poor connection impedance (kΩ)

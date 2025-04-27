@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+#[derive(Debug)]
 pub struct PredictColorThinkingCommand;
 
 impl presage::Command for PredictColorThinkingCommand {

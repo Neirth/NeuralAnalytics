@@ -24,8 +24,8 @@ from config.settings import (
 
 def play_sound(message=""):
     """Play system beep using macOS tools"""
-    #os.system(f'say "{message}"')
-    pass
+    os.system(f'say "{message}"')
+    # pass
 
 def get_impedance_status(value):
     """Returns status based on impedance value"""
