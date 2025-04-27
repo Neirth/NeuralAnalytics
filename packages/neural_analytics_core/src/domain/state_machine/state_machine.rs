@@ -1,28 +1,22 @@
-use std::sync::Arc;
-
-// Imports needed for DI container building and types
-use log::error;
+use log::{debug, error, info};
 use presage::{CommandBus, Configuration, Event};
+use serde::de;
 use statig::prelude::*;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
 use crate::{
     domain::{
         commands::{
-            extract_calibration_data_command::ExtractCalibrationDataCommand,
-            extract_generalist_data_command::ExtractGeneralistDataCommand,
-            predict_color_thinking_command::PredictColorThinkingCommand,
-            search_headband_command::SearchHeadbandCommand,
-            update_light_status_command::UpdateLightStatusCommand,
+            disconnect_headband_command::DisconnectHeadbandCommand, extract_calibration_data_command::ExtractCalibrationDataCommand, extract_generalist_data_command::ExtractGeneralistDataCommand, predict_color_thinking_command::PredictColorThinkingCommand, search_headband_command::SearchHeadbandCommand, update_light_status_command::UpdateLightStatusCommand
         },
         context::NeuralAnalyticsContext,
         events::{
-            captured_headset_data_event::CapturedHeadsetDataEvent,
-            headset_calibrating_event::HeadsetCalibratingEvent,
-            headset_connected_event::HeadsetConnectedEvent,
-            headset_disconnected_event::HeadsetDisconnectedEvent,
-            initialized_core_event::InitializedCoreEvent,
-        }, use_cases::{extract_calibration_use_case::extract_calibration_data_use_case, extract_extraction_use_case::extract_generalist_data_use_case, search_headband_use_case::search_headband_use_case, update_light_status_use_case::update_light_status_use_case},
+            captured_headset_data_event::CapturedHeadsetDataEvent, headset_calibrated_event::HeadsetCalibratedEvent, headset_calibrating_event::HeadsetCalibratingEvent, headset_connected_event::HeadsetConnectedEvent, headset_disconnected_event::HeadsetDisconnectedEvent, initialized_core_event::InitializedCoreEvent
+        },
+        use_cases::{
+            disconnect_headband_use_case::disconnect_headband_use_case, extract_calibration_use_case::extract_calibration_data_use_case, extract_extraction_use_case::extract_generalist_data_use_case, search_headband_use_case::search_headband_use_case, update_light_status_use_case::update_light_status_use_case
+        },
     },
     EventData, INTERNAL_EVENT_HANDLER,
 };
@@ -41,16 +35,16 @@ impl MainStateMachine {
     /// Creates a new instance of the MainStateMachine asynchronously,
     /// building the necessary DI container.
     pub async fn new() -> Self {
+        debug!("Initializate state machine...");
+
         let bus = CommandBus::<NeuralAnalyticsContext, presage::Error>::new().configure(
             Configuration::new()
-                // Pass the obtained &'static references
+                .command_handler(&disconnect_headband_use_case)
                 .command_handler(&extract_calibration_data_use_case)
                 .command_handler(&extract_generalist_data_use_case)
-                // .command_handler(handler3)
                 .command_handler(&search_headband_use_case)
                 .command_handler(&update_light_status_use_case),
         );
-
 
         Self {
             context: Arc::new(Mutex::new(NeuralAnalyticsContext::default())),
@@ -71,28 +65,20 @@ impl MainStateMachine {
     async fn initialize_application(
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
-    ) -> Response<State> {        
-        // Context is now accessed via self.context
-        let result = {
-            let mut ctx = self.context.lock().await;
-            self.command_bus
-                .execute(&mut *ctx, SearchHeadbandCommand)
-                .await
-        };
+    ) -> Response<State> {
+        // Initialization state - Detailed logging
+        debug!("Executing state: initialize_application");
 
-        if let Err(e) = result {
-            error!("Failed to initialize hardware parts: {:?}", e);
-            return Handled;
-        }
-
-        // Send the event without keeping the context locked
         if let Err(e) = send_event(
             &InitializedCoreEvent::NAME.to_string(),
             &EventData::default(),
         ) {
             error!("Failed to send initialized core event: {}", e);
-            return Handled;
+            debug!("Repeating state: initialize_application due to error");
+            return Transition(State::initialize_application());
         }
+
+        debug!("Transitioning to state: awaiting_headset_connection");
 
         // Direct transition to the next state
         Transition(State::awaiting_headset_connection())
@@ -113,6 +99,18 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
+        debug!("Executing state: awaiting_headset_connection");
+        debug!("Disconnecting headset...");
+        
+        let disconnect_result = {
+            let mut ctx = self.context.lock().await;
+            self.command_bus
+                .execute(&mut *ctx, DisconnectHeadbandCommand)
+                .await
+        };
+
+        info!("Searching for headset...");
+
         let search_result = {
             let mut ctx = self.context.lock().await;
             self.command_bus
@@ -123,18 +121,23 @@ impl MainStateMachine {
         match search_result {
             Ok(_) => {
                 // Headset connected
+                info!("Headset correctly connected");
                 if let Err(e) = send_event(
                     &HeadsetConnectedEvent::NAME.to_string(),
                     &EventData::default(),
                 ) {
                     error!("Failed to send headset connected event: {}", e);
-                    return Handled;
-                }
 
-                Transition(State::awaiting_headset_calibration())
+                    Transition(State::awaiting_headset_connection())
+                } else {
+                    debug!("Transitioning to state: awaiting_headset_calibration");
+                    Transition(State::awaiting_headset_calibration())
+                }
             }
             Err(_) => {
                 // Headset disconnected
+                info!("Headset not connected");
+
                 if let Err(e) = send_event(
                     &HeadsetDisconnectedEvent::NAME.to_string(),
                     &EventData::default(),
@@ -142,7 +145,7 @@ impl MainStateMachine {
                     error!("Failed to send headset disconnected event: {}", e);
                 }
 
-                Handled
+                Transition(State::awaiting_headset_connection())
             }
         }
     }
@@ -163,6 +166,10 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
+        // Send debug message
+        debug!("Executing state: awaiting_headset_calibration");
+
+        // Get calibration data from internal context
         let calibration_result = {
             let mut ctx = self.context.lock().await;
             self.command_bus
@@ -188,8 +195,8 @@ impl MainStateMachine {
         };
 
         if let Some(data) = impedance_data {
-            let needs_more_calibration = data.values().any(|&value| value > 1000);
-            
+            let needs_more_calibration = data.values().any(|&value| value > 1000 || value < 1);
+
             if needs_more_calibration {
                 if let Err(e) = send_event(
                     &HeadsetCalibratingEvent::NAME.to_string(),
@@ -201,11 +208,18 @@ impl MainStateMachine {
                     error!("Failed to send headset calibrating event: {}", e);
                 }
 
-                return Handled;
+                return Transition(State::awaiting_headset_calibration());
             }
         }
 
         // If we get here, the device is calibrated
+        if let Err(e) = send_event(
+            &HeadsetCalibratedEvent::NAME.to_string(),
+            &EventData::default(),
+        ) {
+            error!("Failed to send headset calibrated event: {}", e);
+        }
+
         Transition(State::capturing_headset_data())
     }
 
@@ -249,28 +263,29 @@ impl MainStateMachine {
             ctx.headset_data.clone().unwrap_or_default()
         };
 
-        let color_prediction = {
-            let mut ctx = self.context.lock().await;
-            let prediction_result = self.command_bus
-                .execute(
-                    &mut *ctx,
-                    PredictColorThinkingCommand {},
-                )
-                .await;
+        // let color_prediction = {
+        //     let mut ctx = self.context.lock().await;
+        //     let prediction_result = self
+        //         .command_bus
+        //         .execute(&mut *ctx, PredictColorThinkingCommand {})
+        //         .await;
 
-            if let Err(e) = prediction_result {
-                error!("Failed to predict color thinking: {:?}", e);
-                return Handled;
-            }
+        //     if let Err(e) = prediction_result {
+        //         error!("Failed to predict color thinking: {:?}", e);
+        //         return Transition(State::capturing_headset_data());
+        //     }
 
-            ctx.color_thinking.clone().unwrap_or_default()
-        };
+        //     ctx.color_thinking.clone().unwrap_or_default()
+        // };
+
+        let color_prediction = "green".to_string(); // Placeholder for actual prediction logic
 
         if !color_prediction.is_empty() {
             let is_green = color_prediction == "green";
             let mut ctx = self.context.lock().await;
 
-            if let Err(e) = self.command_bus
+            if let Err(e) = self
+                .command_bus
                 .execute(
                     &mut *ctx,
                     UpdateLightStatusCommand {
@@ -294,7 +309,7 @@ impl MainStateMachine {
             error!("Failed to send captured headset data event: {}", e);
         }
 
-        Handled
+        Transition(State::capturing_headset_data())
     }
 }
 
@@ -310,7 +325,13 @@ impl MainStateMachine {
 fn send_event(event: &String, data: &EventData) -> Result<(), String> {
     // Send the event to the event handler
     if let Some(event_handler) = unsafe { INTERNAL_EVENT_HANDLER.as_ref() } {
-        event_handler(event, data)
+        let result = event_handler(event, data);
+        if let Err(ref e) = result {
+            error!("Error sending event '{}': {}", event, e);
+        } else {
+            debug!("Event '{}' sent successfully", event);
+        }
+        result
     } else {
         Err("BUG: Event handler not set".to_string())
     }

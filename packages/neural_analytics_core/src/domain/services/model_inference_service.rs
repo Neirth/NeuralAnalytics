@@ -26,7 +26,7 @@ pub struct ModelInferenceService {
 impl Default for ModelInferenceService {
     fn default() -> Self {
         // Define the default path to the model
-        let model_path = "assets/model.onnx".to_string();
+        let model_path = "assets/neural_analytics.onnx".to_string();
         let mut service = Self {
             model: None,
             model_path,
@@ -176,7 +176,7 @@ impl ModelInferenceInterface for ModelInferenceService {
         };
         
         // Map indices to colors (adjust according to model classes)
-        let color_map = ["red", "green", "blue", "yellow", "purple"];
+        let color_map = ["red", "green", "trash"];
         
         if output_tensor.is_empty() {
             return Err("No probabilities obtained from the model".to_string());

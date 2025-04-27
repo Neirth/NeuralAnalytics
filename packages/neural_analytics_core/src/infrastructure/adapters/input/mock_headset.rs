@@ -160,7 +160,7 @@ impl EegHeadsetPort for MockHeadsetAdapter {
         self.is_connected
     }
 
-    fn disconnect(&self) -> Result<(), String> {
+    fn disconnect(&mut self) -> Result<(), String> {
         if !self.is_connected {
             warn!("Mock: The device is not connected");
             return Err("Device is not connected".to_string());
