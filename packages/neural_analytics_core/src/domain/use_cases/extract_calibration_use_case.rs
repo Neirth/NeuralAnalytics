@@ -8,6 +8,19 @@ use crate::domain::{
 use std::collections::HashMap;
 use log::{self, info};
 
+/// This use case is responsible for extracting calibration data from the EEG headset
+/// and processing it. It checks if the device is connected and in the correct mode
+/// before attempting to extract the data. The extracted data is then processed and
+/// returned as an event.
+/// 
+/// # Arguments
+/// * `_context`: A mutable reference to the `NeuralAnalyticsContext` which contains
+///  the EEG headset adapter.
+/// * `_command`: The command to extract calibration data.
+///
+/// # Returns
+/// * `Result<Events, Error>`: A result containing either the events generated from
+///  the extracted data or an error if something goes wrong.
 #[command_handler(error = Error)]
 pub async fn extract_calibration_data_use_case(
     _context: &mut NeuralAnalyticsContext,
@@ -26,7 +39,10 @@ pub async fn extract_calibration_data_use_case(
         return Err(Error::MissingCommandHandler(error_msg).into());
     }
 
-    headset.change_work_mode(WorkMode::Calibration);
+    if headset.get_work_mode() != WorkMode::Calibration {
+        log::info!("Changing work mode to Calibration...");
+        headset.change_work_mode(WorkMode::Calibration);
+    }
     
     let data = match headset.extract_impedance_data() {
         Ok(data) => {

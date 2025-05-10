@@ -1,9 +1,10 @@
 use neural_analytics_core::{domain::events::NeuralAnalyticsEvents, initialize_core};
 use neural_analytics_core::domain::models::event_data::EventData;
 use utils::render_signal_plot;
+use std::process::exit;
 use std::sync::{Mutex, LazyLock};
 use std::vec;
-use slint::{ModelRc, SharedString, Weak};
+use slint::{ComponentHandle, ModelRc, SharedString, Weak};
 
 pub mod utils;
 
@@ -123,6 +124,10 @@ async fn main() {
         // Set initial view
         main_window.invoke_update_current_view(SharedString::from("LoadingApplicationView"));
 
+        main_window.window().on_close_requested(|| {
+            exit(0);
+        });
+        
         // Run the application
         main_window.run().unwrap();
     } else {

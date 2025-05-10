@@ -15,8 +15,6 @@ pub struct TapoSmartBulbAdapter {
     device_client: Arc<Mutex<Option<LightHandler>>>,
     // Keep config details for potential retries or reference
     ip_address: String,
-    username: String,
-    password: String,
 }
 
 impl Default for TapoSmartBulbAdapter {
@@ -79,8 +77,6 @@ impl Default for TapoSmartBulbAdapter {
         Self {
             device_client: device_client_arc,
             ip_address,
-            username,
-            password,
         }
     }
 }

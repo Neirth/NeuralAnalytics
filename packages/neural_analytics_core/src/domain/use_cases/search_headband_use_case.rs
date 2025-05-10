@@ -2,6 +2,18 @@ use log::{debug, error, info};
 use presage::{command_handler, Error, Events};
 use crate::domain::{commands::search_headband_command::SearchHeadbandCommand, context::NeuralAnalyticsContext};
 
+/// This use case is responsible for searching and connecting to the EEG headset (BrainBit device).
+/// It checks if the device is already connected and attempts to connect it.
+/// If successful, it returns an empty list of events.
+/// 
+/// # Arguments
+/// * `_context`: A mutable reference to the `NeuralAnalyticsContext` which contains
+/// the EEG headset adapter.
+/// * `_command`: The command to search and connect the headband.
+/// 
+/// # Returns
+/// * `Result<Events, Error>`: A result containing either the events generated from
+/// the connection or an error if something goes wrong.
 #[command_handler(error = Error)]
 pub async fn search_headband_use_case(
     _context: &mut NeuralAnalyticsContext,

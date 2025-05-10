@@ -15,7 +15,7 @@
 
 from utils.trainer import train_model
 from utils.export import export_model
-from utils.evaluation import evaluate_model
+from utils.evaluation import evaluate_model, save_training_curves
 
 from datasets.neural_analytics import NeuralAnalyticsDataset
 from models.neural_analytics import NeuralAnalyticsModel
@@ -28,7 +28,7 @@ import os
 import torch
 
 BATCH_SIZE = 64
-WINDOW_SIZE = 19
+WINDOW_SIZE = 62
 DATASET_FOLDER = os.path.join(os.getcwd(), '../' 'dataset')
 
 def main():
@@ -48,12 +48,34 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)  # No shuffle in validation
 
+    # Create folders for saving the model and training logs
+    if not os.path.exists("../build"):
+        os.makedirs("../build")
+
+    if not os.path.exists("../build/assets"):
+        os.makedirs("../build/assets")
+    
+    if not os.path.exists("../build/runs"):
+        os.makedirs("../build/runs")
+
     # Configure TensorBoard
-    writer = SummaryWriter(log_dir="./runs")
+    writer = SummaryWriter(log_dir="../build/runs")
 
     # Train and evaluate the model
-    model = train_model(train_loader, device, writer)
-    evaluate_model(model, val_loader, device, writer)
+    model, train_losses, train_accuracies = train_model(train_loader, device, writer)
+    val_losses, val_accuracies = evaluate_model(
+        model, 
+        val_loader, 
+        device, writer,
+        output_dir="../build"
+    )
+
+    # Export training curves
+    save_training_curves(
+        train_losses=train_losses,
+        train_accuracies=train_accuracies,
+        output_dir="../build"
+    )
 
     # Export the model
     export_model(

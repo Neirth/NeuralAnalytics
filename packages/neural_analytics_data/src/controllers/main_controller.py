@@ -315,6 +315,9 @@ class NeuralCaptureController:
                                 self.state_info['capture_count'] = capture_count
                                 self.state_info['message'] = f"Sample {capture_count}/{NUM_SAMPLES} captured"
                             
+                            if capture_count == NUM_SAMPLES / 2:
+                                play_sound("Halfway there")
+
                             # Check if we've finished
                             if capture_count >= NUM_SAMPLES:
                                 break
@@ -353,14 +356,17 @@ class NeuralCaptureController:
                 
             except Exception as e:
                 print(f"[ERROR CAPTURE] General error in capture thread: {str(e)}")
+                play_sound("Error in capture thread; Stopping capture")
                 time.sleep(0.5)
         
         # Ensure the result is recorded, whether success or failure
         if capture_count >= NUM_SAMPLES and not self.control_event.is_set():
             print(f"[INFO] Capture completed successfully. {capture_count} CSV files of 100 rows each were saved.")
+            play_sound("Capture completed successfully")
         else:
             print(f"[INFO] Capture interrupted or incomplete. Only {capture_count}/{NUM_SAMPLES} files were saved.")
-    
+            play_sound("Capture interrupted or incomplete")
+
     def countdown_thread(self):
         """
         Thread to manage the countdown before capture.
