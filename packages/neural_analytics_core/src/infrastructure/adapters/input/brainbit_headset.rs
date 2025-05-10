@@ -10,19 +10,17 @@ use std::sync::RwLock;
 use crate::domain::{models::eeg_work_modes::WorkMode, ports::input::eeg_headset::EegHeadsetPort};
 
 // Default MAC address if environment variable is not set
-const DEFAULT_DEVICE_MAC: &str = "C8:8F:B6:6D:E1:E2"; // Or another sensible default
+const DEFAULT_DEVICE_MAC: &str = "C8:8F:B6:6D:E1:E2";
 
 pub struct BrainFlowAdapter {
     board: BoardShim,
     work_mode: WorkMode,
-    // Changed from RefCell to RwLock to allow safe access between threads
     min_values: RwLock<HashMap<String, f32>>,
     max_values: RwLock<HashMap<String, f32>>,
 }
 
 impl Default for BrainFlowAdapter {
     fn default() -> Self {
-        // Logic moved from the old Default::default()
         let mac_address = env::var("BRAINBIT_MAC_ADDRESS").unwrap_or_else(|_| {
             info!(
                 "BRAINBIT_MAC_ADDRESS not set, using default: {}",
@@ -55,7 +53,7 @@ impl BrainFlowAdapter {
     /// Sends a configuration command to the board and handles the result.
     fn _send_board_command(&self, command: &str) -> Result<String, String> {
         // Stabilize the device before sending commands
-        std::thread::sleep(std::time::Duration::from_millis(300));
+        std::thread::sleep(std::time::Duration::from_millis(500));
 
         debug!("Sending command to board: {}", command);
 
@@ -118,12 +116,12 @@ impl EegHeadsetPort for BrainFlowAdapter {
         // --- End Resistance Channel Definition ---
 
         // Await for the device to stabilize
-        std::thread::sleep(std::time::Duration::from_millis(300));
+        std::thread::sleep(std::time::Duration::from_millis(100));
 
         // Send the command to get impedance data
         let data = self
             .board
-            .get_board_data(Some(100), BrainFlowPresets::DefaultPreset)
+            .get_board_data(Some(62), BrainFlowPresets::DefaultPreset)
             .map_err(|e| format!("Failed to get board data for impedance: {}", e))?;
 
         let mut impedance_values = HashMap::new();
@@ -187,7 +185,7 @@ impl EegHeadsetPort for BrainFlowAdapter {
         // Send the command to get generalist data
         let data = self
             .board
-            .get_board_data(None, BrainFlowPresets::DefaultPreset)
+            .get_board_data(Some(62), BrainFlowPresets::DefaultPreset)
             .map_err(|e| format!("Failed to get board data for raw extraction: {}", e))?;
 
         let mut raw_data_map = HashMap::new();
@@ -329,8 +327,8 @@ impl EegHeadsetPort for BrainFlowAdapter {
             error_msg
         });
 
-        // Start the stream with a buffer size of 10 and no additional parameters
-        let _ = self.board.start_stream(1000, "").map_err(|e| {
+        // Start the stream with a buffer size of 62 and no additional parameters
+        let _ = self.board.start_stream(62, "").map_err(|e| {
             let error_msg = format!("Failed to start stream: {}", e);
             error!("{}", error_msg);
             error_msg
@@ -350,27 +348,29 @@ impl EegHeadsetPort for BrainFlowAdapter {
         // Check if the device is prepared
         if !self.board.is_prepared().unwrap_or(false) {
             return false;
+        } else {
+            return true;
         }
 
-        // Retreive dummy data to check if the device is sending data
-        let _ = self
-            .board
-            .get_board_data(Some(1), BrainFlowPresets::DefaultPreset);
+        // // Retreive dummy data to check if the device is sending data
+        // let _ = self
+        //     .board
+        //     .get_board_data(Some(1), BrainFlowPresets::DefaultPreset);
 
-        // Stabilize the device before checking connection
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        // // Stabilize the device before checking connection
+        // std::thread::sleep(std::time::Duration::from_millis(500));
 
-        // Try to get data from board to check if it's sending data
-        match self
-            .board
-            .get_board_data(Some(1), BrainFlowPresets::DefaultPreset)
-        {
-            Ok(data) => data.shape()[1] != 0,
-            Err(e) => {
-                debug!("Error trying to verify the connection of the device: {}", e);
-                false
-            }
-        }
+        // // Try to get data from board to check if it's sending data
+        // match self
+        //     .board
+        //     .get_board_data(Some(1), BrainFlowPresets::DefaultPreset)
+        // {
+        //     Ok(data) => data.shape()[1] != 0,
+        //     Err(e) => {
+        //         debug!("Error trying to verify the connection of the device: {}", e);
+        //         false
+        //     }
+        // }
     }
 
     /// Disconnects from the BrainBit device and releases the session.

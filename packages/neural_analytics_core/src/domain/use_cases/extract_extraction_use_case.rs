@@ -3,6 +3,19 @@ use presage::{command_handler, Error, Events};
 use crate::domain::{commands::extract_generalist_data_command::ExtractGeneralistDataCommand, context::NeuralAnalyticsContext, models::{eeg_work_modes::WorkMode, event_internals::ReceivedGeneralistDataEvent}, ports::input::eeg_headset::EegHeadsetPort};
 use std::collections::HashMap;
 
+/// This use case is responsible for extracting raw EEG data from the EEG headset
+/// and processing it. It checks if the device is connected and in the correct mode
+/// before attempting to extract the data. The extracted data is then processed and
+/// returned as an event.
+/// 
+/// # Arguments
+/// * `_context`: A mutable reference to the `NeuralAnalyticsContext` which contains
+/// the EEG headset adapter.
+/// * `_command`: The command to extract generalist data.
+/// 
+/// # Returns
+/// * `Result<Events, Error>`: A result containing either the events generated from
+/// the extracted data or an error if something goes wrong.
 #[command_handler(error = Error)]
 pub async fn extract_generalist_data_use_case(
     _context: &mut NeuralAnalyticsContext,
@@ -22,7 +35,10 @@ pub async fn extract_generalist_data_use_case(
     }
 
     // Change to extraction mode before trying to get data
-    headset.change_work_mode(WorkMode::Extraction);
+    if headset.get_work_mode() != WorkMode::Extraction {
+        info!("Changing work mode to Extraction...");
+        headset.change_work_mode(WorkMode::Extraction); 
+    }
     
     // Try to extract raw data from the device
     let data = match headset.extract_raw_data() {

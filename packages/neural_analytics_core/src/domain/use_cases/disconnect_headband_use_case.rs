@@ -2,6 +2,18 @@ use log::{debug, error, info};
 use presage::{command_handler, Error, Events};
 use crate::domain::{commands::disconnect_headband_command::DisconnectHeadbandCommand, context::NeuralAnalyticsContext};
 
+/// This use case is responsible for disconnecting the EEG headset (BrainBit device).
+/// It checks if the device is connected and attempts to disconnect it.
+/// If successful, it returns an empty list of events.
+/// 
+/// # Arguments
+/// * `_context`: A mutable reference to the `NeuralAnalyticsContext` which contains
+/// the EEG headset adapter.
+/// * `_command`: The command to disconnect the headband.
+/// 
+/// # Returns
+/// * `Result<Events, Error>`: A result containing either the events generated from
+/// the disconnection or an error if something goes wrong.
 #[command_handler(error = Error)]
 pub async fn disconnect_headband_use_case(
     _context: &mut NeuralAnalyticsContext,

@@ -19,22 +19,24 @@ HIDDEN_SIZE = 64  # Size of hidden units in the LSTM
 NUM_CLASSES = 3  # Number of classification categories (RED, GREEN, UNKNOWN)
 
 class NeuralAnalyticsModel(nn.Module):
+    # Mapping from index to class label
+    class_mapping = {0: 'RED', 1: 'GREEN', 2: 'TRASH'}
+
     def __init__(self):
         super(NeuralAnalyticsModel, self).__init__()
 
         # Define individual components
-        self.lstm = nn.LSTM(INPUT_SIZE, HIDDEN_SIZE, 4, batch_first=True, bidirectional=False)
+        self.lstm = nn.LSTM(INPUT_SIZE, HIDDEN_SIZE, 1, batch_first=True, bidirectional=False)
         
         # Linear components in Sequential with ReLU and additional layer
         self.model = nn.Sequential(
-            nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE // 2),  # First dense layer reduces dimensionality
-            nn.ReLU(),                                 # ReLU activation for non-linearity
-            nn.Linear(HIDDEN_SIZE // 2, NUM_CLASSES),  # Second dense layer for classification
-            nn.Softmax(dim=1)                          # Softmax for probabilities
-        )
-    
-        # Mapping from index to class label
-        self.class_mapping = {0: 'RED', 1: 'GREEN', 2: 'UNKNOWN'}
+            nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE // 2),       # First dense layer reduces dimensionality
+            nn.ReLU(),                                      # ReLU activation for non-linearity
+            # nn.Linear(HIDDEN_SIZE // 2, HIDDEN_SIZE // 4),  # Second dense layer for classification
+            # nn.ReLU(),                                      # ReLU activation for non-linearity
+            nn.Linear(HIDDEN_SIZE // 2, NUM_CLASSES),       # Third dense layer for classification
+            nn.Softmax(dim=1)                               # Softmax for probabilities
+        )    
 
     def forward(self, x, initial_states=None):
         # x shape: (batch_size, seq_length, input_size)
