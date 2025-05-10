@@ -1,30 +1,43 @@
 use log::{debug, error, info};
 use presage::{CommandBus, Configuration, Event};
-use serde::de;
 use statig::prelude::*;
 use std::sync::Arc;
+use std::time::Instant;
 use tokio::sync::Mutex;
 
 use crate::{
     domain::{
         commands::{
-            disconnect_headband_command::DisconnectHeadbandCommand, extract_calibration_data_command::ExtractCalibrationDataCommand, extract_generalist_data_command::ExtractGeneralistDataCommand, predict_color_thinking_command::PredictColorThinkingCommand, search_headband_command::SearchHeadbandCommand, update_light_status_command::UpdateLightStatusCommand
+            disconnect_headband_command::DisconnectHeadbandCommand,
+            extract_calibration_data_command::ExtractCalibrationDataCommand,
+            extract_generalist_data_command::ExtractGeneralistDataCommand,
+            predict_color_thinking_command::PredictColorThinkingCommand,
+            search_headband_command::SearchHeadbandCommand,
+            update_light_status_command::UpdateLightStatusCommand,
         },
         context::NeuralAnalyticsContext,
         events::{
-            captured_headset_data_event::CapturedHeadsetDataEvent, headset_calibrated_event::HeadsetCalibratedEvent, headset_calibrating_event::HeadsetCalibratingEvent, headset_connected_event::HeadsetConnectedEvent, headset_disconnected_event::HeadsetDisconnectedEvent, initialized_core_event::InitializedCoreEvent
+            captured_headset_data_event::CapturedHeadsetDataEvent,
+            headset_calibrated_event::HeadsetCalibratedEvent,
+            headset_calibrating_event::HeadsetCalibratingEvent,
+            headset_connected_event::HeadsetConnectedEvent,
+            headset_disconnected_event::HeadsetDisconnectedEvent,
+            initialized_core_event::InitializedCoreEvent,
         },
         use_cases::{
-            disconnect_headband_use_case::disconnect_headband_use_case, extract_calibration_use_case::extract_calibration_data_use_case, extract_extraction_use_case::extract_generalist_data_use_case, search_headband_use_case::search_headband_use_case, update_light_status_use_case::update_light_status_use_case
+            disconnect_headband_use_case::disconnect_headband_use_case,
+            extract_calibration_use_case::extract_calibration_data_use_case,
+            extract_extraction_use_case::extract_generalist_data_use_case,
+            predict_color_thinking_use_case::predict_color_thinking_use_case,
+            search_headband_use_case::search_headband_use_case,
+            update_light_status_use_case::update_light_status_use_case,
         },
-    },
-    EventData, INTERNAL_EVENT_HANDLER,
+    }, utils::send_event, EventData
 };
 
 use super::neural_events::NeuralAnalyticsCoreEvents;
 
 /// Main state machine - Initializes and holds DI container internally.
-// Not injectable itself via blackbox_di attributes
 pub(crate) struct MainStateMachine {
     context: Arc<Mutex<NeuralAnalyticsContext>>,
     command_bus: CommandBus<NeuralAnalyticsContext, presage::Error>,
@@ -42,14 +55,12 @@ impl MainStateMachine {
                 .command_handler(&disconnect_headband_use_case)
                 .command_handler(&extract_calibration_data_use_case)
                 .command_handler(&extract_generalist_data_use_case)
+                .command_handler(&predict_color_thinking_use_case)
                 .command_handler(&search_headband_use_case)
                 .command_handler(&update_light_status_use_case),
         );
 
-        Self {
-            context: Arc::new(Mutex::new(NeuralAnalyticsContext::default())),
-            command_bus: bus,
-        }
+        Self {context:Arc::new(Mutex::new(NeuralAnalyticsContext::default())),command_bus:bus }
     }
 
     /// Initialization state for the Neural Analytics system.
@@ -101,7 +112,7 @@ impl MainStateMachine {
     ) -> Response<State> {
         debug!("Executing state: awaiting_headset_connection");
         debug!("Disconnecting headset...");
-        
+
         let disconnect_result = {
             let mut ctx = self.context.lock().await;
             self.command_bus
@@ -240,12 +251,19 @@ impl MainStateMachine {
         &mut self,
         event: &NeuralAnalyticsCoreEvents,
     ) -> Response<State> {
+        // Start measuring total time
+        let start_total = Instant::now();
+
+        // Measure data extraction time
+        let start_extraction = Instant::now();
         let extract_result = {
             let mut ctx = self.context.lock().await;
             self.command_bus
                 .execute(&mut *ctx, ExtractGeneralistDataCommand)
                 .await
         };
+        let extraction_time = start_extraction.elapsed();
+        info!("Data extraction time: {:?}", extraction_time);
 
         if extract_result.is_err() {
             if let Err(e) = send_event(
@@ -263,23 +281,41 @@ impl MainStateMachine {
             ctx.headset_data.clone().unwrap_or_default()
         };
 
-        // let color_prediction = {
-        //     let mut ctx = self.context.lock().await;
-        //     let prediction_result = self
-        //         .command_bus
-        //         .execute(&mut *ctx, PredictColorThinkingCommand {})
-        //         .await;
+        // Measure color prediction time (the most computationally intensive part)
+        let start_prediction = Instant::now();
+        
+        let color_prediction = {
+            let mut ctx = self.context.lock().await;
+            let prediction_result = self
+                .command_bus
+                .execute(&mut *ctx, PredictColorThinkingCommand {})
+                .await;
 
-        //     if let Err(e) = prediction_result {
-        //         error!("Failed to predict color thinking: {:?}", e);
-        //         return Transition(State::capturing_headset_data());
-        //     }
+            if let Err(e) = prediction_result {
+                error!("Failed to predict color thinking: {:?}", e);
+                let prediction_time = start_prediction.elapsed();
 
-        //     ctx.color_thinking.clone().unwrap_or_default()
-        // };
+                if e.to_string().contains("has no data") {
+                    if let Err(e) = send_event(
+                        &HeadsetDisconnectedEvent::NAME.to_string(),
+                        &EventData::default(),
+                    ) {
+                        error!("Failed to send headset disconnected event: {}", e);
+                    }
 
-        let color_prediction = "green".to_string(); // Placeholder for actual prediction logic
+                    return Transition(State::awaiting_headset_connection());
+                } else {
+                    return Transition(State::capturing_headset_data());                
+                }
+            }
 
+            ctx.get_color_thinking()
+        };
+        let prediction_time = start_prediction.elapsed();
+        info!("Color prediction time: {:?}", prediction_time);
+
+        // Measure light status update time
+        let start_light_update = Instant::now();
         if !color_prediction.is_empty() {
             let is_green = color_prediction == "green";
             let mut ctx = self.context.lock().await;
@@ -297,7 +333,11 @@ impl MainStateMachine {
                 error!("Failed to update light status: {:?}", e);
             }
         }
+        let light_update_time = start_light_update.elapsed();
+        info!("Light update time: {:?}", light_update_time);
 
+        // Measure event sending time
+        let start_event_send = Instant::now();
         if let Err(e) = send_event(
             &CapturedHeadsetDataEvent::NAME.to_string(),
             &EventData {
@@ -308,31 +348,14 @@ impl MainStateMachine {
         ) {
             error!("Failed to send captured headset data event: {}", e);
         }
+        let event_send_time = start_event_send.elapsed();
+        info!("Event sending time: {:?}", event_send_time);
+
+        // Total time
+        let total_time = start_total.elapsed();
+        info!("Total sample processing time: {:?}", total_time);
 
         Transition(State::capturing_headset_data())
     }
 }
 
-/// Helper function to send events to external subscribers.
-/// This delegates the event to the globally registered event handler.
-///
-/// # Parameters
-/// - `event`: Event name/identifier
-/// - `data`: Event payload data
-///
-/// # Returns
-/// - `Result<(), String>`: Success or error message
-fn send_event(event: &String, data: &EventData) -> Result<(), String> {
-    // Send the event to the event handler
-    if let Some(event_handler) = unsafe { INTERNAL_EVENT_HANDLER.as_ref() } {
-        let result = event_handler(event, data);
-        if let Err(ref e) = result {
-            error!("Error sending event '{}': {}", event, e);
-        } else {
-            debug!("Event '{}' sent successfully", event);
-        }
-        result
-    } else {
-        Err("BUG: Event handler not set".to_string())
-    }
-}

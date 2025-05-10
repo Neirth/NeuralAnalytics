@@ -1,12 +1,9 @@
-use std::sync::Arc;
 
 use domain::models::event_data::EventData;
-use domain::state_machine;
 use domain::state_machine::{
     neural_events::NeuralAnalyticsCoreEvents, state_machine::MainStateMachine,
 };
 
-use log::debug;
 use statig::awaitable::{InitializedStateMachine, IntoStateMachineExt};
 
 pub mod domain;
