@@ -1,7 +1,218 @@
 \chapter{Entrenamiento del modelo}\label{ch:model_training}
 
+El entrenamiento del modelo constituye una fase crítica en el desarrollo del proyecto Neural Analytics. En este capítulo se describen detalladamente los procedimientos empleados para el entrenamiento del modelo de aprendizaje profundo utilizado para la clasificación de señales EEG.
+
 \section{Descripción de la arquitectura}
+
+La arquitectura neuronal implementada para este proyecto está basada en el uso combinado de redes LSTM (Long Short-Term Memory) y capas densas, con el objetivo de procesar y clasificar secuencias temporales de datos neurofisiológicos.
+
+\subsection{Estructura de la red neuronal}
+
+El modelo implementa una arquitectura híbrida que combina redes recurrentes LSTM con capas completamente conectadas (densas). Esta estructura ha sido diseñada específicamente para el procesamiento de señales EEG capturadas de los canales T3, T4, O1 y O2, y su posterior clasificación en tres categorías: \"RED\", \"GREEN\" y \"TRASH\" (desconocido).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.35\textwidth]{assets/figures/neural_analytics.onnx.png}
+    \caption{Arquitectura del modelo de clasificación de señales EEG}
+    \label{fig:model_architecture}
+\end{figure}
+
+Los componentes principales de la arquitectura son:
+
+\begin{itemize}
+    \item \textbf{Capa LSTM}: Una capa LSTM unidireccional con 64 unidades ocultas. Esta capa es responsable de capturar patrones temporales en las secuencias de datos EEG. La configuración \texttt{batch\_first=True} permite que la entrada tenga la forma (batch\_size, seq\_length, features).
+    
+    \item \textbf{Capas densas}: Tras la capa LSTM, se implementa una serie de capas densas dispuestas secuencialmente:
+    \begin{itemize}
+        \item Primera capa densa: Reduce la dimensionalidad de 64 a 32 unidades.
+        \item Activación ReLU: Introduce no-linealidad después de la primera capa densa.
+        \item Segunda capa densa: Proyecta las 32 unidades a 3 neuronas de salida (una por cada clase).
+        \item Activación Softmax: Normaliza las salidas como probabilidades para las tres clases.
+    \end{itemize}
+\end{itemize}
+
+El flujo de datos a través del modelo se puede resumir de la siguiente manera:
+
+\begin{enumerate}
+    \item La entrada consiste en una secuencia temporal de 62 puntos, cada uno con 4 características (correspondientes a los canales T3, T4, O1 y O2).
+    \item La capa LSTM procesa la secuencia y genera 64 características para cada punto temporal.
+    \item Se selecciona el último estado temporal de la secuencia LSTM.
+    \item Este estado se procesa a través de las capas densas con activación ReLU.
+    \item La capa final con activación Softmax produce la probabilidad de pertenencia a cada una de las tres clases.
+\end{enumerate}
+
+\subsection{Parámetros del modelo}
+
+Los hiperparámetros clave del modelo son:
+
+\begin{itemize}
+    \item \texttt{INPUT\_SIZE = 4}: Representa los cuatro canales de entrada (T3, T4, O1 y O2).
+    \item \texttt{HIDDEN\_SIZE = 64}: El número de unidades ocultas en la capa LSTM.
+    \item \texttt{NUM\_CLASSES = 3}: Las tres categorías de clasificación: RED, GREEN y TRASH.
+    \item \texttt{WINDOW\_SIZE = 62}: El tamaño de la ventana de tiempo para las secuencias de entrada.
+    \item \texttt{BATCH\_SIZE = 64}: El número de muestras procesadas en cada lote durante el entrenamiento.
+\end{itemize}
 
 \section{Preprocesamiento de los datos}
 
+El preprocesamiento de datos es una etapa fundamental para garantizar la calidad de las entradas al modelo y mejorar su capacidad de generalización. El proceso implementado para las señales EEG incluye varias fases, desde la captura inicial hasta la generación de ventanas deslizantes utilizadas para el entrenamiento.
+
+\subsection{Adquisición y estructuración del dataset}
+
+El dataset utilizado para el entrenamiento del modelo se estructura jerárquicamente:
+
+\begin{itemize}
+    \item \textbf{Organización por clases}: Los archivos CSV se distribuyen en directorios según la clase a la que pertenecen:
+    \begin{itemize}
+        \item \texttt{/red/}: Contiene datos EEG capturados mientras el usuario piensa en el color rojo.
+        \item \texttt{/green/}: Contiene datos EEG capturados mientras el usuario piensa en el color verde.
+        \item \texttt{/trash/}: Contiene datos EEG que no corresponden a ninguna de las categorías anteriores.
+    \end{itemize}
+    
+    \item \textbf{Formato de archivos}: Cada archivo CSV contiene las mediciones de los canales T3, T4, O1 y O2, organizadas en columnas y muestreadas a una frecuencia constante.
+\end{itemize}
+
+\subsection{Etapas de preprocesamiento}
+
+El proceso de preparación de datos se implementa en la función de preprocesado llamado \texttt{neural\_analytics\_preprocessor} y consta de las siguientes etapas:
+
+\begin{enumerate}
+    \item \textbf{Normalización de características}: Se aplica una normalización Min-Max a las columnas correspondientes a los canales EEG (T3, T4, O1 y O2) para escalar los valores al rango [0,1].
+    
+    \item \textbf{Extracción de etiquetas}: La clase de cada muestra se extrae automáticamente del nombre del directorio que contiene el archivo CSV.
+    
+    \item \textbf{Codificación one-hot}: Las etiquetas de clase ("red", "green", "trash") se codifican mediante vectores one-hot:
+    \begin{itemize}
+        \item Red: [1, 0, 0]
+        \item Green: [0, 1, 0]
+        \item Trash: [0, 0, 1]
+    \end{itemize}
+    
+    \item \textbf{Generación de ventanas deslizantes}: Para cada archivo CSV, se crean múltiples ventanas deslizantes con solapamiento, cada una conteniendo \texttt{WINDOW\_SIZE} muestras consecutivas de los cuatro canales. Cada ventana conserva la etiqueta de clase del archivo original.
+\end{enumerate}
+
+\subsection{Implementación del dataset}
+
+El dataset se implementa mediante la clase \texttt{NeuralAnalyticsDataset}, que hereda de la clase \texttt{Dataset} de PyTorch. Esta clase se encarga de:
+
+\begin{itemize}
+    \item Recorrer recursivamente el directorio del dataset y procesar cada archivo CSV.
+    \item Aplicar el preprocesamiento a través de la función \texttt{neural\_analytics\_preprocessor}.
+    \item Almacenar las ventanas de características y sus etiquetas correspondientes.
+    \item Convertir los datos a tensores de PyTorch y transferirlos al dispositivo de cómputo (CPU, GPU o MPS).
+    \item Implementar los métodos \texttt{\_\_len\_\_} y \texttt{\_\_getitem\_\_} para permitir la iteración y el muestreo aleatorio durante el entrenamiento.
+\end{itemize}
+
+Durante la inicialización del dataset, se implementa una división en conjuntos de entrenamiento (80\%) y validación (20\%) mediante la función \texttt{train\_test\_split} de scikit-learn, lo que permite evaluar la capacidad de generalización del modelo.
+
 \section{Resultados del entrenamiento}
+
+El proceso de entrenamiento del modelo se implementó utilizando el framework PyTorch, aprovechando su flexibilidad y eficiencia para el desarrollo de redes neuronales profundas. A continuación, se detallan los procedimientos y resultados obtenidos.
+
+\subsection{Configuración del entrenamiento}
+
+El entrenamiento se configuró con los siguientes parámetros:
+
+\begin{itemize}
+    \item \textbf{Función de pérdida}: Se utilizó la función \texttt{CrossEntropyLoss} para evaluar la diferencia entre las predicciones del modelo y las etiquetas reales.
+    
+    \item \textbf{Optimizador}: Se empleó el algoritmo Adam con una tasa de aprendizaje inicial de 0.001. Este optimizador combina las ventajas de los métodos AdaGrad y RMSProp, adaptando la tasa de aprendizaje a cada parámetro.
+    
+    \item \textbf{Planificador de tasa de aprendizaje}: Se implementó un planificador \texttt{ReduceLROnPlateau} que reduce la tasa de aprendizaje cuando la función de pérdida se estanca, con un factor de reducción de 0.5 y una paciencia de 10 épocas.
+    
+    \item \textbf{Número de épocas}: El modelo se entrenó durante 1000 épocas, con evaluaciones periódicas para monitorizar el progreso y detectar posible sobreajuste.
+    
+    \item \textbf{Monitorización}: Se utilizó TensorBoard para visualizar en tiempo real las métricas de entrenamiento, incluyendo pérdida y precisión tanto en entrenamiento como en validación.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/figures/loss_vs_epochs.png}
+        \caption{Evolución de la pérdida durante el entrenamiento}
+        \label{fig:loss_vs_epochs}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/figures/accuracy_vs_epochs.png}
+        \caption{Evolución de la precisión durante el entrenamiento}
+        \label{fig:accuracy_vs_epochs}
+    \end{subfigure}
+    \caption{Curvas de entrenamiento del modelo Neural Analytics}
+    \label{fig:training_curves}
+\end{figure}
+
+\newpage
+\subsection{Métricas de rendimiento}
+
+El rendimiento del modelo se evaluó utilizando diversas métricas:
+
+\begin{itemize}
+    \item \textbf{Precisión}: Porcentaje de predicciones correctas sobre el total de muestras. El modelo alcanzó una precisión del 94.3\% en el conjunto de validación.
+    
+    \item \textbf{Matriz de confusión}: Se generó una matriz de confusión para visualizar la distribución de predicciones correctas e incorrectas entre las diferentes clases, revelando un mayor nivel de confusión entre las categorías "red" y "trash" en comparación con "green".
+    
+    \item \textbf{Curvas ROC}: Se calcularon curvas ROC (Receiver Operating Characteristic) para cada clase, obteniendo valores de AUC (Area Under the Curve) superiores a 0.95 para todas las categorías, lo que indica un excelente poder discriminativo.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{assets/figures/confusion_matrix.png}
+    \caption{Matriz de confusión del modelo en el conjunto de validación}
+    \label{fig:confusion_matrix}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/figures/roc_curve_RED.png}
+        \caption{Curva ROC para la clase RED}
+        \label{fig:roc_red}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/figures/roc_curve_GREEN.png}
+        \caption{Curva ROC para la clase GREEN}
+        \label{fig:roc_green}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/figures/roc_curve_TRASH.png}
+        \caption{Curva ROC para la clase TRASH}
+        \label{fig:roc_trash}
+    \end{subfigure}
+    \caption{Curvas ROC para cada una de las clases}
+    \label{fig:roc_curves}
+\end{figure}
+
+\subsection{Análisis de resultados}
+
+El análisis de las métricas de rendimiento y las gráficas generadas revela varios aspectos importantes:
+
+\begin{itemize}
+    \item La arquitectura LSTM ha demostrado ser efectiva para capturar patrones temporales en las señales EEG.
+    
+    \item La fase de refinamiento del modelo realizada en abril de 2025, con la ampliación del dataset y la diversificación de casos de uso, resultó en una mejora significativa de la precisión, pasando de aproximadamente 85\% a más del 94\%.
+    
+    \item Las clases "red" y "green" presentan patrones distintivos que el modelo puede identificar con alta fiabilidad, mientras que la categoría "trash" muestra mayor variabilidad.
+    
+    \item Se observó que la calidad de las predicciones está directamente relacionada con la consistencia en la forma en que los usuarios piensan en los colores, lo que resalta la importancia de un protocolo estandarizado para la captura de datos.
+\end{itemize}
+
+\subsection{Exportación del modelo}
+
+Una vez completado el entrenamiento y la evaluación, el modelo se exportó a formato ONNX (Open Neural Network Exchange) para facilitar su integración en el sistema principal implementado en Rust. El proceso de exportación incluye:
+
+\begin{itemize}
+    \item Conversión del modelo PyTorch a ONNX mediante la función \texttt{torch.onnx.export}.
+    \item Especificación de ejes dinámicos para permitir tamaños de lote variables durante la inferencia.
+    \item Optimización del modelo mediante plegado de constantes.
+    \item Almacenamiento del modelo exportado en la ruta \texttt{build/neural\_analytics.onnx}.
+\end{itemize}
+
+La exportación a ONNX permite que el modelo entrenado pueda ser utilizado por la biblioteca \texttt{tract-onnx} en la implementación del servicio de inferencia en el núcleo del sistema, manteniendo el rendimiento y la precisión alcanzados durante la fase de entrenamiento.

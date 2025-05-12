@@ -1,9 +1,285 @@
 \chapter{Implementación del Core}\label{ch:core_implementing}
 
-\section{Implementación del modelo}
+Este capítulo describe la implementación del núcleo del sistema Neural Analytics, centrándose en la arquitectura hexagonal, el patrón Model-View-Intent (MVI) y la integración con diversos componentes externos como dispositivos EEG y bombillas inteligentes.
+
+\section{Arquitectura Hexagonal}
+
+La arquitectura hexagonal (también conocida como arquitectura de puertos y adaptadores) es la piedra angular del diseño del núcleo de Neural Analytics. Esta arquitectura permite separar claramente la lógica de negocio de las dependencias externas, facilitando la mantenibilidad, testabilidad y escalabilidad del sistema.
+
+\subsection{Estructura General}
+
+El paquete \texttt{neural\_analytics\_core} está estructurado siguiendo los principios de la arquitectura hexagonal:
+
+\begin{itemize}
+    \item \textbf{Dominio}: Contiene la lógica central de la aplicación, completamente independiente de las tecnologías externas.
+    \begin{itemize}
+        \item \texttt{models}: Define las entidades y objetos de valor del dominio.
+        \item \texttt{services}: Implementa servicios específicos del dominio como la inferencia del modelo.
+        \item \texttt{ports}: Define las interfaces que conectan el dominio con el exterior.
+        \item \texttt{use\_cases}: Implementa los casos de uso que orquestan los flujos de trabajo.
+        \item \texttt{state\_machine}: Gestiona los estados de la aplicación mediante una máquina de estados.
+    \end{itemize}
+    
+    \item \textbf{Infraestructura}: Contiene los adaptadores que implementan los puertos definidos en el dominio.
+    \begin{itemize}
+        \item \texttt{adapters/input}: Adaptadores para dispositivos de entrada como el casco EEG.
+        \item \texttt{adapters/output}: Adaptadores para dispositivos de salida como bombillas inteligentes.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Puertos y Adaptadores}
+
+Los puertos definen interfaces abstractas que el dominio utiliza para interactuar con el exterior, mientras que los adaptadores proporcionan implementaciones concretas de estas interfaces.
+
+\subsubsection{Puertos de Entrada}
+
+El puerto principal de entrada es el \texttt{EegHeadsetPort}, que define operaciones para interactuar con dispositivos EEG. Este puerto especifica métodos esenciales como:
+
+\begin{itemize}
+    \item Métodos de gestión de conexión: conexión, verificación de estado y desconexión con el dispositivo.
+    \item Métodos de extracción de datos: obtención de datos de impedancia y datos en bruto de los canales EEG.
+    \item Métodos de configuración: cambio y consulta del modo de trabajo del dispositivo.
+\end{itemize}
+
+La firma de este puerto garantiza que cualquier implementación sea compatible con hilos concurrentes y pueda ser compartida de forma segura entre diferentes componentes del sistema.
+
+\subsubsection{Puertos de Salida}
+
+El puerto principal de salida es el \texttt{SmartBulbPort}, que define operaciones para controlar bombillas inteligentes. Este puerto especifica:
+
+\begin{itemize}
+    \item Métodos de conexión y desconexión con el dispositivo domótico.
+    \item Un método para cambiar el color de la bombilla basado en la detección de la señal EEG.
+    \item Un método para verificar el estado de la conexión con el dispositivo.
+\end{itemize}
+
+Al igual que el puerto de entrada, se ha diseñado para ser seguro en entornos multi-hilo y compatible con el patrón de actores utilizado en el sistema.
+
+\subsubsection{Adaptadores}
+
+Los adaptadores implementan los puertos para tecnologías específicas:
+
+\begin{itemize}
+    \item \texttt{BrainFlowAdapter}: Implementa \texttt{EegHeadsetPort} utilizando la biblioteca BrainFlow para interactuar con el dispositivo BrainBit.
+    \item \texttt{MockHeadsetAdapter}: Implementa \texttt{EegHeadsetPort} para pruebas sin hardware real.
+    \item \texttt{TapoSmartBulbAdapter}: Implementa \texttt{SmartBulbPort} para controlar bombillas inteligentes Tapo.
+\end{itemize}
 
 \section{Consumo del SDK de BrainFlow}
 
+BrainFlow es una biblioteca open-source que proporciona una API unificada para dispositivos de neurointerfaz (BCI), lo que facilita la adquisición, procesamiento y visualización de datos cerebrales. Neural Analytics utiliza BrainFlow para comunicarse con el dispositivo BrainBit.
+
+\subsection{Inicialización y Configuración}
+
+El adaptador \texttt{BrainFlowAdapter} inicializa el dispositivo BrainBit utilizando la API de BrainFlow mediante un proceso que implica:
+
+\begin{enumerate}
+    \item Construcción de los parámetros de configuración para el dispositivo, especificando la dirección MAC del dispositivo BrainBit y un tiempo de espera adecuado para la conexión.
+    \item Selección del identificador de placa correspondiente al modelo BrainBit.
+    \item Creación de una instancia del gestor de placa (BoardShim) que manejará toda la comunicación con el dispositivo.
+\end{enumerate}
+
+Este proceso establece un canal de comunicación bidireccional con el dispositivo EEG que permite tanto la configuración como la recepción de datos en tiempo real.
+
+\subsection{Adquisición de Datos}
+
+El adaptador extrae datos EEG de cuatro canales específicos (T3, T4, O1 y O2) mediante un proceso estructurado:
+
+\begin{enumerate}
+    \item \textbf{Validación previa}: Se verifica que el dispositivo esté conectado antes de intentar obtener datos, garantizando una operación robusta frente a desconexiones.
+    
+    \item \textbf{Obtención de datos crudos}: Se solicita al dispositivo un buffer con las últimas 256 muestras temporales de todos los canales disponibles.
+    
+    \item \textbf{Selección de canales}: Se extraen específicamente los canales T3, T4, O1 y O2, que corresponden a las regiones temporales y occipitales del cerebro relevantes para la detección de patrones visuales.
+    
+    \item \textbf{Estructuración de datos}: Los datos extraídos se organizan en un mapa donde la clave es el nombre del canal y el valor es un vector de valores de punto flotante que representa la señal a lo largo del tiempo.
+\end{enumerate}
+
+Esta metodología de adquisición de datos permite capturar señales EEG de regiones temporales y occipitales del cerebro, que son críticas para detectar los patrones generados al pensar en colores.
+
+Esta metodología de adquisición de datos permite capturar señales EEG de regiones temporales y occipitales del cerebro, que son críticas para detectar los patrones generados al pensar en colores.
+
+\section{Patrón Model-View-Intent (MVI)}
+
+Neural Analytics implementa el patrón Model-View-Intent (MVI) para gestionar la comunicación entre la interfaz de usuario y el núcleo de la aplicación, proporcionando un flujo de datos unidireccional y fácilmente testeable.
+
+\subsection{Componentes del Patrón MVI}
+
+\begin{itemize}
+    \item \textbf{Model}: Representado por el contexto \texttt{NeuralAnalyticsContext}, que almacena el estado de la aplicación.
+    \item \textbf{View}: Implementado en el paquete \texttt{neural\_analytics\_gui} utilizando el framework Slint.
+    \item \textbf{Intent}: Representado por los comandos que se envían al \texttt{CommandBus}, desencadenando cambios en el estado.
+\end{itemize}
+
+\subsection{Flujo de Datos}
+
+El flujo de datos en el patrón MVI implementado sigue estos pasos:
+
+\begin{enumerate}
+    \item \textbf{Intención del usuario}: El usuario interactúa con la interfaz gráfica.
+    \item \textbf{Comando}: La GUI genera un comando que se envía al núcleo.
+    \item \textbf{Procesamiento}: El comando es procesado por un caso de uso específico.
+    \item \textbf{Actualización del modelo}: El caso de uso actualiza el estado del contexto.
+    \item \textbf{Emisión de eventos}: Los cambios en el estado generan eventos.
+    \item \textbf{Actualización de la vista}: Los eventos son capturados por el manejador de eventos de la GUI, que actualiza la interfaz de usuario.
+\end{enumerate}
+
+\subsection{Manejador de Eventos}
+
+El manejador de eventos en \texttt{neural\_analytics\_gui} procesa los eventos generados por el núcleo y actualiza la interfaz gráfica siguiendo un enfoque estructurado:
+
+\begin{enumerate}
+    \item \textbf{Recepción del evento}: El manejador recibe tanto el nombre del evento como los datos asociados (impedancias, datos del dispositivo, color detectado).
+    
+    \item \textbf{Sincronización con el hilo de la interfaz gráfica}: Dado que los eventos se generan en hilos de procesamiento diferentes al hilo de la UI, se utiliza un mecanismo de invocación segura para modificar la interfaz gráfica.
+    
+    \item \textbf{Recuperación del contexto de la ventana}: El sistema obtiene una referencia a la ventana principal de la aplicación mediante un mecanismo de referencia débil, lo que previene ciclos de referencia y fugas de memoria.
+    
+    \item \textbf{Procesamiento condicional}: Dependiendo del tipo de evento recibido, se desencadenan acciones específicas:
+    \begin{itemize}
+        \item Para el evento de inicialización del núcleo, se muestra la vista de bienvenida.
+        \item Cuando el dispositivo EEG se conecta, se muestra la vista de calibración.
+        \item Otros eventos desencadenan transiciones de vista o actualizaciones de datos específicas.
+    \end{itemize}
+\end{enumerate}
+
+Este diseño permite una separación clara entre la lógica de negocio (núcleo) y la presentación (interfaz gráfica), siguiendo fielmente el patrón MVI.
+
 \section{Interconexión con el sistema domótico}
 
+El sistema Neural Analytics se integra con dispositivos domóticos para proporcionar una respuesta visual a los pensamientos del usuario. En la implementación actual, se utiliza bombillas inteligentes Tapo, pero la arquitectura permite extender fácilmente a otros sistemas.
+
+\subsection{Adaptador para Bombillas Inteligentes}
+
+El adaptador \texttt{TapoSmartBulbAdapter} implementa el puerto \texttt{SmartBulbPort} para controlar las bombillas inteligentes Tapo. Su diseño contempla:
+
+\begin{itemize}
+    \item \textbf{Estado interno}: El adaptador mantiene referencias al cliente de comunicación con dispositivos Tapo, una instancia específica del modelo de bombilla P110 y un indicador del estado de conexión.
+    
+    \item \textbf{Establecimiento de conexión}: Implementa un protocolo de autenticación y conexión segura con la bombilla inteligente, configurando las credenciales necesarias y estableciendo una sesión persistente.
+    
+    \item \textbf{Control de color}: Proporciona lógica de traducción entre los conceptos de alto nivel del dominio ("rojo", "verde") y los comandos específicos de la API de Tapo:
+    \begin{itemize}
+        \item Para "rojo": configura la bombilla con parámetros de color rojo intenso.
+        \item Para "verde": configura la bombilla con parámetros de color verde mediano.
+        \item Para otros valores: configura un estado neutro o de apagado.
+    \end{itemize}
+    
+    \item \textbf{Gestión de errores}: Implementa un sistema robusto de manejo de excepciones y errores para evitar fallos en caso de problemas de red o del dispositivo.
+\end{itemize}
+
+Esta abstracción permite que el sistema principal opere con conceptos de alto nivel sin preocuparse por los detalles específicos del protocolo de comunicación con las bombillas Tapo.
+
+\subsection{Integración con la Máquina de Estados}
+
+El sistema domótico se integra en el flujo de la aplicación a través de casos de uso específicos que operan sobre el contexto de la aplicación. El caso de uso para actualizar el estado de la bombilla incluye:
+
+\begin{enumerate}
+    \item \textbf{Recepción del contexto y comando}: El caso de uso recibe acceso al contexto global de la aplicación y el comando específico para actualizar el estado de la bombilla.
+    
+    \item \textbf{Extracción del color detectado}: Se consulta al contexto para determinar el último color identificado en el pensamiento del usuario.
+    
+    \item \textbf{Adquisición de acceso exclusivo}: Mediante un mecanismo de bloqueo de escritura, se obtiene acceso exclusivo al adaptador de la bombilla inteligente para evitar condiciones de carrera.
+    
+    \item \textbf{Actualización del estado}: Se invoca el método para cambiar el color de la bombilla, pasando el color detectado como parámetro.
+    
+    \item \textbf{Manejo de errores}: Se implementa un sistema de propagación de errores para notificar adecuadamente si ocurre algún problema durante el proceso.
+\end{enumerate}
+
+Esta integración permite que los cambios en la detección del pensamiento del usuario se reflejen inmediatamente en el entorno físico, creando un lazo cerrado de interacción entre el cerebro y el entorno.
+
+\subsection{Preparación para una futura integración con Matter}
+
+La arquitectura hexagonal se diseñó con la futura integración de Matter en mente. Matter es un estándar de conectividad para el Internet de las Cosas (IoT) que proporciona interoperabilidad entre dispositivos de diferentes fabricantes.
+
+Para soportar Matter en el futuro, solo se necesitará:
+
+\begin{enumerate}
+    \item Implementar un nuevo adaptador que cumpla con el \texttt{SmartBulbPort} utilizando la API de Matter.
+    \item Registrar el nuevo adaptador en el sistema de inyección de dependencias.
+    \item Configurar la aplicación para utilizar el adaptador de Matter en lugar del adaptador Tapo.
+\end{enumerate}
+
+Este es un ejemplo claro de cómo la arquitectura hexagonal permite extender el sistema con nuevas tecnologías sin modificar la lógica de negocio central.
+
 \section{Implementación de la interfaz gráfica}
+
+La interfaz gráfica de Neural Analytics se implementa utilizando el framework Slint, que permite crear interfaces gráficas declarativas y eficientes para aplicaciones escritas en Rust.
+
+\subsection{Estructura de la GUI}
+
+La GUI está organizada en varios componentes:
+
+\begin{itemize}
+    \item \textbf{Vistas principales}: Diferentes pantallas que corresponden a los estados del sistema.
+    \item \textbf{Componentes reutilizables}: Elementos de interfaz como botones, etiquetas y visualizaciones.
+    \item \textbf{Manejadores de eventos}: Funciones que procesan acciones del usuario y eventos del sistema.
+\end{itemize}
+
+\subsection{Integración con el Core}
+
+La interfaz gráfica se comunica con el núcleo principalmente a través del manejador de eventos, siguiendo un proceso estructurado:
+
+\begin{enumerate}
+    \item \textbf{Inicialización de la interfaz gráfica}: Se crea la ventana principal de la aplicación utilizando el framework Slint, que proporciona una interfaz declarativa y eficiente.
+    
+    \item \textbf{Gestión de referencias}: Se almacena una referencia débil a la ventana principal en una variable global protegida por un mutex. Esto evita problemas de ciclos de referencia mientras permite que los callbacks asíncronos puedan acceder a la interfaz.
+    
+    \item \textbf{Configuración de manejadores de eventos}: Se configuran los callbacks para responder a las acciones del usuario:
+    \begin{itemize}
+        \item Cuando el usuario inicia el proceso principal, se lanza un hilo asíncrono que inicializa el núcleo.
+        \item El núcleo recibe como parámetro un manejador de eventos que le permite notificar cambios a la interfaz gráfica.
+    \end{itemize}
+    
+    \item \textbf{Ejecución del bucle de eventos}: Finalmente, se inicia el bucle de eventos principal de la interfaz gráfica, que procesará las interacciones del usuario y actualizará la visualización según los eventos recibidos.
+\end{enumerate}
+
+Este diseño permite que la interfaz gráfica y el núcleo operen de manera asíncrona, aprovechando múltiples hilos para tareas intensivas como el procesamiento de señales EEG, mientras mantiene la interfaz de usuario receptiva.
+
+\section{Conclusiones y Justificación de Decisiones Arquitectónicas}
+
+La implementación del núcleo de Neural Analytics mediante arquitectura hexagonal responde a requisitos específicos del proyecto y proporciona ventajas significativas para un sistema de procesamiento de señales EEG orientado a aplicaciones médicas:
+
+\subsection{Alineación con los Requisitos del Proyecto}
+
+La arquitectura elegida satisface directamente varios requisitos fundamentales establecidos en las fases iniciales del proyecto:
+
+\begin{itemize}
+    \item \textbf{Portabilidad (\hyperref[rnf-04]{RNF-04})}: La interfaz de puertos (\texttt{EegHeadsetPort}) permite sustituir el dispositivo BrainBit por cualquier otro compatible con BrainFlow sin modificar el núcleo del sistema, facilitando su ejecución en Raspberry Pi.
+    
+    \item \textbf{Interoperabilidad (\hyperref[rnf-06]{RNF-06})}: El diseño facilita la integración con diversos sistemas domóticos a través del puerto \texttt{SmartBulbPort}, preparando el terreno para la futura adopción del estándar Matter.
+    
+    \item \textbf{Cumplimiento normativo (\hyperref[rnf-01]{RNF-01})}: La separación clara de componentes facilita la validación y verificación según la norma UNE-EN 62304:2007/A1:2016, crítica para software de dispositivos médicos.
+    
+    \item \textbf{Tiempo Real (\hyperref[rnf-02]{RNF-02})}: La arquitectura permite que los componentes críticos de procesamiento de señales funcionen en sus propios hilos de ejecución, independientes de la interfaz de usuario.
+\end{itemize}
+
+\subsection{Beneficios Observados Durante el Desarrollo}
+
+Durante el desarrollo del sistema, esta arquitectura ha demostrado varias ventajas prácticas:
+
+\begin{itemize}
+    \item \textbf{Desarrollo modular}: La arquitectura permitió trabajar de manera modular en la interfaz gráfica y en los adaptadores de hardware sin interferencias, facilitando la implementación como proyecto individual.
+    
+    \item \textbf{Pruebas simplificadas}: Se implementó un adaptador simulado (\texttt{MockHeadsetAdapter}) que permitió probar el sistema completo sin depender de hardware físico.
+    
+    \item \textbf{Evolución tecnológica}: La actualización de la biblioteca BrainFlow a su versión más reciente requirió modificaciones solo en el adaptador correspondiente, sin afectar al resto del sistema.
+    
+    \item \textbf{Trazabilidad}: La estructura facilitó el seguimiento del cumplimiento de requisitos durante las revisiones de calidad del software.
+\end{itemize}
+
+\subsection{Impacto en la Calidad del Software}
+
+La arquitectura elegida ha tenido un impacto positivo verificable en la calidad final del sistema:
+
+\begin{itemize}
+    \item \textbf{Fiabilidad (\hyperref[rnf-03]{RNF-03})}: El sistema ha demostrado un comportamiento predecible ante desconexiones del hardware y valida la calidad de las señales EEG mediante los datos de impedancia antes de realizar predicciones.
+    
+    \item \textbf{Mantenibilidad (\hyperref[rnf-07]{RNF-07})}: El patrón MVI y la máquina de estados proporcionan un flujo de datos unidireccional que facilita la depuración y el mantenimiento del código, siguiendo el diseño hexagonal (puertos y adaptadores).
+    
+    \item \textbf{Extensibilidad}: La principal característica extensible del sistema es la capacidad de actualizar el modelo de inferencia sin necesidad de modificar el código de la aplicación. Esta modularidad permite entrenar y desplegar nuevos modelos de detección de patrones cerebrales sin afectar al resto de componentes del sistema.
+    
+    \item \textbf{Portabilidad}: El sistema se ha probado con éxito en macOS (Entorno de Desarrollo) y Linux (Raspberry Pi) sin requerir adaptaciones significativas en la lógica de negocio.
+\end{itemize}
+
+En resumen, la implementación basada en arquitectura hexagonal ha proporcionado una base sólida que no solo cumple con los requisitos actuales del proyecto Neural Analytics, sino que también permite su evolución futura de manera sostenible y alineada con estándares médicos y tecnológicos emergentes.

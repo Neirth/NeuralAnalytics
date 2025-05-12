@@ -6,6 +6,37 @@
 \usepackage{amsmath,amssymb,amsthm}             % For math
 \usepackage{graphicx}                           % For images
 \usepackage{listings}                           % For code snippets
+% Define Rust language for listings
+\lstdefinelanguage{Rust}{
+  keywords={
+    async, await, break, const, continue, crate, dyn, else, enum, extern, false, fn,
+    for, if, impl, in, let, loop, match, mod, move, mut, pub, ref, return, self, Self,
+    static, struct, super, trait, true, type, unsafe, use, where, while, try, macro_rules, 
+    Box, Option, Result, String, Vec, write, writeln
+  },
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Configure listing style
+\lstset{
+  basicstyle=\small\ttfamily,
+  commentstyle=\color{green!50!black},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  language=Rust
+}
+
 \usepackage{hyperref}                           % For clickable links and references
 \usepackage{bookmark}                           % For bookmarks
 \usepackage{makeidx}
@@ -13,10 +44,13 @@
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
 \usepackage{xcolor}                             % For colors
+\usepackage{tikz}                               % Required for pgfgantt
+\usepackage{pgfgantt}                           % For Gantt charts
 \usepackage{authoraftertitle}                   % For author and title
 \usepackage{lipsum}                             % For dummy text
 \usepackage{nomencl}                            % For nomenclature
-\usepackage{natbib}                             % For bibliography  
+\usepackage{natbib}                             % For bibliography
+\usepackage{subcaption}                         % For subfigures
 
 \makenomenclature
 \makeindex
