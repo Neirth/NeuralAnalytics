@@ -2,10 +2,115 @@
 
 \section{Objetivos Especificos}
 \subsection{Realizados}
+
+Los objetivos principales realizados en este trabajo son los siguientes:
+
+\begin{itemize}
+    \item Diseñar una aplicación que permita la captura raw de la información del EEG para los canales T3, T4, O1 y O2.
+    \item Diseño de un modelo de IA que sea capaz de distinguir entre distintas categorías Rojo, Verde o Desconocido.
+    \item Extracción de diferentes datos para las categorías propuestas.
+    \item Diseñar una aplicación autónoma que sea capaz de interactuar con la señal del EEG del usuario.
+    \item Asegurar que la aplicación autónoma cumpla con la norma UNE-EN 62304:2007/A1:2016, garantizando los requisitos para los procesos del ciclo de vida del software en dispositivos médicos.
+    \item Integrar el sistema completo en una Raspberry Pi respetando los requerimientos de tiempo real blando.
+    \item Por último, ser capaces de encender y apagar una bombilla a raíz del color pensado por el usuario.
+\end{itemize}
+
+\newpage
+
 \subsection{Deseados (Futuras Mejoras)}
 
-\section{Requistios funcionales y no funcionales}
+Entre las mejoras futuras que podrían implementarse en el proyecto, se destacan las siguientes:
+
+\begin{itemize}
+    \item Obtener un dataset más amplio con diferentes pacientes, lo que permitiría mejorar la generalización del modelo y su aplicabilidad en distintos perfiles neurológicos.
+    \item Ampliar el espectro de colores disponibles para la detección, pasando del actual sistema binario (rojo y verde) a un sistema con mayor variedad cromática.
+    \item Integración con el estándar Matter para facilitar la compatibilidad con un mayor número de dispositivos domóticos y ecosistemas de hogar inteligente.
+\end{itemize}
+
+\newpage
+
+\section{Requisitos funcionales y no funcionales}
 \subsection{Requisitos Funcionales}
+
+Los requisitos funcionales identificados en el análisis del código del sistema son:
+
+\begin{itemize}
+    \item \textbf{RF-01}: El sistema debe permitir la conexión y desconexión con el dispositivo EEG (electroencefalograma).
+    \item \textbf{RF-02}: El sistema debe capturar los datos raw de los canales T3, T4, O1 y O2 del dispositivo EEG.
+    \item \textbf{RF-03}: El sistema debe obtener datos de impedancia del dispositivo EEG para verificar la calidad de la señal.
+    \item \textbf{RF-04}: El sistema debe permitir el cambio entre distintos modos de trabajo del dispositivo EEG.
+    \item \textbf{RF-05}: El sistema debe implementar un modelo de inferencia para predecir el color en el que está pensando el usuario.
+    \item \textbf{RF-06}: El sistema debe distinguir entre al menos dos colores (rojo y verde) y un estado 'desconocido'.
+    \item \textbf{RF-07}: El sistema debe controlar la activación y desactivación de una bombilla inteligente.
+    \item \textbf{RF-08}: El sistema debe proporcionar una interfaz gráfica que permita visualizar el estado de la conexión del dispositivo EEG.
+    \item \textbf{RF-09}: El sistema debe permitir visualizar la señal EEG en tiempo real.
+    \item \textbf{RF-10}: El sistema debe mostrar al usuario las predicciones realizadas por el modelo de inferencia.
+\end{itemize}
+
+\newpage
+
 \subsection{Requisitos No Funcionales}
 
+Los requisitos no funcionales identificados en el análisis del código del sistema son:
+
+\begin{itemize}
+    \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304:2007/A1:2016 para software de dispositivos médicos.\label{rnf-01}
+    \item \textbf{RNF-02}: \textbf{Tiempo Real}: El sistema debe operar en tiempo real blando para asegurar una respuesta adecuada a los cambios en la señal EEG.\label{rnf-02}
+    \item \textbf{RNF-03}: \textbf{Fiabilidad}: El sistema debe validar la calidad de las señales EEG mediante los datos de impedancia antes de realizar predicciones.\label{rnf-03}
+    \item \textbf{RNF-04}: \textbf{Portabilidad}: El sistema debe poder ejecutarse en una Raspberry Pi.\label{rnf-04}
+    \item \textbf{RNF-05}: \textbf{Seguridad}: El sistema debe garantizar la privacidad y seguridad de los datos biométricos del usuario.\label{rnf-05}
+    \item \textbf{RNF-06}: \textbf{Interoperabilidad}: El sistema debe integrarse con dispositivos domóticos standard (bombillas inteligentes).\label{rnf-06}
+    \item \textbf{RNF-07}: \textbf{Mantenibilidad}: El sistema debe seguir un diseño hexagonal (puertos y adaptadores) para facilitar su mantenimiento y pruebas.\label{rnf-07}
+    \item \textbf{RNF-08}: \textbf{Usabilidad}: La interfaz gráfica debe ser intuitiva y proporcionar feedback claro sobre el estado del sistema.\label{rnf-08}
+    \item \textbf{RNF-09}: \textbf{Escalabilidad}: La arquitectura debe permitir la inclusión de nuevos tipos de predicciones o dispositivos de salida.\label{rnf-09}
+    \item \textbf{RNF-10}: \textbf{Rendimiento}: El sistema debe ser capaz de procesar y analizar señales EEG con una latencia mínima.\label{rnf-10}
+\end{itemize}
+
+\newpage
+
 \section{Bibliotecas Usadas}
+
+El proyecto Neural Analytics utiliza diversas bibliotecas tanto para el desarrollo de la parte core como para la interfaz gráfica. A continuación, se presentan las principales bibliotecas utilizadas agrupadas por su propósito:
+
+\subsection{Procesamiento de Señales EEG}
+\begin{itemize}
+    \item \textbf{BrainFlow}: Biblioteca para la adquisición y procesamiento de datos de dispositivos de electroencefalografía (EEG). Permite la comunicación con el dispositivo BrainBit y la captura de datos en tiempo real.
+\end{itemize}
+
+\subsection{Interfaz Gráfica y Visualización}
+\begin{itemize}
+    \item \textbf{slint}: Framework para la creación de interfaces gráficas, con soporte para Rust y con características de alta eficiencia.
+    \item \textbf{plotters}: Biblioteca para la creación de gráficos y visualizaciones en Rust, utilizada para mostrar las señales EEG en tiempo real.
+\end{itemize}
+
+\subsection{Inteligencia Artificial y Procesamiento de Datos}
+\begin{itemize}
+    \item \textbf{PyTorch}: Framework de aprendizaje profundo utilizado para el entrenamiento del modelo de clasificación de señales EEG.
+    \item \textbf{ONNX}: Formato estándar para la representación de modelos de aprendizaje automático que permite la interoperabilidad entre diferentes frameworks.
+    \item \textbf{tract-onnx}: Biblioteca en Rust para la ejecución de modelos ONNX, utilizada para las inferencias en tiempo real.
+    \item \textbf{ndarray}: Biblioteca para el procesamiento de arrays multidimensionales en Rust, utilizada para el preprocesamiento de datos.
+\end{itemize}
+
+\subsection{Comunicación y Control de Dispositivos}
+\begin{itemize}
+    \item \textbf{tapo}: Cliente en Rust para controlar dispositivos inteligentes Tapo, utilizado para la bombilla inteligente que responde a los pensamientos del usuario.
+    \item \textbf{presage}: Biblioteca de gestión de eventos y mensajería para la comunicación entre componentes.
+\end{itemize}
+
+\subsection{Herramientas de Concurrencia y Asincronía}
+\begin{itemize}
+    \item \textbf{tokio}: Runtime asíncrono para Rust que facilita la programación concurrente, esencial para manejar múltiples flujos de datos en tiempo real.
+    \item \textbf{async-trait}: Permite la definición de traits asíncronos en Rust.
+\end{itemize}
+
+\subsection{Arquitectura y Diseño del Sistema}
+\begin{itemize}
+    \item \textbf{statig}: Biblioteca para la implementación del patrón máquina de estados en Rust, utilizada para gestionar el ciclo de vida de la aplicación.
+    \item \textbf{once\_cell}: Para la implementación de singletons en Rust, utilizado en la gestión de recursos compartidos.
+\end{itemize}
+
+\subsection{Serialización y Estructuras de Datos}
+\begin{itemize}
+    \item \textbf{serde}: Framework de serialización/deserialización para Rust, utilizado para el intercambio de datos entre componentes.
+    \item \textbf{chrono}: Biblioteca para el manejo de fechas y tiempos en Rust.
+\end{itemize}
