@@ -1,1 +1,244 @@
 \chapter{Planificación Temporal}\label{ch:temporal_scheduling}
+
+\section{Cronología del Desarrollo}
+
+El desarrollo del proyecto ha seguido una planificación estructurada en distintas fases, desde la investigación inicial hasta la implementación final. A continuación, se detalla la cronología de las actividades realizadas.
+
+\subsection{Fase de Investigación (Enero 2025)}
+
+Durante el mes de enero de 2025 se llevó a cabo una fase intensiva de investigación para sentar las bases teóricas y técnicas del proyecto:
+
+\begin{itemize}
+    \item \textbf{Estudio de arquitecturas de redes neuronales}: Se investigaron diversas arquitecturas de aprendizaje profundo, con especial énfasis en las redes LSTM (Long Short-Term Memory) por su capacidad para procesar secuencias temporales, característica esencial para el análisis de señales EEG.
+    
+    \item \textbf{Evaluación de dispositivos EEG}: Se realizó un análisis comparativo de diferentes dispositivos de electroencefalografía comercialmente disponibles, evaluando aspectos como precisión, canales disponibles, facilidad de uso y compatibilidad con bibliotecas de software. El dispositivo BrainBit fue seleccionado por su equilibrio entre prestaciones y accesibilidad.
+    
+    \item \textbf{Investigación de bibliotecas de adquisición de datos}: Se examinaron diferentes bibliotecas para la adquisición de datos EEG, optando finalmente por BrainFlow debido a su compatibilidad con múltiples dispositivos y su robusta documentación.
+    
+    \item \textbf{Estudio de normativas aplicables}: Se investigaron las regulaciones y estándares aplicables a dispositivos médicos, con especial atención a la norma UNE-EN 62304:2007/A1:2016 para software de dispositivos médicos.
+    
+    \item \textbf{Estudio de plataformas para implementación}: Se evaluaron diferentes opciones de hardware para la implementación del sistema, analizando sus capacidades de procesamiento en tiempo real y su adecuación para aplicaciones médicas.
+\end{itemize}
+
+\subsection{Adquisición de Hardware y Estructuración (Finales de Enero 2025)}
+
+Una vez completada la investigación inicial, se procedió a la adquisición del hardware necesario y a la estructuración del proyecto:
+
+\begin{itemize}
+    \item \textbf{Adquisición del dispositivo BrainBit}: Se adquirió el dispositivo EEG que serviría como fuente principal de datos para el proyecto.
+    
+    \item \textbf{Obtención de la Raspberry Pi 4}: Se seleccionó como plataforma principal para la implementación del sistema debido a su balance entre potencia de procesamiento y portabilidad.
+    
+    \item \textbf{Adquisición de bombillas inteligentes Tapo}: Para implementar la respuesta del sistema a los pensamientos del usuario.
+    
+    \item \textbf{Definición de la arquitectura del software}: Se diseñó la estructura general del proyecto, optando por una arquitectura hexagonal (puertos y adaptadores) para garantizar la modularidad, testabilidad y facilidad de mantenimiento.
+    
+    \item \textbf{Planificación de componentes del sistema}: Se definieron los distintos módulos que conformarían el proyecto: neural\_analytics\_data para la captura de datos, neural\_analytics\_model para el entrenamiento e inferencia, neural\_analytics\_core para la lógica central, y neural\_analytics\_gui para la interfaz de usuario.
+\end{itemize}
+
+\subsection{Fase de Desarrollo (Febrero - Marzo 2025)}
+
+Durante los meses de febrero y marzo de 2025 se llevó a cabo el desarrollo intensivo de todos los componentes del sistema:
+
+\subsubsection{Desarrollo del Programa de Extracción de Datos (neural\_analytics\_data)}
+
+El desarrollo comenzó con la implementación del módulo encargado de la captura de los datos EEG:
+
+\begin{itemize}
+    \item \textbf{Integración con BrainFlow}: Se implementó la interfaz con la biblioteca BrainFlow para la adquisición de datos del dispositivo BrainBit.
+    
+    \item \textbf{Diseño de protocolos de captura}: Se desarrollaron rutinas para la captación estructurada de datos EEG mientras el usuario piensa en diferentes colores.
+    
+    \item \textbf{Implementación de procesamiento de señales}: Se desarrollaron funciones para el filtrado inicial y preprocesamiento de las señales raw.
+    
+    \item \textbf{Almacenamiento y etiquetado de datos}: Se implementó un sistema de almacenamiento y etiquetado automático de los datos capturados para su posterior uso en el entrenamiento del modelo.
+\end{itemize}
+
+\subsubsection{Desarrollo del Programa de Entrenamiento del Modelo (neural\_analytics\_model)}
+
+Paralelamente, se implementó el módulo para el entrenamiento del modelo de IA:
+
+\begin{itemize}
+    \item \textbf{Diseño de arquitectura LSTM}: Se diseñó una red neuronal basada en capas LSTM, optimizada para la clasificación de patrones en señales EEG.
+    
+    \item \textbf{Implementación en PyTorch}: Se codificó el modelo utilizando el framework PyTorch por su flexibilidad y potencia para el desarrollo de redes neuronales.
+    
+    \item \textbf{Rutinas de entrenamiento y validación}: Se desarrollaron procedimientos para el entrenamiento eficiente del modelo y su validación con conjuntos de datos independientes.
+    
+    \item \textbf{Exportación a formato ONNX}: Se implementó la funcionalidad para exportar el modelo entrenado a formato ONNX, permitiendo su uso en el entorno de producción en Rust.
+\end{itemize}
+
+\subsubsection{Desarrollo del Core del Sistema (neural\_analytics\_core)}
+
+El desarrollo del núcleo del sistema, basado en los principios de la arquitectura hexagonal, fue la tarea que más tiempo consumió:
+
+\begin{itemize}
+    \item \textbf{Implementación de puertos y adaptadores}: Siguiendo los principios de la arquitectura hexagonal, se definieron interfaces claras para todos los componentes externos (puertos) y sus implementaciones concretas (adaptadores).
+    
+    \item \textbf{Desarrollo del dominio central}: Se implementó la lógica de negocio central, independiente de infraestructuras externas y centrada en los casos de uso principales.
+    
+    \item \textbf{Sistema de eventos}: Se desarrolló un mecanismo robusto para la comunicación entre componentes basado en eventos, utilizando la biblioteca presage.
+    
+    \item \textbf{Máquina de estados}: Se implementó una máquina de estados para gestionar el ciclo de vida de la aplicación y las transiciones entre los diferentes modos de operación.
+    
+    \item \textbf{Servicio de inferencia}: Se desarrolló un servicio para la ejecución eficiente del modelo en tiempo real, utilizando tract-onnx para la inferencia en Rust.
+    
+    \item \textbf{Control de dispositivos domóticos}: Se implementó la integración con bombillas inteligentes a través de la biblioteca tapo.
+\end{itemize}
+
+\subsubsection{Desarrollo de la Interfaz Gráfica (neural\_analytics\_gui)}
+
+Finalmente, se desarrolló la interfaz gráfica del sistema:
+
+\begin{itemize}
+    \item \textbf{Diseño de interfaz con Slint}: Se utilizó Slint para crear una interfaz moderna y eficiente en recursos.
+    
+    \item \textbf{Visualización de señales EEG}: Se implementó la representación gráfica de las señales en tiempo real utilizando la biblioteca plotters.
+    
+    \item \textbf{Integración con el core}: Se estableció la comunicación bidireccional con el core del sistema para mostrar estados y resultados al usuario.
+    
+    \item \textbf{Interfaz para calibración}: Se desarrollaron vistas específicas para la calibración del dispositivo y la verificación de impedancias.
+    
+    \item \textbf{Visualización de predicciones}: Se implementó un sistema para mostrar al usuario las predicciones realizadas por el modelo en tiempo real.
+\end{itemize}
+
+\subsection{Fase de Refinamiento del Modelo (Abril 2025)}
+
+Durante el mes de abril de 2025, el enfoque principal del proyecto se centró en el refinamiento del modelo de predicción:
+
+\begin{itemize}
+    \item \textbf{Ampliación del dataset}: Se realizaron nuevas sesiones de captura de datos EEG, aumentando significativamente el tamaño y la diversidad del dataset. Estas nuevas grabaciones incluyen muestras de diferentes usuarios y sesiones realizadas en distintos momentos del día para mejorar la robustez del modelo.
+    
+    \item \textbf{Diversificación de casos de uso}: Se expandieron los escenarios de prueba para incluir variaciones en la forma en que los usuarios piensan en los colores, capturando patrones más sutiles y entrenando al modelo para reconocer diferencias individuales en la actividad cerebral.
+    
+    \item \textbf{Reentrenamiento del modelo}: Con los nuevos datos recolectados, se realizaron múltiples iteraciones de reentrenamiento del modelo LSTM, ajustando hiperparámetros para optimizar su precisión y capacidad de generalización.
+    
+    \item \textbf{Validación cruzada}: Se implementaron técnicas de validación cruzada más rigurosas para asegurar que el modelo funcionara consistentemente bien con diferentes subconjuntos de datos.
+    
+    \item \textbf{Ajuste de umbrales de confianza}: Se refinaron los mecanismos para determinar cuándo una predicción debía clasificarse como "desconocida", mejorando así la fiabilidad del sistema en condiciones de incertidumbre.
+\end{itemize}
+
+\section{Distribución Temporal}
+
+La siguiente tabla muestra la distribución temporal de las diferentes fases del proyecto:
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Fase} & \textbf{Período} & \textbf{Duración} \\
+        \hline
+        Investigación & Enero 2025 & 4 semanas \\
+        \hline
+        Adquisición y Estructuración & Finales de Enero 2025 & 1 semana \\
+        \hline
+        Desarrollo del Programa de Extracción & Febrero 2025 & 2 semanas \\
+        \hline
+        Desarrollo del Programa de Entrenamiento & Febrero 2025 & 2 semanas \\
+        \hline
+        Desarrollo del Core del Sistema & Febrero - Marzo 2025 & 4 semanas \\
+        \hline
+        Desarrollo de la Interfaz Gráfica & Marzo 2025 & 2 semanas \\
+        \hline
+        Pruebas Iniciales & Finales de Marzo 2025 & 2 semanas \\
+        \hline
+        Refinamiento del Modelo & Abril 2025 & 4 semanas \\
+        \hline
+    \end{tabular}
+    \caption{Distribución temporal del desarrollo del proyecto Neural Analytics}
+    \label{tab:temporal_distribution}
+\end{table}
+
+\newpage
+\section{Diagrama de Gantt}
+
+A continuación, se presenta un diagrama de Gantt que muestra la secuencia y duración de las diferentes fases del proyecto:
+
+\begin{figure}[ht]
+    \centering
+    \definecolor{barblue}{RGB}{153,204,254}
+    \definecolor{groupblue}{RGB}{51,102,254}
+    \definecolor{linkred}{RGB}{165,0,33}
+    \definecolor{investigacion}{RGB}{51,102,204}
+    \definecolor{adquisicion}{RGB}{60,179,113}
+    \definecolor{extraccion}{RGB}{255,153,0}
+    \definecolor{entrenamiento}{RGB}{255,128,0}
+    \definecolor{core}{RGB}{204,0,0}
+    \definecolor{interfaz}{RGB}{255,153,51}
+    \definecolor{pruebas}{RGB}{153,51,153}
+    \definecolor{refinamiento}{RGB}{0,204,204}
+    
+    \renewcommand\sfdefault{phv}
+    \renewcommand\mddefault{mc}
+    \renewcommand\bfdefault{bc}
+    \sffamily
+    \begin{ganttchart}[
+        canvas/.append style={fill=none, draw=black!5, line width=.75pt},
+        hgrid style/.style={draw=black!5, line width=.75pt},
+        vgrid={*1{draw=black!5, line width=.75pt}},
+        title/.style={draw=none, fill=none},
+        title label font=\bfseries\footnotesize,
+        title label node/.append style={below=4pt},
+        include title in canvas=false,
+        bar label font=\mdseries\small\color{black!70},
+        bar label node/.append style={left=2cm},
+        bar/.style={draw=none, rounded corners=1pt},
+        bar height=0.7,
+        y unit title=0.8cm,
+        y unit chart=0.7cm,
+        x unit=0.6cm,
+        group left shift=0,
+        group right shift=0,
+        group height=.5,
+        group peaks tip position=0
+    ]{1}{17}
+        \gantttitle[
+          title label node/.append style={below left=7pt and -3pt}
+        ]{\textbf{Planificación Neural Analytics 2025}}{17} \\
+        \gantttitle{Enero}{4} 
+        \gantttitle{Febrero}{4} 
+        \gantttitle{Marzo}{5} 
+        \gantttitle{Abril}{4} \\
+        
+        \ganttgroup[group/.style={fill=investigacion}]{Fase de Investigación}{1}{4} \\
+        \ganttbar[name=invest, bar/.style={fill=investigacion!90}]{\textbf{Investigación}}{1}{4} \\[grid]
+        
+        \ganttgroup[group/.style={fill=adquisicion}]{Fase de Adquisición}{4}{5} \\
+        \ganttbar[name=adqui, bar/.style={fill=adquisicion!90}]{\textbf{Adquisición y Estructuración}}{4}{5} \\[grid]
+        
+        \ganttgroup[group/.style={fill=extraccion}]{Fase de Desarrollo}{5}{15} \\
+        \ganttbar[name=extract, bar/.style={fill=extraccion!90}]{\textbf{Extracción de Datos}}{5}{8} \\
+        \ganttbar[name=entren, bar/.style={fill=entrenamiento!90}]{\textbf{Entrenamiento del Modelo}}{5}{8} \\
+        \ganttbar[name=core, bar/.style={fill=core!90}]{\textbf{Core del Sistema}}{8}{13} \\
+        \ganttbar[name=gui, bar/.style={fill=interfaz!90}]{\textbf{Interfaz Gráfica}}{13}{15} \\
+        \ganttbar[name=test, bar/.style={fill=pruebas!90}]{\textbf{Pruebas Iniciales}}{13}{15} \\[grid]
+        
+        \ganttgroup[group/.style={fill=refinamiento}]{Fase de Refinamiento}{14}{17} \\
+        \ganttbar[name=refine, bar/.style={fill=refinamiento!90}]{\textbf{Refinamiento del Modelo}}{14}{17} \\
+        
+        \ganttlink[link/.style={-latex, line width=1pt, black!40}]{adqui}{extract}
+        \ganttlink[link/.style={-latex, line width=1pt, black!40}]{extract}{core}
+        \ganttlink[link/.style={-latex, line width=1pt, black!40}]{core}{gui}
+        \ganttlink[link/.style={-latex, line width=1pt, black!40}]{gui}{refine}
+    \end{ganttchart}
+    \caption{Diagrama de Gantt del proyecto Neural Analytics}
+    \label{fig:gantt_diagram}
+\end{figure}
+
+\section{Conclusiones sobre la Planificación}
+
+La planificación temporal del proyecto Neural Analytics ha demostrado ser adecuada para los objetivos planificados, aunque con algunos aspectos a destacar:
+
+\begin{itemize}
+    \item \textbf{Duración de la fase de desarrollo core}: Como se anticipaba, el desarrollo del núcleo del sistema bajo principios de arquitectura hexagonal requirió un tiempo significativo, pero esta inversión ha resultado valiosa en términos de mantenibilidad y testabilidad.
+    
+    \item \textbf{Paralelización de tareas}: La estructuración en componentes claramente diferenciados permitió el desarrollo paralelo de algunos módulos, optimizando el tiempo total del proyecto.
+    
+    \item \textbf{Importancia de la fase de refinamiento}: La fase de refinamiento del modelo en abril demostró ser crucial para mejorar la precisión del sistema. La ampliación del dataset con una mayor diversidad de muestras incrementó significativamente el rendimiento del modelo.
+    
+    \item \textbf{Iteración continua}: El proceso de desarrollo evidenció la importancia de un enfoque iterativo, especialmente en la etapa de refinamiento del modelo, donde cada nueva incorporación de datos permitió ajustes incrementales que mejoraron gradualmente el rendimiento.
+    
+    \item \textbf{Áreas de mejora}: Para futuros desarrollos, podría ser beneficioso ampliar la fase de pruebas con usuarios reales para obtener más retroalimentación sobre la usabilidad del sistema y continuar ampliando el dataset con muestras más diversas.
+\end{itemize}
+
+La adopción de una metodología basada en arquitectura hexagonal, aunque inicialmente más costosa en términos de tiempo de desarrollo, ha proporcionado una base sólida para cumplir con los requisitos normativos y facilitar futuras extensiones del sistema. Asimismo, la dedicación de un mes completo al refinamiento del modelo ha sido fundamental para alcanzar niveles de precisión adecuados para un dispositivo de uso médico.
