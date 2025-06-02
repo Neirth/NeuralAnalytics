@@ -1,58 +1,58 @@
 % Chapter 2: Introducción
 \chapter{Introducción}
 
-El presente trabajo aborda el diseño y desarrollo de un innovador sistema de automatización del hogar que integra tecnología de interfaz cerebro-computadora (BCI) con sistemas de iluminación inteligentes. La finalidad principal consiste en desarrollar una solución no invasiva que facilite el control del entorno doméstico mediante la lectura e interpretación de ondas cerebrales, empleando dispositivos de iluminación TP-Link Tapo como elementos de control.
+Este trabajo aborda —desde una perspectiva integradora— el diseño y desarrollo de un sistema innovador de automatización del hogar que combina tecnología de interfaz cerebro-computadora (BCI) con dispositivos de iluminación inteligentes. Mi propósito fundamental ha sido desarrollar una solución no invasiva que permita el control del entorno doméstico mediante la lectura e interpretación de ondas cerebrales, empleando específicamente dispositivos TP-Link Tapo como elementos de control.
 
-La implementación de este proyecto se fundamenta en dos pilares: el procesamiento de señales electroencefalográficas (EEG) mediante aprendizaje profundo y el cumplimiento de la normativa UNE-EN 62304 para dispositivos médicos. Para garantizar la respuesta en tiempo real del sistema, se utiliza Wind River Linux como sistema operativo base.
+La arquitectura que he implementado se sustenta en dos pilares fundamentales: por un lado, el procesamiento de señales electroencefalográficas (EEG) mediante técnicas de aprendizaje profundo y, por otro, el estricto cumplimiento de la normativa UNE-EN 62304 para dispositivos y/o software médicos. Para garantizar que el sistema responda en tiempo real —aspecto crítico en esta aplicación—, he optado por utilizar Poky Linux del Proyecto Yocto como sistema operativo base. Esta elección no fue casual, sino que respondió a su notable flexibilidad y facilidad de personalización, además de facilitar una posible migración futura a Wind River Linux en caso de querer comercializar este proyecto como producto médico.
 
 \section{Motivación}
-Desde que inicié mi formación en ingeniería, siempre he sentido una profunda fascinación por las interfaces cerebro-computadora (BCI) y sus posibles aplicaciones. Este proyecto representa una perfecta síntesis de mis pasiones e inquietudes: la tecnología, los sistemas operativos en tiempo real, la medicina y la innovación. La oportunidad de trabajar en un sistema que combine el procesamiento de señales cerebrales con el control domótico me permite explorar un campo que considero revolucionario para la interacción persona-máquina.
+Desde que comencé mi formación en ingeniería, he sentido una fascinación particular por las interfaces cerebro-computadora y sus aplicaciones potenciales. Este proyecto representa, en cierto modo, una síntesis perfecta de mis inquietudes intelectuales: la tecnología, los sistemas operativos en tiempo real, la medicina y la innovación. Trabajar en un sistema que integra procesamiento de señales cerebrales con control domótico me ha permitido explorar un campo que, estoy convencido, revolucionará la interacción persona-máquina en los próximos años, aunque en este caso haya realizado este trabajo desde una perspectiva más lúdica que médica.
 
-La decisión de trabajar con actuadores domóticos comunes, específicamente bombillas inteligentes, no es casual. Permite demostrar de manera sencilla y visual el funcionamiento del sistema BCI, haciendo tangible una tecnología que a menudo puede parecer abstracta o inalcanzable. Además, este enfoque práctico facilita la comprensión del sistema y su potencial impacto en la vida cotidiana.
+No es casualidad que decidiera trabajar con actuadores domóticos comunes, concretamente bombillas inteligentes. Esta decisión permite demostrar —de manera visual e intuitiva— el funcionamiento del sistema BCI, haciendo tangible una tecnología que muchas veces parece abstracta o inalcanzable. Este enfoque práctico, además, facilita enormemente la comprensión del sistema y su impacto potencial en contextos cotidianos.
 
-El aspecto normativo del proyecto, aunque técnicamente desafiante, representa para mí una oportunidad única de entender cómo llevar una idea innovadora desde el concepto hasta un producto viable en el mercado médico. El proceso de cumplir con la normativa UNE-EN 62304, implementar un sistema en tiempo real y desarrollar una metodología robusta, lejos de ser una limitación, ha enriquecido significativamente mi comprensión de lo que significa desarrollar tecnología médica responsable y segura.
+El aspecto normativo del proyecto, aunque técnicamente desafiante (y a veces frustrante), ha representado para mí una oportunidad única de entender el proceso completo de desarrollo... desde una idea innovadora hasta un producto viable en el mercado médico. Cumplir con la normativa UNE-EN 62304, implementar un sistema en tiempo real y desarrollar una metodología robusta no ha sido una limitación, sino que ha enriquecido significativamente mi comprensión sobre lo que implica desarrollar tecnología médica responsable y segura.
 
 \section{Objetivos}
-Este proyecto tiene como finalidad principal el desarrollo de un sistema de control domótico basado en interfaces cerebro-computadora, buscando hacer más accesible esta tecnología en entornos cotidianos. 
+Este proyecto tiene como finalidad principal el desarrollo de un sistema de control domótico basado en interfaces cerebro-computadora, con la intención de hacer más accesible esta tecnología en entornos cotidianos.
 
-Para alcanzar esta meta, se han establecido los siguientes objetivos específicos:
+Para alcanzar esta meta, he establecido los siguientes objetivos específicos:
 
 \begin{itemize}
-    \item \textbf{Cumplimiento del estándar UNE-EN 62304}: Crear una solución que cumpla con la normativa UNE-EN 62304, garantizando la seguridad y fiabilidad del software médico mediante una metodología de desarrollo rigurosa y documentada.
+    \item \textbf{Cumplimiento del estándar UNE-EN 62304}: Crear una solución que se ajuste a la normativa UNE-EN 62304, garantizando así la seguridad y fiabilidad del software médico mediante una metodología de desarrollo rigurosa y bien documentada.
     
-    \item \textbf{Implementar un clasificador de señales EEG}: Implementar un modelo de aprendizaje profundo para la clasificación de señales EEG, utilizando PyTorch como framework de desarrollo y centrándose en la detección de patrones asociados a la visualización de colores.
+    \item \textbf{Implementar un clasificador de señales EEG}: Desarrollar e implementar un modelo de aprendizaje profundo para la clasificación eficiente de señales EEG, utilizando PyTorch como framework principal y centrándome especialmente en la detección de patrones asociados a la visualización de colores.
     
-    \item \textbf{Desarrollar un sistema de control BCI}: Crear un sistema que permita el control de dispositivos de iluminación inteligente mediante señales EEG, utilizando la diadema Brainbit como dispositivo de adquisición de señales.
+    \item \textbf{Desarrollar un sistema de control BCI}: Construir un sistema funcional que permita controlar dispositivos de iluminación inteligente mediante señales EEG, empleando la diadema Brainbit como dispositivo para la adquisición de dichas señales.
     
-    \item \textbf{Generar una imagen para la RPi4}: Generar una imagen de sistema operativo personalizada basada en Wind River Linux, asegurando un entorno de ejecución con garantías de tiempo real blando para el procesamiento de señales EEG.
+    \item \textbf{Generar una imagen para la RPi4}: Crear y optimizar una imagen de sistema operativo personalizada basada en Poky Linux, asegurando un entorno de ejecución con garantías de tiempo real blando para el procesamiento de señales EEG.
 \end{itemize}
 
-Estos objetivos se han definido considerando tanto los aspectos técnicos como normativos del proyecto, buscando un equilibrio entre la innovación tecnológica y la viabilidad práctica en entornos reales.
+He definido estos objetivos considerando tanto los aspectos técnicos como normativos del proyecto, intentando mantener un equilibrio entre la innovación tecnológica —siempre atractiva— y la viabilidad práctica en entornos reales.
 
 \newpage
 \section{Metodología}
-El desarrollo del proyecto sigue una metodología estructurada en varias fases:
+El desarrollo de mi proyecto sigue una metodología estructurada en varias fases, aunque debo admitir que el proceso real no siempre ha sido tan lineal como sugiere esta estructura:
 
 \subsection{Fase de Investigación}
 \begin{itemize}
-    \item Estudio de la literatura sobre procesamiento de señales EEG
-    \item Análisis de requisitos normativos para dispositivos médicos
-    \item Evaluación de tecnologías y frameworks disponibles
+    \item Estudio exhaustivo de la literatura disponible sobre procesamiento de señales EEG
+    \item Análisis detallado de requisitos normativos para dispositivos médicos
+    \item Evaluación de tecnologías y frameworks disponibles en el mercado actual
 \end{itemize}
 
 \subsection{Fase de Desarrollo}
 \begin{itemize}
-    \item Implementación del modelo de clasificación en PyTorch
-    \item Desarrollo del motor de inferencia en Rust
-    \item Integración con el SDK de BrainFlow
-    \item Creación de la imagen personalizada de Wind River Linux
+    \item Implementación del modelo de clasificación en PyTorch, con múltiples iteraciones
+    \item Desarrollo del motor de inferencia en Rust, seleccionado por su rendimiento y seguridad
+    \item Integración con el SDK de BrainFlow, no sin ciertas dificultades técnicas
+    \item Creación de la imagen personalizada de Poky Linux, optimizando componentes
 \end{itemize}
 
 \subsection{Fase de Validación}
 \begin{itemize}
-    \item Pruebas de rendimiento y fiabilidad
-    \item Verificación del cumplimiento normativo
-    \item Evaluación de la usabilidad del sistema
+    \item Pruebas rigurosas de rendimiento y fiabilidad en distintos escenarios
+    \item Verificación del cumplimiento normativo, documentando cada aspecto relevante
+    \item Evaluación de la usabilidad del sistema en condiciones reales de operación
 \end{itemize}
 
-La vertiente práctica del proyecto comprende una descripción exhaustiva del proceso de desarrollo, incluyendo el entrenamiento del modelo de aprendizaje profundo, su incorporación al sistema global y la creación de una imagen personalizada para la Raspberry Pi 4.
+La vertiente práctica de mi proyecto incluye una descripción detallada del proceso de desarrollo, abarcando desde el entrenamiento del modelo de aprendizaje profundo —con sus aciertos y errores— hasta la integración con el resto de componentes del sistema.

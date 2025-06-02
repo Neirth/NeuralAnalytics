@@ -2,17 +2,17 @@
 
 \section{Introducción a las Regiones Cerebrales Funcionales}
 
-El cerebro humano es un sistema altamente organizado en el que diferentes regiones trabajan de manera especializada pero interconectada para procesar la información y generar respuestas conductuales adecuadas. Como indican en su libro "Principios de Neurociencia" los autores Kandel, Jessell y Schwartz (\citeyear{Kandel_Jessell_Schwartz_2001}), el estudio de la neurociencia ha demostrado que la división funcional del cerebro permite analizar la forma en que los procesos perceptivos, cognitivos y emocionales emergen de la actividad neuronal distribuida. En este proyecto, nos enfocamos en dos regiones clave para la percepción y la memoria del color: el lóbulo occipital y el lóbulo temporal. 
+El cerebro humano es un sistema altamente organizado en el que diferentes regiones trabajan de manera especializada pero interconectada para procesar la información y generar respuestas conductuales adecuadas. Como indican en su libro "Principios de Neurociencia" los autores Kandel, Jessell y Schwartz (\citeyear{Kandel_Jessell_Schwartz_2001}), el estudio de la neurociencia ha demostrado que la división funcional del cerebro permite analizar la forma en que los procesos perceptivos, cognitivos y emocionales emergen de la actividad neuronal distribuida. En este proyecto, me enfoco en dos regiones clave para la percepción y la memoria del color: el lóbulo occipital y el lóbulo temporal. 
 
-Utilizando un sistema BCI basado en EEG, empleamos electrodos en ubicaciones específicas del sistema internacional 10-20: O1 y O2 en el lóbulo occipital, responsables del procesamiento primario de la información visual, y T3 y T4 en el lóbulo temporal, donde la información visual se asocia con memorias previas y respuestas emocionales. 
+Utilizando un sistema BCI basado en EEG, empleo electrodos en ubicaciones específicas del sistema internacional 10-20: O1 y O2 en el lóbulo occipital, responsables del procesamiento primario de la información visual, y T3 y T4 en el lóbulo temporal, donde la información visual se asocia con memorias previas y respuestas emocionales. Fue particularmente revelador para mí descubrir, a través de descripciones técnicas de diversos proveedores de interfaces cerebro-ordenador, cómo estos sensores ubicados estratégicamente capturan la actividad en estas regiones específicas.
 
-Gracias a esta organización funcional, podemos estudiar la relación entre percepción e imaginación del color, explorando su impacto en la memoria y la experiencia subjetiva.
+Gracias a esta organización funcional —que no es tan rígida como se pensaba hace algunas décadas— puedo estudiar la relación entre percepción e imaginación del color, explorando su impacto en la memoria y la experiencia subjetiva. La literatura previa que consulté al respecto confirmó esta aproximación.
 
 \newpage
 
 \section{El Lóbulo Temporal y la Memoria Visual}
 
-El lóbulo temporal es crucial en la memoria visual y la asociación semántica de colores. Los electrodos T3 y T4 captan la actividad relacionada con:
+El lóbulo temporal es crucial en la memoria visual y la asociación semántica de colores. A veces olvidamos su importancia ante la predominancia del lóbulo occipital en el discurso sobre visión. Los electrodos T3 y T4 captan la actividad relacionada con:
 
 \begin{itemize}
     \item \textbf{Hipocampo:} Responsable de la consolidación de memorias visuales y asociaciones cromáticas.
@@ -21,11 +21,11 @@ El lóbulo temporal es crucial en la memoria visual y la asociación semántica 
     \item \textbf{Corteza entorrinal:} Conecta el hipocampo con otras áreas corticales, permitiendo que las asociaciones cromáticas se integren en experiencias más complejas.
 \end{itemize}
 
-Cuando una persona recuerda un color, T3 y T4 reflejan la activación de estos circuitos, permitiendo analizar la relación entre percepción visual y memoria. Estudios como los de Squire y Zola-Morgan (\citeyear{Squire_Zola_Morgan_1991}) han demostrado que lesiones en el lóbulo temporal pueden afectar la capacidad de recuperar memorias visuales, lo que refuerza su papel en el almacenamiento de información sensorial.
+Cuando una persona recuerda un color, T3 y T4 reflejan la activación de estos circuitos, permitiendo analizar la relación entre percepción visual y memoria. No siempre resulta obvio cómo interpretar estas señales. Estudios como los de Squire y Zola-Morgan (\citeyear{Squire_Zola_Morgan_1991}) han demostrado que lesiones en el lóbulo temporal pueden afectar la capacidad de recuperar memorias visuales, lo que refuerza su papel en el almacenamiento de información sensorial.
 
 \section{El Lóbulo Occipital y la Percepción del Color}
 
-El lóbulo occipital es la principal región del cerebro para el procesamiento de la información visual.  Los electrodos O1 y O2 capturan la actividad en:
+El lóbulo occipital es la principal región del cerebro para el procesamiento de la información visual. Quizá la más conocida, pero no por ello menos compleja. Los electrodos O1 y O2 capturan la actividad en:
 
 \begin{itemize}
     \item \textbf{Corteza visual primaria (V1):} Primer procesamiento del color y detección de longitudes de onda. \footnote{Es importante distinguir entre O1/O2, que son las \textit{posiciones de los electrodos} según el sistema internacional 10-20, y V1/V4, que son \textit{áreas funcionales del córtex visual} (designaciones de Brodmann) cuya actividad es registrada por dichos electrodos.}
@@ -33,23 +33,23 @@ El lóbulo occipital es la principal región del cerebro para el procesamiento d
     \item \textbf{V4 (corteza visual asociativa):} Especializada en la interpretación y categorización de colores, estableciendo una conexión funcional con las áreas temporales para asignar significados semánticos.
 \end{itemize}
 
-Estudios como los de Brouwer y Heeger (\citeyear{Brouwer_Heeger_2013}) han demostrado que la actividad en V4 puede ser utilizada para clasificar diferentes colores percibidos o imaginados, lo que refuerza la validez de nuestros electrodos O1 y O2 para el análisis de patrones cromáticos en EEG.
+Estudios como los de Brouwer y Heeger (\citeyear{Brouwer_Heeger_2013}) han demostrado que la actividad en V4 puede ser utilizada para clasificar diferentes colores percibidos o imaginados, lo que refuerza la validez de mis electrodos O1 y O2 para el análisis de patrones cromáticos en EEG. Conforme avanzaba en mi investigación, me encontré con que este respaldo científico era crucial para fundamentar las decisiones de diseño que tomé.
 
 \newpage
 
 \section{Integración entre Memoria y Percepción}
-El procesamiento del color en el cerebro, simplificándolo al absurdo, sigue un flujo distribuido:
+El procesamiento del color en el cerebro, simplificándolo al absurdo —con el fin de que pueda entenderse fácilmente— sigue un flujo distribuido:
 \begin{enumerate}
     \item O1/O2 detectan y analizan las características del color percibido o imaginado.
     \item La información es enviada a T3/T4 para su comparación con recuerdos previos y asociaciones emocionales.
     \item Se generan asociaciones semánticas y afectivas, determinando la experiencia subjetiva del color.
 \end{enumerate}
 
-Estudios como los de Rissman y Wagner (\citeyear{Rissman_Wagner_2012}) han mostrado que patrones de activación en el lóbulo temporal pueden predecir si un individuo reconoce un color previamente visto, lo que refuerza la idea de que los recuerdos cromáticos tienen una representación neural clara.
+No siempre ocurre de manera tan lineal, desde luego. Estudios como los de Rissman y Wagner (\citeyear{Rissman_Wagner_2012}) han mostrado que patrones de activación en el lóbulo temporal pueden predecir si un individuo reconoce un color previamente visto, lo que refuerza la idea de que los recuerdos cromáticos tienen una representación neural clara. Después de revisar estos trabajos, me resultó evidente que había encontrado un fundamento sólido para mi enfoque.
 
 \section{Aplicaciones en Interfaces Cerebro-Computadora}
 
-La integración de la percepción y la memoria del color en un sistema BCI tiene varias aplicaciones potenciales:
+La integración de la percepción y la memoria del color en un sistema BCI tiene varias aplicaciones potenciales. Algunas que me parecen particularmente prometedoras:
 
 \begin{itemize}
     \item Diferenciar entre percepción real e imaginada de un color.
@@ -57,7 +57,7 @@ La integración de la percepción y la memoria del color en un sistema BCI tiene
     \item Explorar la relación entre color, memoria y emociones para aplicaciones en neurotecnología.
 \end{itemize}
 
-De este modo, podemos exploar mediante una interfaz cerebro-computadora cómo la percepción y la memoria del color se integran en la experiencia subjetiva, permitiendo así que pueda ser interpretado por un computador y que este pueda realizar acciones en función de la información recibida.
+De este modo, puedo explorar mediante una interfaz cerebro-computadora cómo la percepción y la memoria del color se integran en la experiencia subjetiva, permitiendo así que pueda ser interpretado por un computador y que este pueda realizar acciones en función de la información recibida. Asentando así las bases teóricas en relación al BCI de este proyecto.
 
 \section{Aplicaciones durante este proyecto}
-Los electrodos O1, O2, T3 y T4 capturan información clave sobre la percepción y la memoria del color. Su combinación permite analizar la reconstrucción mental de colores y su impacto en la experiencia subjetiva, formando la base de nuestro sistema BCI. La inclusión de referencias a trabajos clave refuerza la validez del enfoque adoptado en este estudio.
+Los electrodos O1, O2, T3 y T4 capturan información clave sobre la percepción y la memoria del color. Su combinación me permite analizar la reconstrucción mental de colores y su impacto en la experiencia subjetiva, formando la base de mi sistema BCI. Seleccioné estas ubicaciones específicas tras revisar detalladamente las especificaciones técnicas proporcionadas por varios fabricantes de dispositivos BCI, así como literatura académica relevante que he ido citando a lo largo de este capítulo.

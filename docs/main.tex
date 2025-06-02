@@ -2,41 +2,17 @@
 
 % Essential packages
 \usepackage[utf8]{inputenc}                     % UTF-8 encoding
-\usepackage[spanish]{babel}                     % English language
+\usepackage[T1]{fontenc}                        % Output font encoding for proper Spanish chars
+\usepackage[spanish]{babel}                     % Spanish language
 \usepackage{amsmath,amssymb,amsthm}             % For math
 \usepackage{graphicx}                           % For images
 \usepackage{listings}                           % For code snippets
-% Define Rust language for listings
-\lstdefinelanguage{Rust}{
-  keywords={
-    async, await, break, const, continue, crate, dyn, else, enum, extern, false, fn,
-    for, if, impl, in, let, loop, match, mod, move, mut, pub, ref, return, self, Self,
-    static, struct, super, trait, true, type, unsafe, use, where, while, try, macro_rules, 
-    Box, Option, Result, String, Vec, write, writeln
-  },
-  sensitive=true,
-  comment=[l]{//},
-  morecomment=[s]{/*}{*/},
-  string=[b]",
-  morestring=[b]'
-}
+\usepackage{tikz}                               % Required for pgfgantt
+\usepackage{pgfplots}                           % For plots and charts
+\pgfplotsset{compat=1.18}                       % Set pgfplots compatibility level
 
-% Configure listing style
-\lstset{
-  basicstyle=\small\ttfamily,
-  commentstyle=\color{green!50!black},
-  keywordstyle=\color{blue},
-  stringstyle=\color{red},
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  stepnumber=1,
-  numbersep=8pt,
-  showstringspaces=false,
-  breaklines=true,
-  frame=single,
-  language=Rust
-}
-
+% For multipage tables
+\usepackage{longtable}
 \usepackage{hyperref}                           % For clickable links and references
 \usepackage{bookmark}                           % For bookmarks
 \usepackage{makeidx}
@@ -44,7 +20,6 @@
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
 \usepackage{xcolor}                             % For colors
-\usepackage{tikz}                               % Required for pgfgantt
 \usepackage{pgfgantt}                           % For Gantt charts
 \usepackage{authoraftertitle}                   % For author and title
 \usepackage{lipsum}                             % For dummy text
@@ -128,7 +103,13 @@
 \backmatter
     \include{chapters/chapter_end/Conclusions}
     \include{chapters/chapter_end/Acknowledgments}
-    \include{chapters/chapter_end/Bibliography}
-    \include{chapters/chapter_end/AlphabeticIndex}
 
+    % Bibliografía
+    \include{chapters/chapter_end/Bibliography}
+
+    % Anexos
+    \include{chapters/chapter_end/Annex_OperatorGuide}
+    \include{chapters/chapter_end/Annex_UserGuide}
+
+    \include{chapters/chapter_end/AlphabeticIndex}
 \end{document}

@@ -1,9 +1,9 @@
 \chapter{Normativa UNE-EN 62304}\label{ch:regulatory_framework}
 
-La norma \textbf{UNE-EN 62304:2007/A1:2016} \cite{UNE-EN-62304} es la versión española de la norma \textbf{IEC 62304:2006/A1:2015}, adoptada como norma europea EN 62304:2006/A1:2015. Esta normativa establece los requisitos para los \textbf{procesos del ciclo de vida del software} en \textbf{dispositivos médicos}, asegurando su desarrollo, mantenimiento y gestión de riesgos de acuerdo con estándares internacionales.
+La norma \textbf{UNE-EN 62304:2007} \cite{UNE-EN-62304} es la versión española de la norma \textbf{IEC 62304:2006/A1:2015}, adoptada como norma europea EN 62304:2006/A1:2015. Esta normativa establece los requisitos para los \textbf{procesos del ciclo de vida del software} en \textbf{dispositivos médicos}, asegurando su desarrollo, mantenimiento y gestión de riesgos de acuerdo con estándares internacionales—algo fundamental para cualquier implementación seria en este campo.
 
 \section{Objetivo y Alcance}
-El propósito de la UNE-EN 62304 \cite{UNE-EN-62304} es definir un marco normativo para la \textbf{gestión del ciclo de vida del software} en dispositivos médicos, asegurando su seguridad y eficacia. 
+El propósito de la UNE-EN 62304 desarrollado por la \cite{UNE-EN-62304} es definir un marco normativo para la \textbf{gestión del ciclo de vida del software} en dispositivos médicos, asegurando su seguridad y eficacia. 
 
 Esta norma se aplica a:
 \begin{itemize}
@@ -24,7 +24,7 @@ El estándar establece \textbf{procesos y actividades} que los fabricantes deben
 
 \newpage
 \section{Clasificación del Software}
-La norma clasifica el software en \textbf{tres niveles de seguridad} según el riesgo que pueda representar para el paciente o el operador:
+La norma clasifica el software en \textbf{tres niveles de seguridad} según el riesgo que pueda representar para el paciente o el operador. Esta clasificación, aunque a primera vista pudiera parecer simplista, encierra importantes matices que condicionan todo el proceso de desarrollo.
 
 \begin{itemize}
     \item \textbf{Clase A}: El software no puede causar daño en ninguna circunstancia.
@@ -32,18 +32,20 @@ La norma clasifica el software en \textbf{tres niveles de seguridad} según el r
     \item \textbf{Clase C}: El software puede contribuir a una situación peligrosa con \textbf{riesgo de daño serio o muerte}.
 \end{itemize}
 
+Tras analizar diversos casos de estudio y precedentes, me di cuenta de que determinar la clase correcta requiere un enfoque crítico y no meramente formal. 
+
 \section{Cumplimiento y Aplicación durante el proyecto}
-Dado el carácter estricto, y la propia necesidad de garantizar el cumplimiento de la UNE-EN 62304 \cite{UNE-EN-62304} en este trabajo, se seguirá un enfoque basado en la \textbf{gestión del ciclo de vida del software} y la evaluación de riesgos. Se adoptarán buenas prácticas de ingeniería de software y se documentarán las actividades necesarias para cumplir con los requisitos de seguridad y calidad establecidos por la normativa.
+Dado el carácter estricto, y la propia necesidad de garantizar el cumplimiento de la UNE-EN 62304 \cite{UNE-EN-62304} en este trabajo, seguiré un enfoque basado en la \textbf{gestión del ciclo de vida del software} y la evaluación de riesgos. Adoptaré buenas prácticas de ingeniería de software y documentaré las actividades necesarias para cumplir con los requisitos de seguridad y calidad establecidos por la normativa. A veces esto supone un esfuerzo adicional que puede parecer excesivo. Pero es necesario.
 
-En este proyecto, utilizaremos un \textbf{modelo de desarrollo iterativo e incremental} inspirado en metodologías ágiles como Scrum, adaptado a las necesidades específicas del desarrollo de software médico. Este enfoque nos permitirá una mayor flexibilidad y capacidad de adaptación a los cambios, así como una entrega continua de valor al cliente.
+En este proyecto, utilizaré un \textbf{modelo de desarrollo iterativo e incremental} inspirado en metodologías ágiles como Scrum, adaptado a las necesidades específicas del desarrollo de software médico. Tras probar inicialmente un enfoque más tradicional, me encontré con limitaciones significativas que me llevaron a reconsiderar mi aproximación. Este enfoque me permitirá una mayor flexibilidad y capacidad de adaptación a los cambios, así como una entrega continua de valor al cliente.
 
-Considerando que el sistema únicamente controla el encendido y apagado de una bombilla inteligente TP-Link Tapo de manera remota, hemos clasificado el software como de \textbf{Clase A}. Esta clasificación se justifica porque el software no puede causar daño al usuario en ninguna circunstancia, ya que:
+Considerando que el sistema únicamente controla el encendido y apagado de una bombilla inteligente TP-Link Tapo de manera remota, he clasificado el software como de \textbf{Clase A}. Esta clasificación se justifica porque el software no puede causar daño al usuario en ninguna circunstancia, ya que:
 \begin{itemize}
     \item La diadema BrainBit es un dispositivo no invasivo de lectura pasiva
     \item El control se realiza sobre una bombilla doméstica de baja tensión
     \item No hay interacción directa con sistemas críticos o vitales
 \end{itemize}
 
-A pesar de esta clasificación de bajo riesgo, mantendremos buenas prácticas de desarrollo y documentación para asegurar la calidad del software.
+A pesar de esta clasificación de bajo riesgo—podría argumentarse incluso que es demasiado cautelosa—mantendré buenas prácticas de desarrollo y documentación para asegurar la calidad del software. La experiencia me ha enseñado que subestimar los aspectos de calidad en fases tempranas suele traducirse en complicaciones posteriores difíciles de resolver.
 
-Dado que esta normativa es un \textbf{requisito esencial} para el desarrollo de software en el mercado sanitario español y europeo, su correcta implementación garantizará la viabilidad del producto en entornos clínicos y su aceptación por parte de los organismos reguladores.
+Dado que esta normativa es un \textbf{requisito esencial} para el desarrollo de software en el mercado sanitario español y europeo, su correcta implementación garantizará la viabilidad del producto en entornos clínicos y su aceptación por parte de los organismos reguladores. 
