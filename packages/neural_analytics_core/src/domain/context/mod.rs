@@ -1,7 +1,6 @@
 use std::collections::{HashMap, VecDeque};
-use std::env;
 use std::sync::Arc;
-use singletons::{get_brainflow_adapter, get_mock_headset_adapter, get_tapo_smartbulb_adapter, get_model_service};
+use singletons::{get_brainflow_adapter, get_tapo_smartbulb_adapter, get_model_service};
 
 use presage::{async_trait, Error, Event, EventWriter, SerializedEvent};
 use tokio::sync::RwLock;
@@ -36,19 +35,9 @@ pub(crate) struct NeuralAnalyticsContext {
 
 impl Default for NeuralAnalyticsContext {
     fn default() -> Self {
-        // Determine if we use the real adapter or mock based on an environment variable
-        let use_mock_adapter = env::var("USE_MOCK_HEADSET")
-            .unwrap_or_else(|_| "true".to_string())
-            .to_lowercase()
-            == "true";
-
         // Obtain the EEG headset adapter based on the environment variable
         // If USE_MOCK_HEADSET is set to "true", use the mock adapter
-        let eeg_adapter = if use_mock_adapter {
-            get_mock_headset_adapter()
-        } else {
-            get_brainflow_adapter()
-        };
+        let eeg_adapter = get_brainflow_adapter();
 
         NeuralAnalyticsContext {
             // Initialize the data context

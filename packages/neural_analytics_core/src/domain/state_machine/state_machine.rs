@@ -32,7 +32,9 @@ use crate::{
             search_headband_use_case::search_headband_use_case,
             update_light_status_use_case::update_light_status_use_case,
         },
-    }, utils::send_event, EventData
+    },
+    utils::send_event,
+    EventData,
 };
 
 use super::neural_events::NeuralAnalyticsCoreEvents;
@@ -60,7 +62,10 @@ impl MainStateMachine {
                 .command_handler(&update_light_status_use_case),
         );
 
-        Self {context:Arc::new(Mutex::new(NeuralAnalyticsContext::default())),command_bus:bus }
+        Self {
+            context: Arc::new(Mutex::new(NeuralAnalyticsContext::default())),
+            command_bus: bus,
+        }
     }
 
     /// Initialization state for the Neural Analytics system.
@@ -283,7 +288,7 @@ impl MainStateMachine {
 
         // Measure color prediction time (the most computationally intensive part)
         let start_prediction = Instant::now();
-        
+
         let color_prediction = {
             let mut ctx = self.context.lock().await;
             let prediction_result = self
@@ -305,7 +310,7 @@ impl MainStateMachine {
 
                     return Transition(State::awaiting_headset_connection());
                 } else {
-                    return Transition(State::capturing_headset_data());                
+                    return Transition(State::capturing_headset_data());
                 }
             }
 
@@ -359,3 +364,447 @@ impl MainStateMachine {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::{
+        models::{bulb_state::BulbState, eeg_work_modes::WorkMode},
+        ports::{input::eeg_headset::EegHeadsetPort, output::smart_bulb::SmartBulbPort},
+        services::model_inference_service::ModelInferenceInterface,
+    };
+    use mockall::{mock, predicate::*};
+    use std::collections::HashMap;
+    use std::sync::Arc;
+    use tokio::sync::RwLock;
+    use tokio::test;
+
+    // Mocks para los tests
+    mock! {
+        EegHeadsetAdapter {}
+        impl EegHeadsetPort for EegHeadsetAdapter {
+            fn connect(&self) -> Result<(), String>;
+            fn disconnect(&mut self) -> Result<(), String>;
+            fn is_connected(&self) -> bool;
+            fn get_work_mode(&self) -> WorkMode;
+            fn change_work_mode(&mut self, mode: WorkMode);
+            fn extract_impedance_data(&self) -> Result<HashMap<String, u16>, String>;
+            fn extract_raw_data(&self) -> Result<HashMap<String, Vec<f32>>, String>;
+        }
+    }
+
+    mock! {
+        SmartBulbAdapter {}
+        #[async_trait::async_trait]
+        impl SmartBulbPort for SmartBulbAdapter {
+            async fn change_state(&self, state: BulbState) -> Result<(), String>;
+        }
+    }
+
+    mock! {
+        ModelService {}
+        impl ModelInferenceInterface for ModelService {
+            fn predict_color(&self, data: &HashMap<String, Vec<f32>>) -> Result<String, String>;
+            fn is_model_loaded(&self) -> bool;
+        }
+    }
+
+    /// Helper para crear una referencia estática para EegHeadsetPort
+    fn create_static_eeg_mock<T>(
+        mock: T,
+    ) -> &'static Arc<RwLock<Box<dyn EegHeadsetPort + Send + Sync>>>
+    where
+        T: EegHeadsetPort + Send + Sync + 'static,
+    {
+        Box::leak(Box::new(Arc::new(RwLock::new(
+            Box::new(mock) as Box<dyn EegHeadsetPort + Send + Sync>
+        ))))
+    }
+
+    /// Helper para crear una referencia estática para SmartBulbPort
+    fn create_static_bulb_mock<T>(
+        mock: T,
+    ) -> &'static Arc<RwLock<Box<dyn SmartBulbPort + Send + Sync>>>
+    where
+        T: SmartBulbPort + Send + Sync + 'static,
+    {
+        Box::leak(Box::new(Arc::new(RwLock::new(
+            Box::new(mock) as Box<dyn SmartBulbPort + Send + Sync>
+        ))))
+    }
+
+    /// Helper para crear una referencia estática para ModelInferenceInterface
+    fn create_static_model_mock<T>(
+        mock: T,
+    ) -> &'static Arc<RwLock<Box<dyn ModelInferenceInterface + Send + Sync>>>
+    where
+        T: ModelInferenceInterface + Send + Sync + 'static,
+    {
+        Box::leak(Box::new(Arc::new(RwLock::new(
+            Box::new(mock) as Box<dyn ModelInferenceInterface + Send + Sync>
+        ))))
+    }
+
+    // Helper para crear una máquina de estados para pruebas con mocks configurados
+    async fn create_test_state_machine(
+        eeg_mock: MockEegHeadsetAdapter,
+        bulb_mock: MockSmartBulbAdapter,
+        model_mock: MockModelService,
+    ) -> MainStateMachine {
+        let mut context = NeuralAnalyticsContext::default();
+
+        // Crear referencias estáticas para los mocks
+        context.eeg_headset_adapter = create_static_eeg_mock(eeg_mock);
+        context.smart_bulb_adapter = create_static_bulb_mock(bulb_mock);
+        context.model_service = create_static_model_mock(model_mock);
+
+        // Creamos la máquina de estados con el contexto mockeado
+        let bus = CommandBus::<NeuralAnalyticsContext, presage::Error>::new().configure(
+            Configuration::new()
+                .command_handler(&disconnect_headband_use_case)
+                .command_handler(&extract_calibration_data_use_case)
+                .command_handler(&extract_generalist_data_use_case)
+                .command_handler(&predict_color_thinking_use_case)
+                .command_handler(&search_headband_use_case)
+                .command_handler(&update_light_status_use_case),
+        );
+
+        MainStateMachine {
+            context: Arc::new(Mutex::new(context)),
+            command_bus: bus,
+        }
+    }
+
+    // #[test]
+    // async fn test_initialize_application_state_transition() {
+    //     // Arrange
+    //     let eeg_mock = MockEegHeadsetAdapter::new();
+    //     let bulb_mock = MockSmartBulbAdapter::new();
+    //     let model_mock = MockModelService::new();
+
+    //     // Configuramos el entorno para que send_event tenga éxito
+    //     let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+    //     // Act - Ejecutar el estado de inicialización
+    //     let result = state_machine
+    //         .initialize_application(&NeuralAnalyticsCoreEvents::InitializeCore)
+    //         .await;
+
+    //     // Assert - Verificar que transitamos al estado de espera de conexión
+    //     if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
+    //         // Transición exitosa
+    //         assert!(true);
+    //     } else {
+    //         panic!("Expected transition to awaiting_headset_connection state");
+    //     }
+    // }
+
+    // #[test]
+    // async fn test_awaiting_headset_connection_success() {
+    //     // Arrange
+    //     let mut eeg_mock = MockEegHeadsetAdapter::new();
+    //     eeg_mock.expect_disconnect().returning(|| Ok(()));
+    //     eeg_mock.expect_is_connected().returning(|| false); // No conectado inicialmente
+    //     eeg_mock.expect_connect().returning(|| Ok(())); // Conexión exitosa
+    //     eeg_mock.expect_is_connected().returning(|| true); // Conectado después
+
+    //     let bulb_mock = MockSmartBulbAdapter::new();
+    //     let model_mock = MockModelService::new();
+
+    //     let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+    //     // Act
+    //     let result = state_machine
+    //         .awaiting_headset_connection(&NeuralAnalyticsCoreEvents::BackgroundTick)
+    //         .await;
+
+    //     // Assert - Verificar que transitamos al estado de calibración
+    //     if let Response::Transition(State::AwaitingHeadsetCalibration { .. }) = result {
+    //         // Transición exitosa
+    //         assert!(true);
+    //     } else {
+    //         panic!("Expected transition to awaiting_headset_calibration state");
+    //     }
+    // }
+
+    #[test]
+    async fn test_awaiting_headset_connection_failure() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+        eeg_mock.expect_disconnect().returning(|| Ok(()));
+        eeg_mock.expect_is_connected().returning(|| false);
+        eeg_mock
+            .expect_connect()
+            .returning(|| Err("Connection failed".to_string()));
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+        let model_mock = MockModelService::new();
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Act
+        let result = state_machine
+            .awaiting_headset_connection(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que permanecemos en el mismo estado
+        if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
+            // Se mantiene en el mismo estado (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected to remain in awaiting_headset_connection state");
+        }
+    }
+
+    #[test]
+    async fn test_awaiting_headset_calibration_success() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        let mut impedance_data = HashMap::new();
+        impedance_data.insert("sensor1".to_string(), 100);
+        impedance_data.insert("sensor2".to_string(), 100);
+
+        eeg_mock
+            .expect_extract_impedance_data()
+            .returning(move || Ok(impedance_data.clone()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Calibration);
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+        let model_mock = MockModelService::new();
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Configurar los datos de impedancia en el contexto
+        {
+            let mut ctx = state_machine.context.lock().await;
+            let mut data = HashMap::new();
+            data.insert("sensor1".to_string(), 100);
+            data.insert("sensor2".to_string(), 100);
+            ctx.impedance_data = Some(data);
+        }
+
+        // Act
+        let result = state_machine
+            .awaiting_headset_calibration(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que transitamos al estado de captura de datos
+        if let Response::Transition(State::CapturingHeadsetData { .. }) = result {
+            // Transición exitosa
+            assert!(true);
+        } else {
+            panic!("Expected transition to capturing_headset_data state");
+        }
+    }
+
+    #[test]
+    async fn test_awaiting_headset_calibration_needs_more_calibration() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        let mut impedance_data = HashMap::new();
+        impedance_data.insert("sensor1".to_string(), 2000); // Valor muy alto, requiere más calibración
+        impedance_data.insert("sensor2".to_string(), 100);
+
+        eeg_mock
+            .expect_extract_impedance_data()
+            .returning(move || Ok(impedance_data.clone()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Calibration);
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+        let model_mock = MockModelService::new();
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Configurar los datos de impedancia en el contexto
+        {
+            let mut ctx = state_machine.context.lock().await;
+            let mut data = HashMap::new();
+            data.insert("sensor1".to_string(), 2000);
+            data.insert("sensor2".to_string(), 100);
+            ctx.impedance_data = Some(data);
+        }
+
+        // Act
+        let result = state_machine
+            .awaiting_headset_calibration(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que permanecemos en el mismo estado
+        if let Response::Transition(State::AwaitingHeadsetCalibration { .. }) = result {
+            // Se mantiene en el estado de calibración (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected to remain in awaiting_headset_calibration state");
+        }
+    }
+
+    #[test]
+    async fn test_awaiting_headset_calibration_fails() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        eeg_mock
+            .expect_extract_impedance_data()
+            .returning(|| Err("Failed to extract impedance data".to_string()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Calibration);
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+        let model_mock = MockModelService::new();
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Act
+        let result = state_machine
+            .awaiting_headset_calibration(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que volvemos al estado de espera de conexión
+        if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
+            // Transición al estado de conexión (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected transition to awaiting_headset_connection state");
+        }
+    }
+
+    #[test]
+    async fn test_capturing_headset_data_success() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        let mut raw_data = HashMap::new();
+        raw_data.insert("sensor1".to_string(), vec![1.0, 2.0, 3.0]);
+        raw_data.insert("sensor2".to_string(), vec![4.0, 5.0, 6.0]);
+
+        eeg_mock
+            .expect_extract_raw_data()
+            .returning(move || Ok(raw_data.clone()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Extraction);
+
+        let mut bulb_mock = MockSmartBulbAdapter::new();
+        bulb_mock
+            .expect_change_state()
+            .with(eq(BulbState::BulbOn))
+            .returning(|_| Ok(()));
+
+        let mut model_mock = MockModelService::new();
+        model_mock
+            .expect_predict_color()
+            .returning(|_| Ok("green".to_string()));
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Configurar datos en el contexto
+        {
+            let mut ctx = state_machine.context.lock().await;
+            let mut data = HashMap::new();
+            data.insert("sensor1".to_string(), vec![1.0, 2.0, 3.0]);
+            data.insert("sensor2".to_string(), vec![4.0, 5.0, 6.0]);
+            ctx.headset_data = Some(data);
+        }
+
+        // Act
+        let result = state_machine
+            .capturing_headset_data(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que permanecemos en el mismo estado
+        if let Response::Transition(State::CapturingHeadsetData { .. }) = result {
+            // Se mantiene en el mismo estado (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected to remain in capturing_headset_data state");
+        }
+    }
+
+    #[test]
+    async fn test_capturing_headset_data_extraction_fails() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        eeg_mock
+            .expect_extract_raw_data()
+            .returning(|| Err("Failed to extract data".to_string()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Extraction);
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+        let model_mock = MockModelService::new();
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Act
+        let result = state_machine
+            .capturing_headset_data(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que volvemos al estado de espera de conexión
+        if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
+            // Transición al estado de conexión (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected transition to awaiting_headset_connection state");
+        }
+    }
+
+    #[test]
+    async fn test_capturing_headset_data_prediction_fails() {
+        // Arrange
+        let mut eeg_mock = MockEegHeadsetAdapter::new();
+
+        let mut raw_data = HashMap::new();
+        raw_data.insert("sensor1".to_string(), vec![1.0, 2.0, 3.0]);
+
+        eeg_mock
+            .expect_extract_raw_data()
+            .returning(move || Ok(raw_data.clone()));
+
+        eeg_mock.expect_is_connected().returning(|| true);
+
+        eeg_mock.expect_get_work_mode().return_const(WorkMode::Extraction);
+
+        let bulb_mock = MockSmartBulbAdapter::new();
+
+        let mut model_mock = MockModelService::new();
+        model_mock
+            .expect_predict_color()
+            .returning(|_| Err("Model has no data".to_string()));
+
+        let mut state_machine = create_test_state_machine(eeg_mock, bulb_mock, model_mock).await;
+
+        // Configurar datos en el contexto
+        {
+            let mut ctx = state_machine.context.lock().await;
+            let mut data = HashMap::new();
+            data.insert("sensor1".to_string(), vec![1.0, 2.0, 3.0]);
+            ctx.headset_data = Some(data);
+        }
+
+        // Act
+        let result = state_machine
+            .capturing_headset_data(&NeuralAnalyticsCoreEvents::BackgroundTick)
+            .await;
+
+        // Assert - Verificar que volvemos al estado de espera de conexión
+        if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
+            // Transición al estado de conexión (esperado)
+            assert!(true);
+        } else {
+            panic!("Expected transition to awaiting_headset_connection state");
+        }
+    }
+}
