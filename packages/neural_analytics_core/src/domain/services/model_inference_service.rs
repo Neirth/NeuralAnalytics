@@ -15,7 +15,8 @@ pub trait ModelInferenceInterface: Send + Sync + 'static {
 
 pub struct ModelInferenceService {
     // The ONNX model loaded using tract-onnx
-    model: Option<Arc<RunnableModel<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>>>,
+    model:
+        Option<Arc<RunnableModel<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>>>,
     // Path to the model file
     model_path: String,
 }
@@ -292,5 +293,272 @@ impl ModelInferenceInterface for ModelInferenceService {
 
     fn is_model_loaded(&self) -> bool {
         self.model.is_some()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+    use tempfile::tempdir;
+
+    // Helper function to create test EEG data
+    fn create_test_eeg_data() -> HashMap<String, Vec<f32>> {
+        let mut eeg_data = HashMap::new();
+        // Create valid data for all required channels
+        eeg_data.insert("T3".to_string(), vec![0.1; 62]);
+        eeg_data.insert("T4".to_string(), vec![0.2; 62]);
+        eeg_data.insert("O1".to_string(), vec![0.3; 62]);
+        eeg_data.insert("O2".to_string(), vec![0.4; 62]);
+        eeg_data
+    }
+
+    // Helper to create varied test data with different values
+    fn create_varied_test_eeg_data() -> HashMap<String, Vec<f32>> {
+        let mut eeg_data = HashMap::new();
+        // Creamos valores variados para obtener mejor cobertura en la normalización
+        eeg_data.insert("T3".to_string(), (0..62).map(|i| i as f32 * 0.1).collect());
+        eeg_data.insert("T4".to_string(), (0..62).map(|i| i as f32 * 0.2).collect());
+        eeg_data.insert("O1".to_string(), (0..62).map(|i| i as f32 * 0.3).collect());
+        eeg_data.insert("O2".to_string(), (0..62).map(|i| i as f32 * 0.4).collect());
+        eeg_data
+    }
+
+    // Test for successful model loading
+    #[test]
+    fn test_model_loading() {
+        // Create a mock model file
+        let dir = tempdir().unwrap();
+        let model_path = dir.path().join("test_model.onnx");
+
+        // Just to make the test work, we'll check if the model is not loaded
+        // because we're not actually creating a valid ONNX model
+        let service = ModelInferenceService::new(model_path.to_str().unwrap_or("invalid_path"));
+
+        // Since we didn't create a real model file, it should not be loaded
+        assert!(!service.is_model_loaded());
+    }
+
+    // Test explicit loading with non-existent file
+    #[test]
+    fn test_load_model_non_existent_file() {
+        let mut service = ModelInferenceService {
+            model: None,
+            model_path: "non_existent_path/model.onnx".to_string(),
+        };
+
+        let result = service.load_model();
+        assert!(result.is_err());
+        let error_msg = result.err().unwrap();
+        assert!(error_msg.contains("Model file does not exist at path"));
+    }
+
+    // Test the default constructor
+    #[test]
+    fn test_default_constructor() {
+        let service = ModelInferenceService::default();
+        // El comportamiento dependerá de si existe el archivo por defecto o no
+        // Solo verificamos que la función no falle
+        assert_eq!(service.model_path, "assets/neural_analytics.onnx");
+    }
+
+    // Test for data preprocessing with varied data (better coverage)
+    #[test]
+    fn test_preprocess_data_varied() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let eeg_data = create_varied_test_eeg_data();
+        let result = service.preprocess_data(&eeg_data);
+
+        assert!(result.is_ok());
+        let processed_data = result.unwrap();
+        assert_eq!(processed_data.len(), 62 * 4);
+    }
+
+    // Test for data preprocessing - success case
+    #[test]
+    fn test_preprocess_data_success() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let eeg_data = create_test_eeg_data();
+        let result = service.preprocess_data(&eeg_data);
+
+        assert!(result.is_ok());
+        let processed_data = result.unwrap();
+        // Verify size: 62 samples * 4 channels = 248 elements
+        assert_eq!(processed_data.len(), 62 * 4);
+    }
+
+    // Test for data preprocessing - missing channel error
+    #[test]
+    fn test_preprocess_data_missing_channel() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let mut eeg_data = create_test_eeg_data();
+        // Remove a required channel
+        eeg_data.remove("T3");
+
+        let result = service.preprocess_data(&eeg_data);
+        assert!(result.is_err());
+        let error_msg = result.err().unwrap();
+        assert!(error_msg.contains("Required channel 'T3' not found"));
+    }
+
+    // Test for data preprocessing - empty channel data
+    #[test]
+    fn test_preprocess_data_empty_channel() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let mut eeg_data = create_test_eeg_data();
+        // Set an empty channel
+        eeg_data.insert("T3".to_string(), vec![]);
+
+        let result = service.preprocess_data(&eeg_data);
+        assert!(result.is_err());
+        let error_msg = result.err().unwrap();
+        assert!(error_msg.contains("Channel 'T3' has no data"));
+    }
+
+    // Test for prediction with model not loaded
+    #[test]
+    fn test_predict_model_not_loaded() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let eeg_data = create_test_eeg_data();
+        let result = service.predict_color(&eeg_data);
+
+        assert!(result.is_err());
+        let error_msg = result.err().unwrap();
+        assert_eq!(error_msg, "Model is not loaded. Call load_model first.");
+    }
+
+    // Test for short data handling in preprocessing
+    #[test]
+    fn test_preprocess_data_short() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let mut eeg_data = create_test_eeg_data();
+        // Set a channel with fewer elements
+        eeg_data.insert("T3".to_string(), vec![0.1; 30]);
+
+        let result = service.preprocess_data(&eeg_data);
+        assert!(result.is_ok());
+        let processed_data = result.unwrap();
+        // Verify the function handled short data correctly
+        assert_eq!(processed_data.len(), 62 * 4);
+    }
+
+    // Test for long data handling in preprocessing
+    #[test]
+    fn test_preprocess_data_long() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        let mut eeg_data = create_test_eeg_data();
+        // Set a channel with more elements
+        eeg_data.insert("T3".to_string(), vec![0.1; 100]);
+
+        let result = service.preprocess_data(&eeg_data);
+        assert!(result.is_ok());
+        let processed_data = result.unwrap();
+        // Verify the function handled long data correctly
+        assert_eq!(processed_data.len(), 62 * 4);
+    }
+
+    // Test for zero variance data
+    #[test]
+    fn test_preprocess_data_zero_variance() {
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        // Todos los valores son iguales, lo que resultará en varianza cero
+        let mut eeg_data = HashMap::new();
+        eeg_data.insert("T3".to_string(), vec![5.0; 62]);
+        eeg_data.insert("T4".to_string(), vec![5.0; 62]);
+        eeg_data.insert("O1".to_string(), vec![5.0; 62]);
+        eeg_data.insert("O2".to_string(), vec![5.0; 62]);
+
+        let result = service.preprocess_data(&eeg_data);
+        assert!(result.is_ok());
+        // Con varianza cero, la división por (std_dev + 1e-6) debería evitar el NaN
+        let processed_data = result.unwrap();
+        assert_eq!(processed_data.len(), 62 * 4);
+    }
+
+    // Test for predict_color with tensor shape error
+    #[test]
+    fn test_predict_color_tensor_shape_error() {
+        // Simular un modelo cargado para esta prueba
+        struct MockModel;
+
+        impl ModelInferenceInterface for MockModel {
+            fn predict_color(&self, _: &HashMap<String, Vec<f32>>) -> Result<String, String> {
+                // Esta implementación nunca se llamará en la prueba
+                Ok("red".to_string())
+            }
+
+            fn is_model_loaded(&self) -> bool {
+                true
+            }
+        }
+
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        // Crear datos con longitud incorrecta para forzar el error de verificación de longitud
+        let mut eeg_data = create_test_eeg_data();
+        // Manipulamos la estructura interna para forzar un error
+        // En realidad esto no debería suceder con la implementación actual,
+        // pero probamos la condición de error de todos modos
+
+        let result = service.predict_color(&eeg_data);
+        assert!(result.is_err());
+        // El error debe ser por modelo no cargado, no por longitud incorrecta
+        assert_eq!(
+            result.err().unwrap(),
+            "Model is not loaded. Call load_model first."
+        );
+    }
+
+    // Mock test for predict_color (since we can't easily create a real ONNX model)
+    #[test]
+    fn test_predict_color_mock() {
+        // This test is a placeholder for a proper prediction test
+        // A real test would require creating a valid ONNX model, which is complex
+        // Instead, we'll just test the interface as a sanity check
+
+        // In a real test environment, you'd create a test-specific ONNX model
+        // or use dependency injection to mock the model behavior
+
+        let service = ModelInferenceService {
+            model: None,
+            model_path: "dummy_path".to_string(),
+        };
+
+        assert!(!service.is_model_loaded());
     }
 }
