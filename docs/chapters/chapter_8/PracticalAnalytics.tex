@@ -3,14 +3,14 @@
 \section{Objetivos Especificos}
 \subsection{Realizados}
 
-Los objetivos principales realizados en este trabajo son los siguientes:
+Al empezar este proyecto tenía una idea bastante clara de lo que quería conseguir, aunque ahora mirando hacia atrás me doy cuenta de que algunas cosas resultaron más complicadas de lo que pensaba inicialmente, por suerte definí los objetivos que quería lograr en esta fase de desarrollo. Entonces, los objetivos principales que finalmente logré completar son los siguientes:
 
 \begin{itemize}
     \item Diseñar una aplicación que permita la captura raw de la información del EEG para los canales T3, T4, O1 y O2.
     \item Diseño de un modelo de IA que sea capaz de distinguir entre distintas categorías Rojo, Verde o Desconocido.
     \item Extracción de diferentes datos para las categorías propuestas.
     \item Diseñar una aplicación autónoma que sea capaz de interactuar con la señal del EEG del usuario.
-    \item Asegurar que la aplicación autónoma cumpla con la norma UNE-EN 62304:2007/A1:2016, garantizando los requisitos para los procesos del ciclo de vida del software en dispositivos médicos.
+    \item Asegurar que la aplicación autónoma cumpla con la norma UNE-EN 62304:2007, garantizando los requisitos para los procesos del ciclo de vida del software en dispositivos médicos.
     \item Integrar el sistema completo en una Raspberry Pi respetando los requerimientos de tiempo real blando.
     \item Por último, ser capaces de encender y apagar una bombilla a raíz del color pensado por el usuario.
 \end{itemize}
@@ -19,20 +19,24 @@ Los objetivos principales realizados en este trabajo son los siguientes:
 
 \subsection{Deseados (Futuras Mejoras)}
 
-Entre las mejoras futuras que podrían implementarse en el proyecto, se destacan las siguientes:
+Aunque conseguí lo que me propuse, durante el proceso me fui dando cuenta de varias limitaciones y áreas donde podría mejorar bastante el sistema. Algunas de estas limitaciones vinieron impuestas por el tiempo disponible o los recursos que tenía a mano, pero otras fueron decisiones que tomé por el camino y que ahora veo que podrían haberse hecho mejor. Las mejoras futuras que veo más interesantes son:
 
 \begin{itemize}
     \item Obtener un dataset más amplio con diferentes pacientes, lo que permitiría mejorar la generalización del modelo y su aplicabilidad en distintos perfiles neurológicos.
     \item Ampliar el espectro de colores disponibles para la detección, pasando del actual sistema binario (rojo y verde) a un sistema con mayor variedad cromática.
     \item Integración con el estándar Matter para facilitar la compatibilidad con un mayor número de dispositivos domóticos y ecosistemas de hogar inteligente.
+    \item Migrar el sistema operativo de Poky Linux a Wind River Linux para facilitar la certificación del dispositivo como producto sanitario.
 \end{itemize}
 
 \newpage
 
 \section{Requisitos funcionales y no funcionales}
+
+Definir los requisitos del sistema resultó ser más complicado de lo que esperaba al principio. Pensé que sería simplemente hacer una lista de lo que quería que hiciera el sistema, pero me di cuenta de que muchos requisitos no aparecen hasta que empiezas a implementar y surgen problemas que no habías previsto. Fue un proceso bastante iterativo donde cada fase del desarrollo revelaba nuevas necesidades.
+
 \subsection{Requisitos Funcionales}
 
-Los requisitos funcionales identificados en el análisis del código del sistema son:
+Los requisitos funcionales básicamente definen qué tiene que hacer el sistema. Estos fueron los que identifiqué analizando el código final:
 
 \begin{itemize}
     \item \textbf{RF-01}: El sistema debe permitir la conexión y desconexión con el dispositivo EEG (electroencefalograma).
@@ -51,10 +55,10 @@ Los requisitos funcionales identificados en el análisis del código del sistema
 
 \subsection{Requisitos No Funcionales}
 
-Los requisitos no funcionales identificados en el análisis del código del sistema son:
+Los requisitos no funcionales fue el punto más complejo de definir. Aquí es donde entran temas como el rendimiento, la seguridad, cumplimiento de normativas—cosas que a menudo pasas por alto al principio porque están más "escondidas". Algunos de estos requisitos ni siquiera los había considerado hasta que empecé a hacer las primeras pruebas del sistema y me di cuenta de que ciertas cosas no funcionaban como esperaba. Los que finalmente identifiqué son:
 
 \begin{itemize}
-    \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304:2007/A1:2016 para software de dispositivos médicos.\label{rnf-01}
+    \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304:2007 para software de dispositivos médicos.\label{rnf-01}
     \item \textbf{RNF-02}: \textbf{Tiempo Real}: El sistema debe operar en tiempo real blando para asegurar una respuesta adecuada a los cambios en la señal EEG.\label{rnf-02}
     \item \textbf{RNF-03}: \textbf{Fiabilidad}: El sistema debe validar la calidad de las señales EEG mediante los datos de impedancia antes de realizar predicciones.\label{rnf-03}
     \item \textbf{RNF-04}: \textbf{Portabilidad}: El sistema debe poder ejecutarse en una Raspberry Pi.\label{rnf-04}
@@ -70,7 +74,9 @@ Los requisitos no funcionales identificados en el análisis del código del sist
 
 \section{Bibliotecas Usadas}
 
-El proyecto Neural Analytics utiliza diversas bibliotecas tanto para el desarrollo de la parte core como para la interfaz gráfica. A continuación, se presentan las principales bibliotecas utilizadas agrupadas por su propósito:
+Elegir las bibliotecas correctas me llevó bastante tiempo de investigación. Al principio pensé que sería cuestión de buscar lo más popular, pero me encontré con que muchas de las tecnologías que parecían perfectas en papel luego no funcionaban bien con los requisitos de tiempo real o directamente no compilaban para ARM. Fue uno de esos casos donde la teoría y la práctica no coinciden para nada.
+
+El proyecto utiliza una mezcla de bibliotecas para diferentes propósitos. Algunas las elegí desde el principio, otras las fui incorporando conforme surgían necesidades específicas que no había previsto. A continuación las organizo por su función principal:
 
 \subsection{Procesamiento de Señales EEG}
 \begin{itemize}
