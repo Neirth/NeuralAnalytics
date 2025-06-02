@@ -1,44 +1,47 @@
 \chapter{Validación del Prototipo}\label{ch:prototype_testing}
 
-Este capítulo documenta el proceso de validación del prototipo Neural Analytics de acuerdo con la normativa aplicable para software de dispositivos médicos. Se detallan las estrategias de prueba implementadas, los resultados obtenidos y su adecuación a los estándares requeridos.
+Después de meses desarrollando Neural Analytics, llegó el momento que más me daba miedo y a la vez más me emocionaba: probar si todo lo que había construido realmente funcionaba. No me refiero solo a que arrancara sin errores, sino a validar que cumplía con todos los estándares médicos que requiere un dispositivo como este.
+
+Este capítulo documenta todo el proceso de validación que seguí, desde las pruebas más básicas hasta las más complejas, siguiendo la normativa para software de dispositivos médicos. Honestamente, no tenía ni idea de lo riguroso que iba a ser este proceso hasta que me metí de lleno en ello—me llevó bastante tiempo entender que la validación de software médico tiene sus propias reglas del juego.
 
 \section{Marco Normativo de Validación}
 
 \subsection{Normativa Aplicable}
 
-La validación del software Neural Analytics se ha realizado siguiendo las directrices establecidas en la norma UNE-EN 62304:2007/A1:2016, "Software de dispositivos médicos - Procesos del ciclo de vida del software". Esta norma establece los requisitos para los procesos del ciclo de vida del desarrollo y mantenimiento del software en dispositivos médicos, y es armonizada con la Directiva Europea de Productos Sanitarios 93/42/CEE.
+Para validar Neural Analytics tuve que seguir las directrices de la norma de \cite{UNE-EN-62304} UNE-EN 62304:2007, "Software de dispositivos médicos - Procesos del ciclo de vida del software". Al principio pensé que sería una formalidad, pero me di cuenta rápidamente de que esta norma establece requisitos muy específicos para todo el proceso de desarrollo y mantenimiento del software en dispositivos médicos—bastante más rigurosos de lo que esperaba.
 
 \subsection{Clasificación del Software}
 
-De acuerdo con la sección 4.3 de la norma UNE-EN 62304, el software Neural Analytics ha sido clasificado como dispositivo de \textbf{Clase A}, dado que:
+Según la sección 4.3 de la norma UNE-EN 62304, tuve que clasificar el software Neural Analytics como dispositivo de \textbf{Clase A}, porque:
 
 \begin{itemize}
-    \item No puede contribuir directamente a situaciones peligrosas, ya que funciona únicamente como herramienta de monitorización sin capacidad de efectuar acciones directas sobre el paciente.
+    \item No puede contribuir directamente a situaciones peligrosas, ya que funciona únicamente como herramienta de monitorización sin capacidad de hacer acciones directas sobre el paciente.
     \item Su uso está destinado a aplicaciones no críticas de interfaz cerebro-computadora.
     \item El sistema incluye restricciones de uso explícitas que previenen su aplicación en escenarios clínicos críticos.
 \end{itemize}
 
-Esta clasificación determina el nivel de rigor aplicado a las pruebas y documentación del software, según lo estipulado en la norma.
+Esta clasificación determinó exactamente el nivel de rigor que tenía que aplicar a las pruebas y documentación del software. Me alivió bastante descubrir que no necesitaba seguir los procesos de Clase B o C, que son mucho más exigentes.
 
 \section{Estrategia de Pruebas}
 
-Siguiendo los requisitos de la norma UNE-EN 62304 para software de Clase A, se ha implementado una estrategia de pruebas estructurada en tres niveles:
+Siguiendo los requisitos de la norma UNE-EN 62304 para software de Clase A, tuve que implementar una estrategia de pruebas estructurada en tres niveles:
 
 \begin{itemize}
-    \item \textbf{Pruebas unitarias}: Verificación de componentes individuales del software
-    \item \textbf{Pruebas de integración}: Verificación de la interacción entre componentes
-    \item \textbf{Pruebas del sistema}: Verificación del funcionamiento global del sistema
+    \item \textbf{Pruebas unitarias}: Verificar que cada componente individual del software funcionara correctamente
+    \item \textbf{Pruebas de integración}: Verificar que los componentes trabajaran bien juntos
+    \item \textbf{Pruebas del sistema}: Verificar que todo el sistema funcionara correctamente en conjunto
 \end{itemize}
 
-Como parte del alcance definido para este proyecto, se ha focalizado la estrategia de pruebas en los dos componentes principales: \texttt{neural\_analytics\_core} y \texttt{neural\_analytics\_gui}, al ser estos los módulos que constituyen el producto final destinado al usuario.
+Como parte del alcance que definí para este proyecto, decidí focalizar la estrategia de pruebas en los dos componentes principales: \texttt{neural\_analytics\_core} y \texttt{neural\_analytics\_gui}, ya que estos son los módulos que constituyen el producto final que usa el usuario. Al final resultó ser una decisión acertada porque estos dos módulos capturan la mayor parte de la funcionalidad crítica del sistema.
 
 \subsection{Herramientas y Entorno de Pruebas}
 
-Para la ejecución de las pruebas se ha utilizado el siguiente entorno:
+Para ejecutar las pruebas utilicé el siguiente entorno:
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{|l|l|}
+    \small
+    \begin{tabular}{|p{4cm}|p{8cm}|}
         \hline
         \textbf{Elemento} & \textbf{Descripción} \\
         \hline
@@ -52,9 +55,9 @@ Para la ejecución de las pruebas se ha utilizado el siguiente entorno:
         \hline
         Framework de pruebas unitarias & Rust Test Framework \\
         \hline
-        Herramientas de cobertura & grcov, cargo-llvm-cov \\
+        Herramientas de cobertura & cargo-llvm-cov \\
         \hline
-        Herramientas de monitorización & Raspberry Pi Diagnostics, htop \\
+        Herramientas de monitorización & htop \\
         \hline
     \end{tabular}
     \caption{Entorno de pruebas para Neural Analytics}
@@ -65,7 +68,7 @@ Para la ejecución de las pruebas se ha utilizado el siguiente entorno:
 
 \subsection{Estrategia de Pruebas Unitarias}
 
-Las pruebas unitarias se han diseñado para verificar el correcto funcionamiento de los componentes individuales del software, con especial énfasis en:
+Las pruebas unitarias las diseñé para verificar el correcto funcionamiento de los componentes individuales del software, con especial énfasis en:
 
 \begin{itemize}
     \item Funcionamiento correcto de módulos aislados
@@ -74,16 +77,30 @@ Las pruebas unitarias se han diseñado para verificar el correcto funcionamiento
     \item Consistencia en la interfaz de los componentes
 \end{itemize}
 
-De acuerdo con la sección 5.5.3 de la norma UNE-EN 62304, para cada prueba unitaria se han definido criterios de aceptación explícitos antes de su ejecución.
+De acuerdo con la sección 5.5.3 de la norma UNE-EN 62304, para cada prueba unitaria definí criterios de aceptación explícitos antes de su ejecución—algo que al principio me pareció excesivo pero que después me ahorró muchísimo tiempo cuando las pruebas fallaban.
+
+\subsubsection{Enfoque para Arquitectura Hexagonal}
+
+La arquitectura hexagonal adoptada en el sistema Neural Analytics me requirió un enfoque bastante específico para las pruebas unitarias. Implementé las siguientes estrategias:
+
+\begin{itemize}
+    \item \textbf{Aislamiento de componentes}: Los tests se ejecutan sobre componentes aislados mediante la inyección de dependencias simuladas (mocks) para puertos y adaptadores.
+    
+    \item \textbf{Doble Testing}: Para cada puerto desarrollé tests tanto para la interfaz como para sus implementaciones concretas (adaptadores). 
+    
+    \item \textbf{Pruebas de casos de uso puros}: Los casos de uso los probé independientemente de sus adaptadores de entrada/salida, verificando únicamente el comportamiento esperado según la lógica de negocio.
+\end{itemize}
 
 \newpage
 \subsection{Pruebas Unitarias del Core (\texttt{neural\_analytics\_core})}
 
-El módulo core del sistema, responsable de la lógica central de procesamiento y gestión de eventos, ha sido sometido a pruebas unitarias exhaustivas:
+El módulo core del sistema, responsable de la lógica central de procesamiento y gestión de eventos, lo sometí a pruebas unitarias exhaustivas:
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{|p{2.5cm}|p{5cm}|p{3cm}|p{2cm}|}
+    \small
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|p{3cm}|p{6cm}|p{4cm}|p{2cm}|}
         \hline
         \textbf{Módulo} & \textbf{Aspectos probados} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
         \hline
@@ -98,76 +115,145 @@ El módulo core del sistema, responsable de la lógica central de procesamiento 
         Comunicación entre componentes & Bus de eventos, suscripciones, publicaciones & Entrega confiable de eventos & PASA \\
         \hline
     \end{tabular}
+    }
     \caption{Resultados de pruebas unitarias del módulo Core}
     \label{tab:unit_tests_core}
-    
-A continuación, se detallan algunas de las pruebas unitarias implementadas para los componentes clave del \texttt{neural\_analytics\_core}:
-
-\subsubsection{Pruebas del Servicio de Inferencia}
-
-El servicio de inferencia, responsable de la clasificación de patrones cerebrales mediante el modelo ONNX, ha sido probado a través de las siguientes pruebas unitarias:
-
-\begin{itemize}
-    \item \textbf{test\_model\_loading}: Verifica que el modelo ONNX se carga correctamente desde diferentes rutas de archivo, incluyendo casos de archivos inexistentes.
-    
-    \item \textbf{test\_prediction\_with\_valid\_data}: Comprueba que el servicio realiza predicciones coherentes cuando recibe datos EEG válidos, comparando las salidas contra valores de referencia conocidos.
-    
-    \item \textbf{test\_prediction\_with\_invalid\_data}: Verifica el comportamiento del servicio ante datos mal formateados o fuera de rango, asegurando que maneja adecuadamente los errores.
-    
-    \item \textbf{test\_prediction\_performance}: Mide el tiempo de inferencia para garantizar que las predicciones se realizan dentro del umbral aceptable (< 100ms por predicción).
-\end{itemize}
-
-\subsubsection{Pruebas de los Adaptadores de Entrada}
-
-Los adaptadores responsables de la comunicación con el dispositivo BrainBit han sido probados mediante:
-
-\begin{itemize}
-    \item \textbf{test\_headset\_connection}: Verifica el ciclo completo de conexión con el dispositivo BrainBit, comprobando la detección de dispositivos y establecimiento de conexión.
-    
-    \item \textbf{test\_headset\_data\_capture}: Asegura que los datos EEG se capturan correctamente de todos los canales disponibles (T3, T4, O1, O2) con las frecuencias de muestreo esperadas.
-    
-    \item \textbf{test\_impedance\_check}: Comprueba el funcionamiento del mecanismo de verificación de impedancias para todos los electrodos, validando que los valores están dentro de los rangos aceptables.
-    
-    \item \textbf{test\_disconnection\_handling}: Verifica la gestión adecuada de desconexiones imprevistas, asegurando la liberación de recursos y la posibilidad de reconexión.
-\end{itemize}
-
-\subsubsection{Pruebas de la Máquina de Estados}
-
-La máquina de estados, componente central que gestiona las transiciones entre los diferentes modos de operación, ha sido probada mediante:
-
-\begin{itemize}
-    \item \textbf{test\_initial\_state}: Verifica que la máquina de estados se inicializa en el estado correcto.
-    
-    \item \textbf{test\_state\_transitions}: Comprueba todas las transiciones válidas entre estados, asegurando que ocurren correctamente en respuesta a los eventos apropiados.
-    
-    \item \textbf{test\_invalid\_transitions}: Verifica que las transiciones no permitidas son rechazadas adecuadamente, manteniendo la consistencia del sistema.
-    
-    \item \textbf{test\_event\_handling}: Asegura que los eventos generados por diferentes componentes son procesados correctamente por la máquina de estados.
-\end{itemize}
 \end{table}
 
-\subsubsection{Prueba destacada: Servicio de Inferencia}
+\subsubsection{Tests para Adaptadores de Hardware Simulado}
 
-Una prueba particularmente relevante fue la verificación del servicio de inferencia, el cual recibe datos EEG preprocesados y debe producir predicciones precisas sobre la intención del usuario. Esta prueba verifica no solo el procesamiento técnico del modelo ONNX, sino también la precisión semántica de sus predicciones, asegurando que el núcleo de la aplicación (la clasificación de ondas cerebrales) funcione correctamente.
+Un componente crítico del sistema son los adaptadores para hardware, como el dispositivo EEG BrainBit y las bombillas inteligentes. Para facilitar las pruebas sin dependencia de hardware físico, implementé adaptadores mock que simulan el comportamiento del hardware real:
 
-Para la prueba se utilizaron datos EEG simulados que representan diferentes patrones cerebrales, verificando que:
 \begin{itemize}
-    \item El servicio cargara correctamente el modelo ONNX
-    \item Los datos de entrada fueran preprocesados adecuadamente
-    \item Las predicciones coincidieran con las categorías esperadas
-    \item El nivel de confianza de las predicciones superara el umbral establecido (70\%)
+    \item \textbf{MockHeadsetAdapter}: Simula el comportamiento del dispositivo BrainBit, generando datos EEG sintéticos y simulando operaciones como conexión/desconexión y cambios de modo.
+    
+    \item \textbf{MockSmartBulbAdapter}: Simula el comportamiento de las bombillas inteligentes, permitiendo probar los casos de uso de control domótico sin necesidad de dispositivos físicos.
 \end{itemize}
 
-\newpage
-\subsection{Pruebas Unitarias de la Interfaz (\texttt{neural\_analytics\_gui})}
+Implementar estos mocks me llevó bastante trabajo inicial, pero al final me ahorraron muchísimo tiempo porque pude probar toda la lógica sin tener que conectar y desconectar constantemente el hardware real.
 
-Las pruebas unitarias para el componente de interfaz gráfica se centraron en:
+\newpage
+\subsubsection{Pruebas Unitarias de Casos de Uso}
+
+Siguiendo el principio de que cada componente debe ser verificable de forma independiente, apliqué un enfoque estricto donde cada caso de uso en el sistema tiene su correspondiente test unitario implementado dentro del propio archivo del caso de uso mediante el atributo \texttt{\#[cfg(test)]}. Esta práctica de co-ubicación de pruebas con código facilita el mantenimiento y asegura que las pruebas evolucionan junto con la implementación—algo que me di cuenta que era fundamental después de varias experiencias con tests que se quedaban desactualizados. Esta organización me garantiza la verificabilidad directa de cada componente funcional, cumpliendo con la sección 5.1.2 de la norma UNE-EN 62304 que establece que el software debe ser verificable:
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{|p{2.5cm}|p{5cm}|p{3cm}|p{2cm}|}
+    \small
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|p{7cm}|p{7cm}|}
         \hline
-        \textbf{Componente} & \textbf{Aspectos probados} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
+        \textbf{Caso de Uso} & \textbf{Aspectos verificados} \\
+        \hline
+        \texttt{predict\_color\_thinking\_use\_case.rs} & Procesamiento de señales EEG, generación de predicciones precisas con datos sintéticos \\
+        \hline
+        \texttt{search\_headband\_use\_case.rs} & Secuencia de búsqueda, protocolo de conexión, manejo de errores de detección \\
+        \hline
+        \texttt{update\_status\_use\_case.rs} & Transiciones de estado basadas en eventos, validación de precondiciones \\
+        \hline
+        \texttt{disconnect\_headband\_use\_case.rs} & Secuencia de desconexión, liberación correcta de recursos \\
+        \hline
+        \texttt{extract\_calibration\_use\_case.rs} & Verificación de impedancia, validación de señales, cambio de modo de trabajo \\
+        \hline
+        \texttt{extract\_extraction\_use\_case.rs} & Adquisición de datos EEG, validación de formato y estructura, detección de dispositivo no conectado \\
+        \hline
+    \end{tabular}
+    }
+    \caption{Correspondencia entre casos de uso y tests unitarios}
+    \label{tab:use_case_tests}
+\end{table}
+
+Con esta metodología me aseguré de que cualquier cambio que hiciera en un caso de uso tuviera que pasar primero por su test correspondiente, lo que me daba bastante tranquilidad sobre la estabilidad del sistema. Para cada test utilicé adaptadores simulados (mocks) que me permitían centrarme únicamente en la lógica de negocio sin depender de componentes externos que podrían complicar las pruebas.
+
+\newpage
+\subsection{Cobertura de Código}
+
+Una de las cosas que más me obsesionaba durante el desarrollo era saber si realmente estaba probando todo el código que había escrito. Para esto implementé un análisis de cobertura usando cargo-llvm-cov, que me daba métricas bastante detalladas sobre qué partes del código se ejecutaban durante las pruebas y cuáles no.
+
+Los resultados fueron reveladores—aunque algunos componentes tenían una cobertura excelente, otros claramente necesitaban más atención. Me di cuenta de que era más difícil de lo que pensaba conseguir una cobertura alta y consistente en todos los módulos.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|l|c|c|c|c|c|}
+        \hline
+        \textbf{Componente} & \textbf{Líneas Total} & \textbf{Líneas Cubiertas} & \textbf{\% Líneas} & \textbf{\% Funciones} & \textbf{\% Regiones} \\
+        \hline
+        model\_inference\_service.rs & 411 & 298 & 72.51\% & 75.00\% & 54.86\% \\
+        \hline
+        disconnect\_headband\_use\_case.rs & 212 & 211 & 99.53\% & 95.00\% & 97.50\% \\
+        \hline
+        extract\_extraction\_use\_case.rs & 252 & 248 & 98.41\% & 94.44\% & 88.89\% \\
+        \hline
+        extract\_calibration\_use\_case.rs & 252 & 250 & 99.21\% & 94.44\% & 91.67\% \\
+        \hline
+        predict\_color\_thinking\_use\_case.rs & 160 & 159 & 99.38\% & 93.75\% & 92.00\% \\
+        \hline
+        search\_headband\_use\_case.rs & 198 & 197 & 99.49\% & 95.00\% & 97.50\% \\
+        \hline
+        update\_light\_status\_use\_case.rs & 209 & 208 & 99.52\% & 95.00\% & 97.37\% \\
+        \hline
+        state\_machine/state\_machine.rs & 780 & 715 & 91.67\% & 90.91\% & 75.81\% \\
+        \hline
+        \textbf{TOTAL} & \textbf{2970} & \textbf{2417} & \textbf{81.38\%} & \textbf{78.88\%} & \textbf{57.00\%} \\
+        \hline
+    \end{tabular}
+    }
+    \caption{Métricas de cobertura de código por componente}
+    \label{tab:code_coverage_metrics}
+\end{table}
+
+Los resultados me mostraron cosas muy interesantes. Los casos de uso principales, que son realmente el corazón del sistema, tenían una cobertura excelente (98-99% de líneas), lo que me tranquilizó mucho porque significaba que estaba probando tanto el flujo normal como todos los casos de error que se me habían ocurrido. La máquina de estados, que es súper crítica porque coordina todo el flujo de trabajo, tuvo una cobertura bastante satisfactoria (91.67%), aunque me costó más trabajo conseguir probar todas las transiciones posibles.
+
+El servicio de inferencia fue donde me di cuenta de que las cosas se complicaban—solo conseguí un 72.51% de cobertura porque es increíblemente difícil simular todas las posibles situaciones que pueden pasar al procesar señales EEG reales y trabajar con modelos de machine learning. Ahí me di cuenta de que no todo se puede probar de manera automatizada.
+
+La cobertura total del 81.38% me parecía bastante decente, y además se alineaba bien con los principios de la norma UNE-EN 62304 para software médico de Clase A, que básicamente dice que el nivel de pruebas tiene que ser proporcional al riesgo del software.
+
+\subsubsection{Por qué elegí un 80\% de cobertura}
+
+Decidir el objetivo de cobertura me llevó bastante reflexión, pero al final me decanté por un 80\% basándome en varios criterios que tenían sentido tanto desde el punto de vista técnico como normativo:
+
+\begin{enumerate}
+    \item \textbf{Enfoque basado en riesgos}: Siguiendo la sección 4.3 de la norma UNE-EN 62304, me centré en conseguir una cobertura casi perfecta (cercana al 100\%) para los componentes del dominio que implementan la lógica crítica, mientras que fui más relajado con los componentes de infraestructura que no afectan directamente al funcionamiento principal.
+    
+    \item \textbf{Limitaciones reales del testing automatizado}: Me di cuenta de que hay cosas que simplemente no se pueden probar de manera automática—especialmente todo lo relacionado con hardware real (el dispositivo EEG y las bombillas inteligentes) o el rendimiento de los modelos de machine learning. Intentarlo habría sido una pérdida de tiempo enorme.
+    
+    \item \textbf{Las pruebas manuales también cuentan}: La cobertura automatizada la complementé con un montón de pruebas manuales que cubrían específicamente esas cosas que no podía automatizar.
+\end{enumerate}
+
+\subsubsection{Las pruebas manuales que me salvaron la vida}
+
+Para compensar todo lo que no podía probar automáticamente, implementé un proceso bastante riguroso de pruebas manuales con hardware real. Estas pruebas fueron fundamentales porque me permitieron verificar cosas que ningún test automatizado podría cubrir:
+
+\begin{itemize}
+    \item \textbf{Validación con señales EEG reales}: Probar el sistema con señales cerebrales reales en diferentes condiciones—cuando estaba cansado, concentrado, distraído, etc. Esto era imposible de simular completamente en tests automatizados.
+    
+    \item \textbf{Medición de latencia end-to-end}: Cronometrar exactamente cuánto tardaba desde que pensaba en un color hasta que se encendía la bombilla correspondiente. Estas mediciones solo tenían sentido con hardware real.
+    
+    \item \textbf{Pruebas de robustez a largo plazo}: Usar el sistema durante sesiones de más de 30 minutos para ver cómo se comportaba con la fatiga del usuario, la deriva de la señal y otros efectos que solo aparecen con el tiempo.
+    
+    \item \textbf{Evaluación de usabilidad}: Probar si la interfaz realmente era intuitiva y fácil de usar—algo que los números de cobertura jamás me iban a decir.
+\end{itemize}
+
+Estas pruebas manuales confirmaron que el sistema funcionaba correctamente en condiciones reales, especialmente en todos esos aspectos que las métricas de cobertura no podían reflejar. Al combinar los resultados satisfactorios de estas pruebas con la cobertura automatizada del 81.38\%, conseguí un nivel de confianza bastante alto en la calidad del sistema, cumpliendo con los requisitos de la norma UNE-EN 62304.
+
+La distribución de cobertura varió bastante según el tipo de componente, lo que al final tenía mucho sentido: mantuve niveles altos (98%) en la capa de dominio donde está toda la lógica crítica, mientras que los servicios llegaron a aproximadamente un 59%, los puertos un 54%, los adaptadores un 47% y otros componentes auxiliares un 29%. Esta distribución me parecía consistente con la estrategia de gestión de riesgos que había adoptado—priorizar la verificación exhaustiva de los componentes más críticos.
+
+Al final, esta distribución confirmaba que tenía mayor cobertura en los componentes realmente críticos del sistema (dominio y puertos), mientras que era relativamente menor en componentes de infraestructura y utilidades, que era exactamente lo que buscaba.
+
+\newpage
+\subsection{Validación Manual de la Interfaz (\texttt{neural\_analytics\_gui})}
+
+Para la interfaz gráfica decidí no desarrollar pruebas unitarias automatizadas, principalmente porque sus componentes son presentacionales y no contienen lógica de negocio crítica que necesite verificación programática. Además, me di cuenta de que probar interfaces gráficas automáticamente puede ser más complicado que beneficioso—después de intentarlo un par de veces abandoné la idea porque era demasiado frágil. En su lugar, opté por un enfoque de validación manual que me permitía verificar el correcto funcionamiento de manera más natural:
+
+\begin{table}[ht]
+    \centering
+    \small
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|p{3cm}|p{6cm}|p{4cm}|p{2cm}|}
+        \hline
+        \textbf{Componente} & \textbf{Aspectos validados} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
         \hline
         Vista principal & Renderizado de elementos, navegación entre secciones & Visualización correcta y respuesta a interacciones & PASA \\
         \hline
@@ -180,55 +266,41 @@ Las pruebas unitarias para el componente de interfaz gráfica se centraron en:
         Indicadores de estado & Visualización del estado del sistema y predicciones & Correspondencia con estados internos & PASA \\
         \hline
     \end{tabular}
-    \caption{Resultados de pruebas unitarias del módulo GUI}
-    \label{tab:unit_tests_gui}
+    }
+    \caption{Resultados de la validación manual del módulo GUI}
+    \label{tab:manual_tests_gui}
 \end{table}
 
 \newpage
-\subsubsection{Cobertura de Código}
-
-Se ha utilizado \texttt{cargo-llvm-cov} para medir la cobertura de código de las pruebas unitarias:
-
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{|l|c|}
-        \hline
-        \textbf{Módulo} & \textbf{Cobertura de código} \\
-        \hline
-        neural\_analytics\_core & 87.3\% \\
-        \hline
-        neural\_analytics\_gui & 82.1\% \\
-        \hline
-    \end{tabular}
-    \caption{Cobertura de pruebas unitarias}
-    \label{tab:code_coverage}
-\end{table}
-
 
 \section{Pruebas de Integración}
 
-\subsection{Enfoque de Pruebas de Integración}
+\subsection{Mi enfoque para las pruebas de integración}
 
-Las pruebas de integración se han enfocado en verificar la correcta interacción entre los distintos componentes del sistema, siguiendo la sección 5.6 de la norma UNE-EN 62304. Se han realizado pruebas en dos niveles:
+Después de tener todas las pruebas unitarias funcionando, el siguiente paso que me daba más nervios era verificar que todos los componentes trabajaran bien juntos. Para las pruebas de integración seguí las recomendaciones de la sección 5.6 de la norma UNE-EN 62304, aunque adaptándolas a mi entorno de desarrollo.
+
+Me centré principalmente en dos niveles de integración:
 
 \begin{enumerate}
-    \item \textbf{Integración intra-módulo}: Verificando la correcta interacción entre componentes del mismo módulo
-    \item \textbf{Integración inter-módulo}: Verificando la interacción entre el módulo core y la interfaz gráfica
+    \item \textbf{Integración intra-módulo}: Verificar que los componentes dentro del mismo módulo se comunicaran correctamente
+    \item \textbf{Integración inter-módulo}: Probar que el módulo core y la interfaz gráfica funcionaran bien juntos
 \end{enumerate}
 
-\subsection{Resultados de Pruebas de Integración}
+Al principio pensé que iba a ser más sencillo que las pruebas unitarias, pero me di cuenta rápidamente de que encontrar problemas de integración puede ser mucho más difícil porque los errores aparecen en las fronteras entre componentes.
 
-Las pruebas de integración realizadas han arrojado los siguientes resultados:
+\subsection{Qué descubrí con las pruebas de integración}
+
+Los resultados fueron bastante satisfactorios, aunque tuve que resolver algunos problemas interesantes durante el proceso:
 
 \begin{table}[ht]
     \centering
+    \small
+    \resizebox{\textwidth}{!}{
     \begin{tabular}{|p{4cm}|p{7cm}|p{2cm}|}
         \hline
         \textbf{Escenario de integración} & \textbf{Descripción} & \textbf{Resultado} \\
         \hline
         Core $\leftrightarrow$ Adaptador EEG & Flujo de datos desde el dispositivo EEG al procesador del Core & PASA \\
-        \hline
-        Core $\leftrightarrow$ Controlador de dispositivos & Activación de bombillas inteligentes tras la detección de intenciones & PASA \\
         \hline
         Core $\leftrightarrow$ Interfaz & Visualización de estados del sistema y datos en tiempo real & PASA \\
         \hline
@@ -237,159 +309,183 @@ Las pruebas de integración realizadas han arrojado los siguientes resultados:
         Módulo de configuración $\leftrightarrow$ Componentes del sistema & Aplicación efectiva de configuraciones de usuario & PASA \\
         \hline
     \end{tabular}
+    }
     \caption{Resultados de pruebas de integración}
     \label{tab:integration_tests}
 \end{table}
 
-\subsubsection{Prueba de Integración Destacada: Flujo Completo de Procesamiento}
+\subsubsection{La prueba que más me gustó: Flujo completo de procesamiento EEG}
 
-Una de las pruebas de integración más significativas verificó el flujo completo de procesamiento del sistema. Esta prueba evalúa la cadena completa de procesamiento desde la entrada de datos hasta la actuación de los dispositivos.
+Una de las pruebas de integración que más trabajo me costó diseñar, pero que al final me dio más satisfacción, fue verificar todo el flujo de procesamiento de datos EEG desde el principio hasta el final. Esta prueba me permitía evaluar toda la cadena de procesamiento desde que llegan los datos hasta que se genera una predicción.
 
-El procedimiento seguido fue:
+Lo que hice fue:
 \begin{enumerate}
-    \item Configurar el sistema completo con adaptadores simulados
-    \item Inyectar datos EEG que representan el patrón cerebral asociado al color "verde"
-    \item Ejecutar un ciclo completo de procesamiento
-    \item Verificar que el estado de la bombilla inteligente cambia al color verde
-    \item Comprobar que la interfaz de usuario se actualiza mostrando la predicción correcta
-    \item Confirmar que el nivel de confianza supera el umbral mínimo establecido (75\%)
+    \item Configurar el sistema con adaptadores simulados para el dispositivo EEG (para no depender del hardware físico)
+    \item Inyectar datos EEG que sabía que representaban patrones cerebrales específicos
+    \item Ejecutar todo el ciclo de procesamiento de principio a fin
+    \item Verificar que el modelo de inferencia generaba predicciones que tenían sentido con los datos que había metido
+    \item Comprobar que la interfaz se actualizaba mostrando la predicción correcta
+    \item Confirmar que el nivel de confianza superaba el umbral mínimo que había establecido (75\%)
 \end{enumerate}
 
-Esta prueba verifica la integración end-to-end del sistema, desde la recepción de datos EEG hasta la activación de dispositivos y actualización de la interfaz, confirmando que todos los componentes trabajan juntos correctamente.
-
-\section{Pruebas del Sistema}
-
-Las pruebas del sistema se han diseñado para evaluar el comportamiento del sistema completo en condiciones reales y similares a las de uso final, conforme a la sección 5.7 de la norma UNE-EN 62304.
+Esta prueba me daba mucha confianza porque verificaba la integración de todo el sistema—desde que llegan los datos EEG hasta que se procesan y se visualizan. Era como una prueba de que todos los componentes principales trabajaban en armonía, que era exactamente lo que necesitaba confirmar.
 
 \newpage
-\subsection{Casos de Prueba del Sistema}
+\section{Pruebas del Sistema}
 
-Se han diseñado y ejecutado los siguientes casos de prueba del sistema:
+Llegué a las pruebas del sistema con una mezcla de emoción y nerviosismo—finalmente iba a probar todo el sistema completo en condiciones que se parecían lo más posible al uso real. Diseñé estas pruebas siguiendo la sección 5.7 de la norma UNE-EN 62304, pero adaptándolas a las capacidades reales de mi prototipo.
 
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{|p{1cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|p{1.5cm}|}
-        \hline
-        \textbf{ID} & \textbf{Descripción} & \textbf{Procedimiento} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
-        \hline
-        SYS-01 & Inicialización del sistema & Iniciar la aplicación y verificar la carga de todos los módulos & Sistema operativo en <10s sin errores & PASA \\
-        \hline
-        SYS-02 & Conexión con dispositivo EEG & Encender el dispositivo BrainBit y conectarlo con la aplicación & Conexión establecida y datos fluyendo & PASA \\
-        \hline
-        SYS-03 & Calibración del dispositivo & Seguir el procedimiento de calibración & Impedancias aceptables en todos los canales & PASA \\
-        \hline
-        SYS-04 & Detección de pensamiento "rojo" & Usuario piensa en color rojo durante 10 segundos & Sistema identifica correctamente la intención & PASA \\
-        \hline
-        SYS-05 & Detección de pensamiento "verde" & Usuario piensa en color verde durante 10 segundos & Sistema identifica correctamente la intención & PASA \\
-        \hline
-        SYS-06 & Activación de dispositivo por pensamiento & Usuario piensa en color específico y se verifica actuación & Bombilla cambia al color detectado en <1s & PASA \\
-        \hline
-        SYS-07 & Operación continua & Sistema funciona por >30 minutos continuos & Sin degradación de rendimiento ni fugas de memoria & PASA \\
-        \hline
-        SYS-08 & Recuperación ante errores & Simular desconexión del dispositivo EEG durante operación & Sistema detecta error y permite reconexión & PASA \\
-        \hline
-    \end{tabular}
-    \caption{Casos de prueba del sistema}
-    \label{tab:system_tests}
-\end{table}
+\subsection{Los casos de prueba que diseñé}
+
+Desarrollé varios casos de prueba del sistema que cubrían desde los escenarios más básicos hasta situaciones más complejas que podrían ocurrir en el mundo real:
 
 
+\begin{center}
+\small
+\begin{longtable}{|p{1cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|p{1.5cm}|}
+    \caption{Casos de prueba del sistema}\label{tab:system_tests} \\
+    \hline
+    \textbf{ID} & \textbf{Descripción} & \textbf{Procedimiento} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{ID} & \textbf{Descripción} & \textbf{Procedimiento} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
+    \hline
+    \endhead
+    SYS-01 & Inicialización del sistema & Iniciar la aplicación y verificar la carga de todos los módulos & Sistema operativo en <10s sin errores & PASA \\
+    \hline
+    SYS-02 & Conexión con dispositivo EEG & Encender el dispositivo BrainBit y conectarlo con la aplicación & Conexión establecida y datos fluyendo & PASA \\
+    \hline
+    SYS-03 & Calibración del dispositivo & Seguir el procedimiento de calibración & Impedancias aceptables en todos los canales & PASA \\
+    \hline
+    SYS-04 & Detección de pensamiento "rojo" & Usuario piensa en color rojo durante 10 segundos & Sistema identifica correctamente la intención & PASA \\
+    \hline
+    SYS-05 & Detección de pensamiento "verde" & Usuario piensa en color verde durante 10 segundos & Sistema identifica correctamente la intención & PASA \\
+    \hline
+    SYS-06 & Activación de dispositivo por pensamiento & Usuario piensa en color específico y se verifica actuación & Bombilla cambia al color detectado en <1s & PASA \\
+    \hline
+    SYS-07 & Operación continua & Sistema funciona por >30 minutos continuos & Sin degradación de rendimiento ni fugas de memoria & PASA \\
+    \hline
+    SYS-08 & Recuperación ante errores & Simular desconexión del dispositivo EEG durante operación & Sistema detecta error y permite reconexión & PASA \\
+    \hline
+\end{longtable}
+\end{center}
 
+
+\newpage
 \section{Pruebas de Seguridad}
 
-Aunque para software de Clase A la norma no exige pruebas de seguridad exhaustivas, se han realizado verificaciones básicas para garantizar que el sistema no compromete la privacidad del usuario ni genera riesgos inaceptables.
+Aunque para software de Clase A la norma no exige pruebas de seguridad súper exhaustivas, decidí hacer algunas verificaciones básicas porque quería asegurarme de que el sistema no comprometiera la seguridad del usuario ni generara riesgos innecesarios. Al fin y al cabo, estamos hablando de un dispositivo que lee señales cerebrales, y eso siempre requiere un poco de cuidado extra.
 
-\subsection{Gestión de Datos del Usuario}
+\subsection{Cómo gestiono los datos del usuario}
 
-Se ha verificado que:
+Una de las cosas que más preocupan normalmente en esta clase de proyecto es el tema de la privacidad de los datos. Me aseguré de que:
 
 \begin{itemize}
-    \item Los datos EEG capturados se procesan localmente sin transmisión externa
-    \item Los archivos de datos guardados se almacenan en formato anonimizado
-    \item El sistema no recopila información personal identificable
+    \item Todos los datos EEG que captura el sistema se procesan localmente, sin enviar nada a servidores externos—esto me daba muchísima tranquilidad porque evitaba toda la complejidad legal y ética del manejo de datos médicos en la nube.
+    \item Los archivos de entrenamiento que se guardan están en formato anonimizado, sin manera de identificar a la persona.
+    \item El sistema no recopila ningún tipo de información personal identificable más allá de las señales EEG.
 \end{itemize}
 
-\subsection{Seguridad Eléctrica}
+\subsection{Seguridad eléctrica}
 
-El dispositivo BrainBit EEG utilizado en el sistema Neural Analytics cumple con los estándares FC y CE, garantizando su seguridad eléctrica y compatibilidad electromagnética. Dado que no se ha implementado hardware personalizado como parte de este proyecto, no se han requerido pruebas adicionales de seguridad eléctrica. No obstante, se ha verificado:
+Para la seguridad eléctrica tuve suerte de usar el dispositivo BrainBit EEG, que ya cumple con los estándares FC y CE, así que tenía garantizada su seguridad eléctrica y compatibilidad electromagnética. Como no implementé hardware personalizado, no necesité hacer pruebas adicionales, pero sí verifiqué algunas cosas básicas que me parecían importantes:
 
 \begin{itemize}
-    \item Ausencia de interacciones eléctricas peligrosas entre el dispositivo EEG y el sistema
-    \item Comportamiento seguro durante la carga del dispositivo EEG
-    \item Ausencia de sobrecalentamiento en operación prolongada
+    \item Que no hubiera interacciones eléctricas raras entre el dispositivo EEG y mi sistema
+    \item Que el comportamiento fuera seguro mientras se carga el dispositivo
+    \item Que no se sobrecalentara durante operaciones prolongadas (esto lo probé en las sesiones largas)
 \end{itemize}
 
 \section{Gestión de Anomalías}
 
-Durante el proceso de pruebas se detectaron e implementaron correcciones para las siguientes anomalías significativas:
+Durante el proceso de pruebas me encontré con varias anomalías que me hicieron entender que desarrollar software nunca es tan lineal como uno espera. Documenté todo cuidadosamente y las fui resolviendo una a una:
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{|c|p{6cm}|c|p{3.5cm}|}
+    \small
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|c|p{6cm}|c|p{4cm}|}
         \hline
-        \textbf{ID} & \textbf{Descripción} & \textbf{Severidad} & \textbf{Resolución} \\
+        \textbf{ID} & \textbf{Descripción} & \textbf{Severidad} & \textbf{Cómo lo resolví} \\
         \hline
-        AN-001 & Pérdida ocasional de datos EEG en sesiones prolongadas & Media & Implementación de buffer circular con retry automático \\
+        AN-001 & Pérdida ocasional de datos EEG en sesiones prolongadas & Media & Implementé un buffer circular con retry automático \\
         \hline
-        AN-002 & Falsos positivos en detección de señales con baja impedancia & Baja & Ajuste de umbral de confianza para clasificación \\
+        AN-002 & Falsos positivos en detección de señales con baja impedancia & Baja & Ajusté el umbral de confianza para clasificación \\
         \hline
-        AN-003 & Latencia excesiva en interfaz gráfica durante visualización de señales & Media & Optimización del renderizado con muestreo adaptativo \\
+        AN-003 & Latencia excesiva en interfaz gráfica durante visualización de señales & Media & Optimicé el renderizado con muestreo adaptativo \\
         \hline
-        AN-004 & Inconsistencia en la persistencia de configuraciones de usuario & Baja & Refactorización de sistema de almacenamiento de configuración \\
+        AN-004 & Inconsistencia en la persistencia de configuraciones de usuario & Baja & Refactoricé todo el sistema de almacenamiento de configuración \\
         \hline
-        AN-005 & Problemas de reconexión con bombillas inteligentes tras pérdida de red & Media & Implementación de protocolo de reconexión resiliente \\
+        AN-005 & Problemas de reconexión con bombillas inteligentes tras pérdida de red & Media & Implementé un protocolo de reconexión más resiliente \\
         \hline
     \end{tabular}
-    \caption{Anomalías detectadas y resueltas}
+    }
+    \caption{Anomalías que encontré y cómo las resolví}
     \label{tab:anomalies}
 \end{table}
 
-De conformidad con la sección 5.8.2 de la norma, todas las anomalías residuales conocidas se han documentado y evaluado, determinando que ninguna representa un riesgo inaceptable para el usuario.
+Siguiendo la sección 5.8.2 de la norma, documenté todas las anomalías que quedaban y las evalué para asegurarme de que ninguna representaba un riesgo inaceptable para el usuario. Al final, todas las que quedaron eran menores y no afectaban la funcionalidad principal.
 
-\newpage
 \section{Matriz de Trazabilidad}
 
-Para garantizar la completitud de las pruebas, se ha desarrollado una matriz de trazabilidad que vincula los requisitos del sistema con los casos de prueba que los verifican:
+Una de las cosas más tediosas pero necesarias fue desarrollar una matriz de trazabilidad que vinculara todos los requisitos del sistema con las pruebas que los verificaban. Esta matriz me ayudaba a asegurarme de que no me había olvidado de probar nada importante:
 
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{|p{2cm}|p{5cm}|p{3cm}|p{3cm}|}
-        \hline
-        \textbf{Requisito} & \textbf{Descripción} & \textbf{Pruebas asociadas} & \textbf{Estado} \\
-        \hline
-        REQ-F01 & Adquisición de señales EEG desde BrainBit & UC-001, TC-001, SYS-02 & VERIFICADO \\
-        \hline
-        REQ-F02 & Clasificación de patrones cerebrales & UC-005, TC-003, SYS-04, SYS-05 & VERIFICADO \\
-        \hline
-        REQ-F03 & Control de dispositivos por pensamiento & UC-007, TC-006, SYS-06 & VERIFICADO \\
-        \hline
-        REQ-F04 & Visualización de estado del sistema & UC-010, TC-008, SYS-01 & VERIFICADO \\
-        \hline
-        REQ-F05 & Calibración del dispositivo EEG & UC-012, TC-010, SYS-03 & VERIFICADO \\
-        \hline
-        REQ-NF01 & Tiempo de respuesta < 3.5s & TC-020, SYS-06 & VERIFICADO \\
-        \hline
-        REQ-NF02 & Precisión de clasificación > 80\% & TC-021, SYS-04, SYS-05 & VERIFICADO \\
-        \hline
-        REQ-NF03 & Operación continua durante > 30min & TC-023, SYS-07 & VERIFICADO \\
-        \hline
-    \end{tabular}
-    \caption{Matriz de trazabilidad de requisitos y pruebas}
-    \label{tab:traceability}
-\end{table}
 
+\begin{center}
+\small
+\begin{longtable}{|p{2.5cm}|p{5.5cm}|p{3.5cm}|p{2.5cm}|}
+    \caption{Matriz de trazabilidad de requisitos y pruebas}\label{tab:traceability} \\
+    \hline
+    \textbf{Requisito} & \textbf{Descripción} & \textbf{Pruebas asociadas} & \textbf{Estado} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{Requisito} & \textbf{Descripción} & \textbf{Pruebas asociadas} & \textbf{Estado} \\
+    \hline
+    \endhead
+    REQ-F01 & Adquisición de señales EEG desde BrainBit & UC-001, TC-001, SYS-02 & VERIFICADO \\
+    \hline
+    REQ-F02 & Clasificación de patrones cerebrales & UC-005, TC-003, SYS-04, SYS-05 & VERIFICADO \\
+    \hline
+    REQ-F03 & Control de dispositivos por pensamiento & UC-007, TC-006, SYS-06 & VERIFICADO \\
+    \hline
+    REQ-F04 & Visualización de estado del sistema & UC-010, TC-008, SYS-01 & VERIFICADO \\
+    \hline
+    REQ-F05 & Calibración del dispositivo EEG & UC-012, TC-010, SYS-03 & VERIFICADO \\
+    \hline
+    REQ-NF01 & Tiempo de respuesta < 3.5s & TC-020, SYS-06 & VERIFICADO \\
+    \hline
+    REQ-NF02 & Precisión de clasificación > 80\% & TC-021, SYS-04, SYS-05 & VERIFICADO \\
+    \hline
+    REQ-NF03 & Operación continua durante > 30min & TC-023, SYS-07 & VERIFICADO \\
+    \hline
+\end{longtable}
+\end{center}
+
+\newpage
 \section{Conclusión de la Validación}
 
-La validación del prototipo Neural Analytics ha seguido rigurosamente las directrices de la norma UNE-EN 62304:2007/A1:2016 para software de dispositivos médicos de Clase A. Se han completado satisfactoriamente los tres niveles de prueba requeridos (unitarias, integración y sistema), verificando el cumplimiento de todos los requisitos especificados.
+Después de meses de desarrollo y semanas intensas de pruebas, puedo decir con seguridad que la validación del prototipo Neural Analytics ha seguido rigurosamente las directrices de la norma UNE-EN 62304:2007 para software de dispositivos médicos de Clase A. Cumplir con esta normativa fue crucial para garantizar que lo que había construido era seguro y efectivo.
 
-Los resultados demuestran:
+Como requiere la sección 5.7 de la norma UNE-EN 62304, establecí una estrategia de verificación para cada requisito del sistema. Completé satisfactoriamente los tres niveles de prueba que eran necesarios—unitarias, integración y sistema—verificando el cumplimiento de todos los requisitos que había especificado mediante la matriz de trazabilidad que presenté anteriormente.
+
+Una de las cosas de las que más orgulloso me siento es del enfoque que apliqué para hacer corresponder casos de uso con pruebas unitarias, como se ve en la tabla \ref{tab:use_case_tests}. Esto me garantizaba que cada funcionalidad crítica del sistema estaba adecuadamente verificada, tal como exige la sección 5.5.5 de la norma.
+
+Esta implementación metódica de las pruebas unitarias cumple con los requisitos de las secciones 5.5.2 y 5.5.3 de la norma, que básicamente me pedían que definiera criterios claros para verificar cada unidad de software y que estableciera procedimientos de prueba que demostraran que todo funcionaba según las especificaciones.
+
+Los resultados que conseguí me demostraron que el sistema funcionaba realmente bien:
 
 \begin{itemize}
-    \item Alta precisión en la detección de intenciones del usuario (86.8\% promedio)
-    \item Tiempos de respuesta dentro de los límites aceptables (3.1s promedio)
-    \item Operación estable y robusta del sistema
+    \item Alta precisión en la detección de intenciones del usuario (86.8\% promedio)—mucho mejor de lo que esperaba al principio
+    \item Tiempos de respuesta dentro de los límites que había establecido (3.1s promedio)
+    \item Operación estable y robusta del sistema, incluso en sesiones largas
 \end{itemize}
 
-Las anomalías detectadas durante el proceso de prueba han sido debidamente documentadas y corregidas, verificando que ninguna de las anomalías residuales conocidas representa un riesgo inaceptable para el usuario.
+Las anomalías que detecté durante el proceso las documenté cuidadosamente y las corregí todas, verificando que ninguna de las que quedaban representaba un riesgo inaceptable para el usuario. Esto cumplía con la sección 5.8 de la norma que exige evaluar defectos y analizar su impacto en la seguridad.
 
-El proceso de pruebas ha aportado evidencia objetiva de que el sistema Neural Analytics cumple con los requisitos especificados y funciona correctamente en el entorno previsto de uso, quedando validado para su implementación como sistema de interfaz cerebro-computadora para el control de dispositivos domóticos mediante ondas cerebrales.
+El hecho de que el software fuera Clase A según la norma me permitió aplicar un nivel proporcionado de rigor en la verificación—me centré en aspectos críticos para la funcionalidad pero reconociendo que el riesgo inherente del sistema era bajo, ya que actúa principalmente como una herramienta de monitorización sin capacidad de efectuar acciones directas sobre el paciente.
+
+También adopté un enfoque sistemático para la gestión de errores y excepciones, tal como requiere la sección 5.5.4 de la norma. Cada test unitario incluía verificaciones específicas para casos de error, como cuando no había conexión con el dispositivo o llegaban datos inválidos.
+
+Al final, el proceso de pruebas me aportó evidencia objetiva de que Neural Analytics cumple con los requisitos especificados en la normativa UNE-EN 62304:2007 y funciona correctamente en el entorno donde está previsto usarlo. Queda validado para su implementación como sistema de interfaz cerebro-computadora para el control de dispositivos domóticos mediante ondas cerebrales, y eso me llena de satisfacción después de todo el trabajo que le dediqué.

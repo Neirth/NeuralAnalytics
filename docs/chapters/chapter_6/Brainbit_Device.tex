@@ -1,46 +1,53 @@
 \chapter{BrainBit Headset}
 
 \section{Introducci\'on}
-En este capítulo se describe la implementación del dispositivo de electroencefalogramas \textbf{BrainBit} \cite{brainbit} en nuestro proyecto, centrándonos específicamente en la detección y análisis de la actividad neuronal del \textbf{lóbulo occipital} para distinguir entre la visualización mental de los colores \textbf{rojo y verde}.
+Elegir el dispositivo EEG adecuado para este proyecto fue más complicado de lo que esperaba inicialmente. Después de revisar varias opciones disponibles, terminé decidiendo por el \textbf{BrainBit} \cite{brainbit} por razones que van más allá de las especificaciones técnicas puras.
+
+Mi proceso de selección se centró en encontrar algo que fuera preciso pero también práctico. No me servía un dispositivo que solo funcionara bien en laboratorio —y créeme que hay muchos así en el mercado— necesitaba algo que pudiera usar en condiciones reales, sin que me fuera excesivamente complicado cada vez que tuviera que configurarlo. Al final, la decisión se redujo a encontrar el mejor balance entre calidad científica y facilidad de uso, algo que francamente no siempre va de la mano en el mundo de las interfaces cerebro-computadora.
 
 \section{Características Técnicas del Dispositivo}
-El BrainBit representa una solución portátil para la electroencefalografía (EEG), destacando por su capacidad de registro mediante \textbf{electrodos secos}. Entre sus especificaciones destacan:
+El BrainBit es básicamente un casco EEG portátil que usa \textbf{electrodos secos}. Esto último me ahorró muchísimos problemas, porque no tener que usar gel conductor hace que todo el proceso sea mucho más simple —especialmente cuando tienes que repetir mediciones varias veces al día y te quieres ahorrar la molestia de preparar los electrodos cada vez.
+
+Las especificaciones que más me importaron fueron:
 
     \begin{itemize}
         \item \textbf{Canales EEG}: 4 canales (T3, T4, O1, O2).
         \item \textbf{Frecuencia de muestreo}: 250 Hz.
         \item \textbf{Interfaz de comunicación}: Bluetooth Low Energy (BLE).
         \item \textbf{Tiempo de uso continuo}: Hasta 12 horas.
-        \item \textbf{Filtro de ruido integrado}: Integra un filtro
-        \item \textbf{Ubicación de electrodos}: Conforme al sistema 10-20, con sensores en \textbf{O1 y O2} para capturar actividad occipital.
+        \item \textbf{Filtro de ruido integrado}: Esto me salvó de tener que implementar mucho procesado adicional.
+        \item \textbf{Ubicación de electrodos}: Sistema 10-20 estándar, con sensores en \textbf{O1 y O2} para actividad occipital.
     \end{itemize}
 
-\section{Relevancia del Lóbulo Occipital en el Procesamiento Visual}
-La corteza occipital constituye el centro neurológico principal para el procesamiento visual. En el Capítulo~\ref{ch:brain_regions}. se profundizó en la correlación entre la visualización mental de colores y la actividad cerebral en esta región, respaldado por investigaciones neurocientíficas relevantes.
-
-\newpage
+La configuración de los electrodos O1 y O2, y los electrodos T3 y T4, fue lo que realmente me convenció del dispositivo. Su posicionamiento sobre la región occipital y temporal encajaba perfectamente con lo que necesitaba para detectar patrones visuales relacionados con colores. No siempre resulta obvio encontrar un dispositivo que tenga exactamente los electrodos que necesitas donde los necesitas —a veces parece que los fabricantes ponen los sensores donde les da la gana.
 
 \section{Metodologías para la Adquisición y Procesamiento}
-La implementación del sistema sigue un protocolo estructurado en tres fases:
+El desarrollo práctico siguió un protocolo en tres fases, aunque admito que en la realidad tuve que improvisar bastante más de lo que había planeado inicialmente.
 
     \subsection{Captación de Señales}
-    La colocación precisa de los electrodos \textbf{O1 y O2} sobre la región occipital permite la adquisición de señales. El SDK proporciona herramientas para la captura en tiempo real, incorporando filtrado para minimizar interferencias musculares (EMG) y ambientales.
+    Colocar correctamente los electrodos \textbf{O1 y O2} sobre la región occipital resultó más crítico de lo que pensaba. En teoría parecía sencillo, pero me costó varias sesiones experimentales hasta encontrar el protocolo que realmente funcionaba bien. Hay algo frustrante en darte cuenta de que algo que parece trivial en los papers resulta ser un arte en la práctica.
+    
+    El SDK que proporciona el fabricante está bien para empezar, pero pronto me di cuenta de que necesitaba algo más personalizado, teniendo en cuenta los requerimientos del proyecto. Las herramientas básicas de captura en tiempo real que incluye simplemente no cubrían todos los requisitos específicos de mi proyecto, pues estos solo eran modelos básicos para inferir, por ejemplo, el nivel de estrés del paciente. Terminé desarrollando una interfaz propia que se integrara mejor con el sistema de procesamiento y clasificación que estaba diseñando —básicamente porque no me quedaba otra opción si quería que funcionara como yo necesitaba.
+    
+    Uno de los problemas que más me preocupó fue garantizar que la conexión de los electrodos fuera estable. Para solucionarlo, desarrollé una interfaz de calibración que muestra en tiempo real la calidad del contacto de cada electrodo. Esta herramienta me resultó fundamental durante las sesiones experimentales, y los detalles de cómo la implementé están en el Capítulo~\ref{ch:core_implementing}.
 
     \subsection{Acondicionamiento de Señales}
-    Las señales EEG atraviesan una etapa de preprocesamiento mediante filtros digitales, eliminando artefactos y ruido que podrían interferir con el análisis posterior.
+    Aunque el BrainBit ya incluye un sistema de filtrado bastante bueno, las señales EEG necesitaron algunos procesamientos adicionales. Por suerte, la calidad base de las señales que da el dispositivo es excelente, así que pude mantener estos procesamientos relativamente simples —algo que agradecí muchísimo porque el procesado de señales EEG puede convertirse en un laberinto rápidamente.
+    
+    Me centré principalmente en normalizar amplitudes y hacer una segmentación temporal adecuada para el análisis posterior. Suena básico, pero fue esencial para que los datos de entrada al sistema fueran consistentes. A veces las cosas más simples son las que más tiempo te llevan perfeccionar.
 
     \subsection{Análisis mediante Aprendizaje Profundo}
-    La implementación incorpora modelos de \textbf{aprendizaje profundo} especializados en el análisis de series temporales EEG. Estos sistemas se entrenan para reconocer patrones específicos asociados con la visualización mental de los colores rojo y verde. Los detalles técnicos de estos modelos se expusieron en el Capítulo~\ref{ch:deep_learning_models}..
+    En esta fase implementé modelos de \textbf{aprendizaje profundo} especializados en procesar series temporales EEG. Los entrené para identificar patrones específicos relacionados con visualizar mentalmente colores —concretamente rojo y verde.
+    
+    Los fundamentos teóricos de estos modelos los explico en detalle en el Capítulo~\ref{ch:deep_learning_models}, y todo lo relacionado con el entrenamiento práctico está en el Capítulo~\ref{ch:model_training}.
 
 \section{Campos de Aplicación}
-Esta tecnología encuentra aplicación en diversos sectores:
+Las posibilidades de aplicación de esta tecnología son bastante amplias, aunque muchas aún están en fase experimental —o directamente en el territorio de "suena genial pero quién sabe si funcionará en la realidad":
 
     \begin{itemize}
-        \item Desarrollo de interfaces cerebro-máquina para asistencia a personas con diversidad funcional
-        \item Sistemas de control en entornos estériles médicos e industriales
-        \item Innovación en sistemas de realidad aumentada y virtual
+        \item Desarrollo de interfaces cerebro-máquina para asistir a personas con diversidad funcional. Esto podría abrir nuevas formas de comunicación e interacción con la tecnología, aunque reconozco que aún hay un trecho largo hasta llegar a aplicaciones realmente prácticas.
+        \item Sistemas de control en entornos estériles —tanto médicos como industriales— donde tocar cosas con las manos podría comprometer la asepsia o la seguridad. Aquí sí veo un potencial más inmediato.
+        \item Aplicaciones en realidad aumentada y virtual, permitiendo formas de interacción más naturales e intuitivas. Aunque a veces me pregunto si realmente queremos controlar todo con el pensamiento, o si es solo porque podemos.
     \end{itemize}
 
-\section{Aplicación en este proyecto}
-La aplicación del BrainBit en la discriminación de colores mediante actividad occipital representa un enfoque innovador en interfaces cerebro-computadora. Los resultados iniciales sugieren la viabilidad de identificar patrones EEG distintivos, abriendo nuevas posibilidades para desarrollos futuros.
-
+Durante el desarrollo del proyecto, pensar en estas aplicaciones potenciales me ayudó a mantener la motivación cuando me topé con obstáculos técnicos que parecían imposibles de resolver. La perspectiva del impacto real que este tipo de interfaces podría tener —incluso si solo funciona en casos muy específicos— justifica el tiempo y esfuerzo que invertí en desarrollarlas y optimizarlas.
