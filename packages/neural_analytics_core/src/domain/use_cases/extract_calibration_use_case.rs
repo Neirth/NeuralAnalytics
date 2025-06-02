@@ -81,3 +81,180 @@ fn process_impedance_data(data: &HashMap<String, u16>) {
         info!("  Electrode {}: {:.2} kOhm - {}", electrode, last_value, status);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use super::*;
+    use crate::domain::ports::input::eeg_headset::EegHeadsetPort;
+    use mockall::predicate::*;
+    use mockall::mock;
+    use presage::CommandBus;
+    use presage::Configuration;
+    use tokio::sync::RwLock;
+    use tokio::test;
+
+    // Mock implementation of the EegHeadsetPort for testing
+    mock! {
+        EegHeadsetAdapter {}
+        impl EegHeadsetPort for EegHeadsetAdapter {
+            fn connect(&self) -> Result<(), String>;
+            fn disconnect(&mut self) -> Result<(), String>;
+            fn is_connected(&self) -> bool;
+            fn get_work_mode(&self) -> WorkMode;
+            fn change_work_mode(&mut self, mode: WorkMode);
+            fn extract_impedance_data(&self) -> Result<HashMap<String, u16>, String>;
+            fn extract_raw_data(&self) -> Result<HashMap<String, Vec<f32>>, String>;
+        }
+    }
+
+    /// Función auxiliar para crear mocks estáticos para los tests
+    /// Esta función crea un mock y lo convierte en una referencia estática
+    /// que puede ser utilizada en el contexto del test.
+    fn create_static_mock<T>(
+        mock: T,
+    ) -> &'static Arc<RwLock<Box<dyn EegHeadsetPort + Send + Sync>>>
+    where
+        T: EegHeadsetPort + Send + Sync + 'static,
+    {
+        // Crear un Box dinámico con el mock
+        let boxed_mock: Box<dyn EegHeadsetPort + Send + Sync> = Box::new(mock);
+
+        // Envolver en RwLock y Arc
+        let arc_rwlock = Arc::new(RwLock::new(boxed_mock));
+
+        // Convertir a referencia estática
+        Box::leak(Box::new(arc_rwlock))
+    }
+
+    /// Función auxiliar para configurar el CommandBus para los tests
+    fn setup_command_bus() -> CommandBus<NeuralAnalyticsContext, Error> {
+        CommandBus::<NeuralAnalyticsContext, Error>::new().configure(
+            Configuration::new()
+                .command_handler(&extract_calibration_data_use_case)
+        )
+    }
+
+    #[test]
+    async fn test_extract_calibration_data_disconnected() {
+        // Arrange
+        let mut mock = MockEegHeadsetAdapter::new();
+        mock.expect_is_connected()
+            .return_const(false); // Device is not connected
+
+        let mut context = NeuralAnalyticsContext::default();
+        context.eeg_headset_adapter = create_static_mock(mock);
+
+        let command = ExtractCalibrationDataCommand;
+        let command_bus = setup_command_bus();
+
+        // Act
+        let result = command_bus.execute(&mut context, command).await;
+
+        // Assert
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Device is not connected"));
+    }
+
+    #[test]
+    async fn test_extract_calibration_data_already_in_calibration_mode() {
+        // Arrange
+        let mut mock = MockEegHeadsetAdapter::new();
+        mock.expect_is_connected()
+            .return_const(true); // Device is connected
+            
+        mock.expect_get_work_mode()
+            .return_const(WorkMode::Calibration); // Already in calibration mode
+            
+        // We don't expect change_work_mode to be called
+        
+        let mut impedance_data = HashMap::new();
+        impedance_data.insert("electrode1".to_string(), 1);
+        impedance_data.insert("electrode2".to_string(), 2);
+        
+        mock.expect_extract_impedance_data()
+            .times(1)
+            .returning(move || Ok(impedance_data.clone()));
+
+        let mut context = NeuralAnalyticsContext::default();
+        context.eeg_headset_adapter = create_static_mock(mock);
+
+        let command = ExtractCalibrationDataCommand;
+        let command_bus = setup_command_bus();
+
+        // Act
+        let result = command_bus.execute(&mut context, command).await;
+
+        // Assert
+        assert!(result.is_ok());
+        
+        // Verify that the context has been updated with the impedance data
+        // Since this is using the CommandBus, we can't directly access the events
+        // Instead, we can check if the context was properly updated
+        // If needed, we could implement a custom handler to capture and verify the events
+    }
+
+    #[test]
+    async fn test_extract_calibration_data_change_mode() {
+        // Arrange
+        let mut mock = MockEegHeadsetAdapter::new();
+        mock.expect_is_connected()
+            .return_const(true); // Device is connected
+            
+        mock.expect_get_work_mode()
+            .return_const(WorkMode::Extraction); // In extraction mode
+            
+        mock.expect_change_work_mode()
+            .times(1)
+            .with(eq(WorkMode::Calibration))
+            .return_const(());
+            
+        let mut impedance_data = HashMap::new();
+        impedance_data.insert("electrode1".to_string(), 1);
+        
+        mock.expect_extract_impedance_data()
+            .times(1)
+            .returning(move || Ok(impedance_data.clone()));
+
+        let mut context = NeuralAnalyticsContext::default();
+        context.eeg_headset_adapter = create_static_mock(mock);
+
+        let command = ExtractCalibrationDataCommand;
+        let command_bus = setup_command_bus();
+
+        // Act
+        let result = command_bus.execute(&mut context, command).await;
+
+        // Assert
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    async fn test_extract_calibration_data_extraction_error() {
+        // Arrange
+        let mut mock = MockEegHeadsetAdapter::new();
+        mock.expect_is_connected()
+            .return_const(true); // Device is connected
+            
+        mock.expect_get_work_mode()
+            .return_const(WorkMode::Calibration); // Already in calibration mode
+            
+        mock.expect_extract_impedance_data()
+            .times(1)
+            .returning(|| Err("Impedance extraction failed".to_string()));
+
+        let mut context = NeuralAnalyticsContext::default();
+        context.eeg_headset_adapter = create_static_mock(mock);
+
+        let command = ExtractCalibrationDataCommand;
+        let command_bus = setup_command_bus();
+
+        // Act
+        let result = command_bus.execute(&mut context, command).await;
+
+        // Assert
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Error extracting calibration data"));
+    }
+}
