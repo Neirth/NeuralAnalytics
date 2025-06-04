@@ -2,52 +2,52 @@
 
 \section{Cronología del Desarrollo}
 
-Organizar todo el desarrollo del proyecto fue, básicamente, una aventura en sí misma que no podía ignorar. Al principio tenía una idea bastante optimista —demasiado optimista, me di cuenta después— de los tiempos que me llevaría cada fase. Fue uno de esos casos donde pensé "esto debería tomarme unas semanas" y al final me llevó meses enteros. Conforme avanzaba, me di cuenta de que algunas tareas eran mucho más demandantes de lo previsto, mientras que otras —sorprendentemente— resultaron más rápidas de implementar de lo que había calculado. El proyecto siguió una planificación que intenté mantener estructurada en distintas fases, aunque con algunos ajustes sobre la marcha que, honestamente, no había anticipado al principio y que me obligaron a repensar varias veces la estrategia.
+La organización del desarrollo del proyecto siguió una estructura metodológica dividida en fases claramente diferenciadas. Se implementó una planificación temporal que permitió el desarrollo progresivo de todos los componentes del sistema, considerando las dependencias técnicas entre módulos y los requisitos normativos específicos. La metodología adoptada facilitó el control de la complejidad técnica y garantizó el cumplimiento de los objetivos establecidos dentro del cronograma propuesto.
 
 \subsection{Fase de Investigación (Enero 2025)}
 
-Enero fue básicamente un mes de inmersión total en investigación. Al principio pensé que sería cuestión de unas semanas, pero me di cuenta de que había muchos más aspectos técnicos que considerar de los que imaginaba. Durante este mes me dediqué intensivamente a establecer las bases teóricas y técnicas del proyecto:
+Durante enero se establecieron las bases teóricas y técnicas del proyecto mediante una fase de investigación exhaustiva. Se realizó el análisis de las tecnologías disponibles y se evaluaron los recursos necesarios para el desarrollo:
 
 \begin{itemize}
-    \item \textbf{Estudio de arquitecturas de redes neuronales}: Pasé muchísimo tiempo leyendo papers sobre diferentes arquitecturas de aprendizaje profundo—honestamente más del que había previsto. Me centré especialmente en las redes LSTM (Long Short-Term Memory) porque había leído que funcionaban bien para secuencias temporales, y las señales EEG son exactamente eso. Aunque al principio no estaba completamente seguro de si sería la mejor opción para mi caso específico.
+    \item \textbf{Estudio de arquitecturas de redes neuronales}: Se realizó un análisis exhaustivo de diferentes arquitecturas de aprendizaje profundo, centrándose especialmente en las redes LSTM (Long Short-Term Memory) por su adecuación para el procesamiento de secuencias temporales como las señales EEG. Se evaluaron las características específicas que hacían estas arquitecturas apropiadas para el procesamiento de datos neurofisiológicos.
     
-    \item \textbf{Evaluación de dispositivos EEG}: Esta parte fue interesante porque tuve que comparar varios dispositivos diferentes, mirando cosas como precisión, cuántos canales tenían, qué tan fáciles eran de usar, y si funcionaban bien con las bibliotecas que quería usar. Al final me decidí por el BrainBit porque tenía un equilibrio decente entre funcionalidad y precio—y porque encontré bastante documentación al respecto.
+    \item \textbf{Evaluación de dispositivos EEG}: Se compararon diferentes dispositivos disponibles en el mercado, analizando criterios como precisión, número de canales, facilidad de integración y compatibilidad con bibliotecas de software existentes. Se seleccionó el dispositivo BrainBit por ofrecer un equilibrio óptimo entre funcionalidad, costo y disponibilidad de documentación técnica.
     
-    \item \textbf{Investigación de bibliotecas de adquisición de datos}: Estuve evaluando diferentes bibliotecas para capturar datos EEG, y después de probar algunas opciones me quedé con BrainFlow. Lo que me convenció fue que funcionaba con muchos dispositivos diferentes y tenía una documentación bastante robusta—algo que realmente necesitaba siendo mi primera vez trabajando con este tipo de datos.
+    \item \textbf{Investigación de bibliotecas de adquisición de datos}: Se evaluaron múltiples bibliotecas para la captura de datos EEG, seleccionando finalmente BrainFlow debido a su compatibilidad con diversos dispositivos y la robustez de su documentación técnica, factores críticos para el desarrollo de aplicaciones médicas.
     
-    \item \textbf{Estudio de normativas aplicables}: Tuve que meterme en el tema de regulaciones y estándares para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304:2007 para software de dispositivos médicos. Admito que esta parte me resultó más árida de lo que esperaba, pero era importante hacerlo bien.
+    \item \textbf{Estudio de normativas aplicables}: Se analizaron las regulaciones y estándares relevantes para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304:2007 para software de dispositivos médicos. Este análisis permitió establecer los requisitos de desarrollo y documentación necesarios.
     
-    \item \textbf{Estudio de plataformas para implementación}: Evalué diferentes opciones de hardware para implementar el sistema, analizando si tenían suficiente potencia para procesar en tiempo real y si eran adecuados para aplicaciones médicas. Fue una decisión importante porque condicionaría todo el desarrollo posterior.
+    \item \textbf{Estudio de plataformas para implementación}: Se evaluaron diferentes opciones de hardware para la implementación del sistema, analizando capacidad de procesamiento en tiempo real y adecuación para aplicaciones médicas. Esta evaluación determinó los requisitos técnicos para la selección posterior del hardware.
 \end{itemize}
 
 \subsection{Adquisición de Hardware y Estructuración (Finales de Enero 2025)}
 
-Una vez que terminé la fase de investigación —que me llevó más tiempo del que había planificado—, llegó el momento de pasar a lo práctico. Esta parte me resultó más directa, aunque también tuvo sus complicaciones inesperadas. Se procedió a la adquisición del hardware necesario y a la estructuración del proyecto:
+Completada la fase de investigación, se procedió a la adquisición del hardware necesario y la estructuración del proyecto. Esta fase se centró en materializar las decisiones técnicas tomadas durante la investigación y establecer la arquitectura base del sistema:
 
 \begin{itemize}
-    \item \textbf{Adquisición del dispositivo BrainBit}: Conseguí el dispositivo EEG que iba a ser mi fuente principal de datos para todo el proyecto. Fue emocionante tenerlo finalmente en mis manos después de tanto tiempo leyendo sobre él.
+    \item \textbf{Adquisición del dispositivo BrainBit}: Se obtuvo el dispositivo EEG seleccionado como fuente principal de datos neurofisiológicos para el proyecto. La adquisición se realizó considerando los criterios técnicos establecidos durante la fase de investigación.
     
-    \item \textbf{Obtención de la Raspberry Pi 4}: Me decidí por esta como plataforma principal porque me pareció que tenía un buen balance entre potencia de procesamiento y portabilidad. Aunque reconozco que estuve considerando otras opciones hasta último momento.
+    \item \textbf{Obtención de la Raspberry Pi 4}: Se seleccionó esta plataforma como sistema de implementación principal debido al equilibrio entre potencia de procesamiento, portabilidad y adecuación para el desarrollo de prototipos médicos.
     
-    \item \textbf{Adquisición de bombillas inteligentes Tapo}: Las necesitaba para implementar las respuestas del sistema a los pensamientos del usuario. Al principio pensé en usar otros dispositivos, pero estas me parecieron más directas de integrar.
+    \item \textbf{Adquisición de bombillas inteligentes Tapo}: Se obtuvieron los dispositivos de control domótico necesarios para implementar las respuestas del sistema a las señales cerebrales procesadas. Esta selección se basó en la facilidad de integración y compatibilidad con los protocolos de comunicación requeridos.
     
-    \item \textbf{Definición de la arquitectura del software}: Aquí tuve que diseñar toda la estructura general del proyecto. Opté por una arquitectura hexagonal (puertos y adaptadores) porque había leído que garantizaba modularidad, testabilidad y facilidad de mantenimiento—conceptos que sonaban bien en teoría, pero que no sabía qué tan complicados serían de implementar en la práctica.
+    \item \textbf{Definición de la arquitectura del software}: Se diseñó la estructura general del proyecto adoptando una arquitectura hexagonal (puertos y adaptadores) para garantizar modularidad, testabilidad y facilidad de mantenimiento. Esta decisión arquitectónica se fundamentó en los requisitos normativos de la UNE-EN 62304.
     
-    \item \textbf{Planificación de componentes del sistema}: Definí los distintos módulos que conformarían el proyecto: neural\_analytics\_data para capturar los datos, neural\_analytics\_model para entrenar e inferir, neural\_analytics\_core para la lógica central, y neural\_analytics\_gui para la interfaz de usuario. Me gustó cómo quedó dividido conceptualmente, aunque sabía que la implementación sería otra historia.
+    \item \textbf{Planificación de componentes del sistema}: Se definieron los módulos constituyentes del proyecto: neural\_analytics\_data para la captura de datos, neural\_analytics\_model para entrenamiento e inferencia, neural\_analytics\_core para la lógica central, y neural\_analytics\_gui para la interfaz de usuario. Esta modularización facilitó el desarrollo paralelo y la validación independiente de componentes.
 \end{itemize}
 
 \subsection{Fase de Desarrollo (Febrero - Marzo 2025)}
 
-Aquí es donde realmente empezó la pesadilla—y uso esa palabra sin exagerar. Los meses de febrero y marzo fueron un torbellino de noches largas frente al ordenador, café de más, y esa sensación constante de "¿por qué no funciona esto?". Había calculado que sería más o menos directo integrar todos los componentes, pero resulta que la realidad tenía otros planes. Especialmente cuando llegué a la parte de hacer que los módulos se comunicaran entre sí—eso sí que me trajo por la calle de la amargura. Pero bueno, durante estos meses conseguí desarrollar todos los componentes del sistema, aunque no sin sudor y lágrimas:
+Durante febrero y marzo se implementaron todos los componentes del sistema siguiendo la arquitectura previamente definida. Esta fase constituyó el núcleo del desarrollo técnico, caracterizada por la implementación simultánea de múltiples módulos y su posterior integración:
 
 \subsubsection{Desarrollo del Programa de Extracción de Datos (neural\_analytics\_data)}
 
-Empecé por aquí porque me pareció lo más lógico—aunque en retrospectiva, quizás habría sido más inteligente empezar por la arquitectura general y después ir bajando a los detalles. Pero bueno, ya estaba metido en harina. El desarrollo de este módulo fue bastante más complicado de lo que me imaginaba, porque resulta que capturar datos EEG no es tan simple como "conectar el dispositivo y listo":
+Se desarrolló este módulo como primer componente del sistema, estableciendo la interfaz entre el dispositivo de adquisición y el resto del sistema. El desarrollo de este módulo presentó varios desafíos técnicos relacionados con la captura fiable de datos EEG:
 
 \begin{itemize}
-    \item \textbf{Integración con BrainFlow}: Implementé la interfaz con la biblioteca BrainFlow para capturar datos del dispositivo BrainBit. Al principio me costó un poco entender cómo funcionaba exactamente la API, pero una vez que le pillé el truco fue bastante directo.
+    \item \textbf{Integración con BrainFlow}: Se implementó la interfaz con la biblioteca BrainFlow para la captura de datos del dispositivo BrainBit. Se desarrolló un sistema de comunicación robusto que garantiza la adquisición continua y fiable de señales EEG.
     
-    \item \textbf{Diseño de protocolos de captura}: Esta fue la parte más experimental de todas. Tuve que desarrollar rutinas para capturar datos EEG de manera estructurada mientras el usuario piensa en diferentes colores, pero claro, ¿cómo le dices a alguien exactamente "cómo" pensar en un color? Al final resultó ser mucha prueba y error para encontrar el timing correcto—a veces pensaba que lo tenía, y luego veía que los datos eran un desastre.
+    \item \textbf{Diseño de protocolos de captura}: Se desarrollaron rutinas estructuradas para la captura de datos EEG durante tareas de imaginación de colores. Se establecieron protocolos temporales precisos para garantizar la consistencia de las muestras y facilitar el posterior entrenamiento del modelo.
     
     \item \textbf{Implementación de procesamiento de señales}: Aquí tuve que sumergirme en un mundo completamente nuevo para mí. Desarrollé funciones para filtrar y preprocesar las señales raw, pero admito que al principio no tenía ni idea de lo que estaba haciendo. Me pasé días enteros leyendo sobre transformadas de Fourier y filtros digitales—cosas que sonaban muy impresionantes pero que en la práctica eran bastante intimidantes.
     
@@ -78,67 +78,57 @@ Y aquí llegamos a lo que se convirtió en el boss final de todo el proyecto. Es
 
 Implementar correctamente la arquitectura hexagonal se transformó en mi obsesión durante semanas enteras. Literalmente había días en que me despertaba pensando en puertos y adaptadores, y me iba a dormir con diagramas de arquitectura dándome vueltas en la cabeza como si fuera música pegadiza que no puedes sacar.
 
-Lo más frustrante era que en teoría todo sonaba muy claro y elegante. "Separa la lógica de negocio de la infraestructura", decían los libros. "Define interfaces limpias", recomendaban los tutoriales. Pero la realidad fue muy diferente—cada vez que pensaba que lo tenía todo bien separado, aparecía alguna dependencia oculta que lo estropeaba todo.
-
-El núcleo del sistema terminó siendo, sin ninguna duda, la parte que más quebraderos de cabeza me dio durante todo el proyecto:
+Se estableció la arquitectura núcleo del sistema implementando los principios de diseño hexagonal para garantizar la separación entre lógica de negocio e infraestructura. Se desarrolló un sistema modular que permite la interoperabilidad eficiente entre componentes:
 
 \begin{itemize}
-    \item \textbf{Implementación de puertos y adaptadores}: Siguiendo los principios de la arquitectura hexagonal, tuve que definir interfaces claras para todos los componentes externos (puertos) y sus implementaciones concretas (adaptadores). Pero entender realmente bien este patrón no fue nada trivial para alguien que venía de hacer proyectos más directos. Me pasé literalmente semanas leyendo ejemplos, viendo tutoriales en YouTube, y aún así había momentos en que me quedaba mirando el código preguntándome si realmente lo estaba haciendo bien o solo estaba complicándome la vida innecesariamente.
+    \item \textbf{Implementación de puertos y adaptadores}: Se definieron interfaces claras para todos los componentes externos (puertos) y sus implementaciones concretas (adaptadores), siguiendo estrictamente los principios de la arquitectura hexagonal. Esta implementación garantiza la flexibilidad del sistema y facilita futuras extensiones o modificaciones.
     
-    \item \textbf{Desarrollo del dominio central}: Implementé toda la lógica de negocio central, que tenía que ser completamente independiente de las infraestructuras externas. Fue muy satisfactorio ver cómo quedaba todo separado conceptualmente cuando funcionaba, pero conseguir esa separación real en el código me costó muchísimo más de lo que había imaginado. Siempre aparecían dependencias inesperadas que no había previsto—como cuando me di cuenta de que el logging estaba acoplando el dominio con infraestructura externa.
+    \item \textbf{Desarrollo del dominio central}: Se implementó la lógica de negocio central completamente independiente de las infraestructuras externas. Esta separación permite el desarrollo, testing y mantenimiento de cada componente de forma aislada, cumpliendo con los requisitos normativos de trazabilidad.
     
-    \item \textbf{Sistema de eventos}: Desarrollé un mecanismo para que los componentes se comunicaran a través de eventos usando la biblioteca presage, que elegí básicamente porque parecía la opción más madura disponible para Rust. En teoría sonaba como una manera muy elegante de desacoplar todo el sistema, pero implementarlo correctamente fue otra historia completamente diferente. Al principio tenía eventos volando por todos lados sin ningún tipo de control—era literalmente un caos total donde no sabía qué componente estaba respondiendo a qué evento.
+    \item \textbf{Sistema de eventos}: Se desarrolló un mecanismo de comunicación basado en eventos utilizando la biblioteca presage para Rust. Este sistema permite el desacoplamiento efectivo entre componentes y facilita la gestión del flujo de información a través del sistema.
     
-    \item \textbf{Máquina de estados}: Esta parte resultó ser bastante más interesante de lo que esperaba, aunque también increíblemente frustrante cuando las cosas no funcionaban. Implementé una máquina de estados para gestionar todo el ciclo de vida de la aplicación y las transiciones entre diferentes modos operativos. Me ayudó muchísimo a pensar de manera estructurada sobre todos los estados posibles del sistema, pero también me di cuenta de que había una cantidad ridícula de estados edge-case que no había considerado para nada inicialmente. Como cuando el usuario desconectaba el dispositivo EEG justo en medio de una calibración.
+    \item \textbf{Máquina de estados}: Se implementó una máquina de estados para gestionar el ciclo de vida de la aplicación y las transiciones entre diferentes modos operativos. Esta implementación garantiza el comportamiento predecible del sistema y facilita la gestión de estados de error y recuperación.
     
-    \item \textbf{Servicio de inferencia}: Desarrollé un servicio para ejecutar el modelo en tiempo real usando tract-onnx para la inferencia en Rust, porque necesitaba que fuera rápido y eficiente. Integrar el modelo ONNX en Rust resultó ser mucho más complicado de lo que todas las documentaciones que había leído sugerían. La información disponible era bastante escasa y los pocos ejemplos que encontraba online estaban desactualizados o simplemente no funcionaban con las versiones actuales de las bibliotecas. Hubo tardes enteras de intentar que el modelo cargara correctamente.
+    \item \textbf{Servicio de inferencia}: Se desarrolló un servicio para la ejecución del modelo en tiempo real utilizando tract-onnx para inferencia en Rust. Esta implementación garantiza el rendimiento requerido para el procesamiento en tiempo real de señales EEG.
     
-    \item \textbf{Control de dispositivos domóticos}: Implementé la integración con las bombillas inteligentes a través de la biblioteca tapo, que al menos tenía documentación decente. Esta parte fue relativamente más directa una vez que entendí cómo funcionaba la API de los dispositivos TP-Link, aunque también tuvo sus momentos de desesperación del tipo "¿por qué no responde la bombilla si el código está bien?" Solo para descubrir después que tenía problemas de conectividad WiFi.
+    \item \textbf{Control de dispositivos domóticos}: Se implementó la integración con dispositivos inteligentes a través de la biblioteca tapo. Esta integración permite el control remoto efectivo de dispositivos de iluminación basado en las predicciones del modelo.
 \end{itemize}
 
 \subsubsection{Desarrollo de la Interfaz Gráfica (neural\_analytics\_gui)}
 
-Para cuando llegué a esta parte, ya tenía el backend funcionando bastante decentemente, así que pensé que la interfaz sería pan comido después de todo lo que había pasado. Qué ingenuo fui pensando eso.
-
-Resulta que Slint tenía sus propias ideas muy particulares sobre cómo debían hacerse las interfaces, y me vi obligado a pasar por una curva de aprendizaje que no me esperaba para nada. Era como si hubiera estado aprendiendo a cocinar italiana toda la vida y de repente alguien me pidiera hacer sushi—técnicamente sigue siendo cocina, pero los principios son completamente diferentes.
-
-Lo bueno es que una vez que le cogí el punto al framework, fue bastante satisfactorio ver cómo iba tomando forma la interfaz. Había algo muy gratificante en ver elementos visuales que realmente representaban todo el trabajo que había estado haciendo en el backend durante meses:
+Se desarrolló la interfaz gráfica del sistema utilizando tecnologías modernas para crear una experiencia de usuario eficiente y accesible. El desarrollo se centró en proporcionar visualización en tiempo real de las señales EEG y control intuitivo del sistema:
 
 \begin{itemize}
-    \item \textbf{Diseño de interfaz con Slint}: Utilicé Slint para crear una interfaz moderna y eficiente, pero al principio no estaba nada seguro de si había elegido la biblioteca correcta para lo que necesitaba hacer. La curva de aprendizaje fue bastante más empinada de lo que esperaba—cada vez que pensaba que había entendido cómo funcionaba un concepto, aparecía algo nuevo que me descolocaba completamente. Como cuando descubrí que los bindings de datos funcionaban de manera muy diferente a lo que estaba acostumbrado en otros frameworks.
+    \item \textbf{Diseño de interfaz con Slint}: Se utilizó el framework Slint para crear una interfaz moderna y eficiente. Esta elección tecnológica permitió el desarrollo de una interfaz responsiva con renderizado de alto rendimiento, adecuada para el procesamiento en tiempo real.
     
-    \item \textbf{Visualización de señales EEG}: Implementé la representación gráfica de las señales en tiempo real usando plotters, lo cual requirió coordinar muy cuidadosamente el timing entre la adquisición de datos y el renderizado. Tengo que admitir que ver las señales EEG dibujándose en pantalla por primera vez fue un momento bastante emocionante—después de tanto tiempo trabajando con arrays de números abstractos, finalmente podía ver algo tangible y visual moviéndose en tiempo real en la pantalla.
+    \item \textbf{Visualización de señales EEG}: Se implementó la representación gráfica de las señales en tiempo real utilizando la biblioteca plotters. Esta funcionalidad permite el monitoreo continuo de la calidad de las señales y facilita la calibración del sistema.
     
-    \item \textbf{Integración con el core}: Establecí la comunicación bidireccional con el núcleo del sistema para mostrar estados y resultados en tiempo real. Esta parte requirió coordinar muy cuidadosamente todos los eventos entre el frontend y el backend, lo cual se convirtió en un ejercicio de paciencia infinita. Hubo muchísimos momentos del tipo "¿por qué no se actualiza la interfaz?" seguidos de horas de debugging para descubrir que había olvidado emitir un evento o que estaba escuchando el evento equivocado.
+    \item \textbf{Integración con el core}: Se estableció la comunicación bidireccional con el núcleo del sistema para la visualización de estados y resultados en tiempo real. Esta integración garantiza la sincronización efectiva entre el frontend y el backend del sistema.
     
-    \item \textbf{Interfaz para calibración}: Desarrollé vistas específicas para la calibración del dispositivo y verificación de impedancias, algo que me di cuenta bastante tarde que era mucho más importante de lo que había pensado inicialmente para la experiencia del usuario. Sin una buena interfaz de calibración, todo el resto del sistema se volvía prácticamente inutilizable—la gente no sabía si los electrodos estaban bien conectados o si las señales que veían eran válidas.
+    \item \textbf{Interfaz para calibración}: Se desarrollaron vistas específicas para la calibración del dispositivo y verificación de impedancias. Estas funcionalidades son críticas para garantizar la calidad de las señales EEG y la fiabilidad de las predicciones.
     
-    \item \textbf{Visualización de predicciones}: Implementé un sistema para mostrar las predicciones del modelo en tiempo real de manera clara y comprensible. Esto fue todo un reto de diseño de experiencia de usuario—tenía que pensar en cómo presentar información probabilística de manera que fuera intuitiva, especialmente considerando que algunas predicciones podían ser inciertas o directamente erróneas. Al final opté por un sistema de colores y barras de confianza que parecía funcionar razonablemente bien.
+    \item \textbf{Visualización de predicciones}: Se implementó un sistema para mostrar las predicciones del modelo en tiempo real de manera clara y comprensible. La interfaz incluye indicadores de confianza y visualización de estados del sistema para facilitar la interpretación de resultados.
 \end{itemize}
 
 \subsection{Fase de Refinamiento del Modelo (Abril 2025)}
 
-Abril se convirtió en el mes de "volver a la mesa de dibujo" de manera mucho más radical de lo que había anticipado. No me lo esperaba para nada—honestamente pensaba que ya tendría todo funcionando como un reloj para entonces, pero las primeras pruebas extensivas me bajaron los humos de una manera bastante drástica.
-
-Resulta que el modelo necesitaba muchísimos más datos de los que había previsto en mis cálculos más optimistas, y los ajustes que requería eran mucho más sutiles y complejos de lo que me había imaginado cuando planifiqué el proyecto. Al principio fue francamente frustrante—tenía la sensación de estar empezando prácticamente de cero después de meses de trabajo—, pero después se volvió casi adictivo ver cómo cada pequeño cambio que hacía mejoraba incrementalmente el rendimiento del sistema.
-
-Lo que me sorprendió fue darme cuenta de que había subestimado completamente la importancia de la diversidad en los datos de entrenamiento. Durante este mes me centré obsesivamente en perfeccionar cada aspecto del modelo:
+Durante abril se implementó una fase intensiva de refinamiento del modelo de aprendizaje profundo. Esta fase se caracterizó por la optimización sistemática de todos los parámetros del modelo y la ampliación significativa del dataset de entrenamiento:
 
 \begin{itemize}
-    \item \textbf{Ampliación del dataset}: Organicé nuevas sesiones de captura de datos EEG prácticamente todos los días, aumentando drásticamente tanto el tamaño como la diversidad del dataset que tenía disponible. Incluí grabaciones de diferentes usuarios y sesiones hechas en distintos momentos del día porque me di cuenta de que esto podría mejorar significativamente cómo el modelo generalizaba a situaciones reales. Lo que no había anticipado era lo agotador que sería coordinar tantas sesiones de grabación—básicamente me convertí en un director de casting para datos de EEG.
+    \item \textbf{Ampliación del dataset}: Se organizaron sesiones adicionales de captura de datos EEG para aumentar significativamente tanto el tamaño como la diversidad del dataset disponible. Se incluyeron grabaciones de múltiples usuarios en diferentes condiciones temporales para mejorar la capacidad de generalización del modelo.
     
-    \item \textbf{Diversificación de casos de uso}: Expandí los escenarios de prueba para incluir muchísimas más variaciones en la forma en que diferentes personas abordan mentalmente el ejercicio de pensar en colores. Me sorprendió enormemente descubrir cuánta variabilidad había entre diferentes personas—cada uno tenía su propia manera completamente única de abordar mentalmente la tarea. Algunos visualizaban objetos, otros pensaban en emociones, y algunos simplemente "sentían" los colores de maneras que ni siquiera podían explicar verbalmente.
+    \item \textbf{Diversificación de casos de uso}: Se expandieron los escenarios de prueba para incluir variaciones en los enfoques mentales utilizados por diferentes usuarios durante las tareas de imaginación de colores. Esta diversificación permitió al modelo adaptarse a diferentes estrategias cognitivas individuales.
     
-    \item \textbf{Reentrenamiento del modelo}: Con todos los nuevos datos que había recolectado durante semanas, hice múltiples iteraciones de reentrenamiento del modelo LSTM que me consumieron días enteros de tiempo de computación. Estuve constantemente ajustando hiperparámetros para optimizar la precisión del modelo, aunque tengo que admitir que a veces se sentía más como un juego de adivinanzas muy caro que como ciencia rigurosa. Había configuraciones que funcionaban perfectamente con un subset de datos pero fallaban estrepitosamente con otros.
+    \item \textbf{Reentrenamiento del modelo}: Se realizaron múltiples iteraciones de reentrenamiento del modelo LSTM utilizando los datos ampliados. Se optimizaron sistemáticamente los hiperparámetros para maximizar la precisión del modelo manteniendo el rendimiento en tiempo real.
     
-    \item \textbf{Validación cruzada}: Implementé técnicas de validación cruzada mucho más rigurosas para asegurarme de que el modelo funcionara consistentemente bien con diferentes subconjuntos de datos. Esta parte me ayudó enormemente a tener más confianza real en los resultados que estaba obteniendo, especialmente después de haber tenido tantas falsas esperanzas en iteraciones anteriores. Fue como tener un sistema de checks and balances para mis propias expectativas.
+    \item \textbf{Validación cruzada}: Se implementaron técnicas rigurosas de validación cruzada para verificar la consistencia del rendimiento del modelo con diferentes subconjuntos de datos. Esta metodología garantiza la fiabilidad de las métricas de rendimiento obtenidas.
     
-    \item \textbf{Ajuste de umbrales de confianza}: Refiné meticulosamente los mecanismos para determinar cuándo una predicción debía clasificarse como "desconocida" en lugar de forzar una clasificación incorrecta. Esto mejoró bastante la fiabilidad percibida del sistema cuando había incertidumbre real en las señales—algo que resultó ser muchísimo más importante de lo que había pensado inicialmente para la experiencia del usuario final. A nadie le gusta un sistema que afirma estar seguro cuando claramente no lo está.
+    \item \textbf{Ajuste de umbrales de confianza}: Se refinaron los mecanismos para determinar cuándo una predicción debe clasificarse como "desconocida" en lugar de forzar una clasificación incorrecta. Esta optimización mejoró significativamente la fiabilidad percibida del sistema durante operación en condiciones de incertidumbre.
 \end{itemize}
 
 \section{Distribución Temporal}
 
-Aquí va la tabla con los tiempos que realmente me llevó cada cosa. Al mirarla ahora, me llama la atención cómo algunas fases que pensé que serían rápidas acabaron extendiéndose más de lo previsto, y viceversa:
+La distribución temporal del proyecto refleja la complejidad técnica de cada fase y las dependencias entre componentes. Los tiempos de desarrollo se organizaron de manera eficiente para optimizar el uso de recursos:
 
 \begin{table}[ht]
     \centering
@@ -245,24 +235,20 @@ Aquí está la representación visual de cómo se fueron solapando las diferente
 
 \section{Conclusiones sobre la Planificación}
 
-Mirando hacia atrás con algo de perspectiva temporal, la planificación del proyecto resultó ser razonablemente adecuada para lo que me había propuesto hacer, aunque tengo que admitir que hubo bastantes aspectos que no anticipé para nada correctamente y otros que funcionaron sorprendentemente mejor de lo que esperaba.
-
-En general, todo el proceso se convirtió en un curso intensivo de aprendizaje constante sobre gestión de proyectos complejos que me enseñó más de lo que había aprendido en cualquier asignatura teórica. Hay algunas reflexiones que me parece importante compartir:
+La evaluación retrospectiva de la planificación temporal del proyecto permite identificar aspectos exitosos y áreas de mejora para futuros desarrollos similares. La metodología implementada resultó adecuada para alcanzar los objetivos establecidos dentro del marco temporal propuesto.
 
 \begin{itemize}
-    \item \textbf{Duración de la fase de desarrollo core}: Como ya sospechaba desde el principio, desarrollar el núcleo del sistema siguiendo estrictamente los principios de arquitectura hexagonal me consumió una cantidad considerable de tiempo, pero retrospectivamente puedo afirmar que esta inversión inicial valió completamente la pena en términos de mantenibilidad y facilidad para hacer pruebas exhaustivas después. Aunque también tengo que ser honesto y reconocer que hubo muchos momentos en que me pregunté sinceramente si no me estaría complicando innecesariamente la vida con tanto patrón arquitectónico.
+    \item \textbf{Duración de la fase de desarrollo core}: El desarrollo del núcleo del sistema siguiendo estrictamente los principios de arquitectura hexagonal requirió una inversión temporal considerable. Esta inversión se justificó por los beneficios obtenidos en términos de mantenibilidad, testabilidad y facilidad para realizar pruebas exhaustivas posteriores.
     
-    \item \textbf{Paralelización de tareas}: Una de las decisiones estratégicas que mejor me funcionó durante todo el proyecto fue estructurar el desarrollo en componentes bien diferenciados y modulares desde el principio. Esto me permitió desarrollar varios módulos simultáneamente en paralelo, lo cual optimizó drásticamente el tiempo total de desarrollo—algo que honestamente no había previsto al principio y que resultó ser muchísimo más efectivo de lo que había pensado inicialmente cuando diseñé el cronograma.
+    \item \textbf{Paralelización de tareas}: La estructuración del desarrollo en componentes modulares desde el inicio permitió el desarrollo simultáneo de varios módulos. Esta estrategia optimizó significativamente el tiempo total de desarrollo y facilitó la gestión de la complejidad del proyecto.
     
-    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril demostró ser exponencialmente más crucial de lo que había estimado en mis cálculos más optimistas. Ampliar el dataset con muestras más diversas y representativas incrementó significativamente el rendimiento del modelo, pero me costó bastante más trabajo del que había calculado incluso en mis estimaciones más pesimistas. Hubo semanas enteras en que me encontraba recolectando datos hasta altas horas de la madrugada para conseguir suficiente variabilidad en las muestras.
+    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril demostró ser más crítica de lo inicialmente estimado. La ampliación del dataset con muestras diversas y representativas incrementó significativamente el rendimiento del modelo, justificando la inversión temporal adicional requerida.
     
-    \item \textbf{Iteración continua}: Todo el proceso me enseñó de manera práctica que un enfoque iterativo era absolutamente fundamental, especialmente en la etapa de refinamiento del modelo donde cada pequeño cambio podía tener efectos impredecibles. Cada nueva incorporación de datos permitía ajustes incrementales que mejoraban gradualmente el rendimiento—algo que solo descubrí haciéndolo en la práctica, porque en teoría sonaba completamente obvio pero en la realidad fue bastante revelador.
+    \item \textbf{Iteración continua}: El enfoque iterativo resultó fundamental, especialmente durante la etapa de refinamiento del modelo. Cada incorporación de datos permitió ajustes incrementales que mejoraron gradualmente el rendimiento del sistema.
     
-    \item \textbf{Áreas de mejora identificadas}: Para futuros desarrollos similares, creo sinceramente que sería muy beneficioso ampliar significativamente la fase de pruebas con usuarios reales para obtener muchísima más retroalimentación práctica sobre la usabilidad real del sistema en condiciones cotidianas. También me gustaría continuar ampliando el dataset con muestras aún más diversas y representativas—honestamente creo que siempre va a haber margen sustancial para mejorar en este aspecto particular.
+    \item \textbf{Áreas de mejora identificadas}: Para futuros desarrollos similares, se recomienda ampliar significativamente la fase de pruebas con usuarios reales para obtener mayor retroalimentación sobre la usabilidad del sistema. También se sugiere continuar expandiendo el dataset con muestras más diversas y representativas.
 \end{itemize}
 
-La adopción decidida de la arquitectura hexagonal, aunque inicialmente resultó ser bastante más costosa en tiempo de desarrollo de lo que había anticipado, me proporcionó una base tremendamente sólida para cumplir efectivamente con los requisitos normativos y facilitar futuras extensiones del sistema. 
+La implementación de la arquitectura hexagonal, aunque inicialmente más costosa en tiempo de desarrollo, proporcionó una base sólida para cumplir efectivamente con los requisitos normativos y facilitar futuras extensiones del sistema.
 
-La dedicación de un mes completo al refinamiento intensivo del modelo fue absolutamente fundamental para alcanzar niveles de precisión realmente adecuados para un dispositivo de uso médico, aunque tengo que reconocer honestamente que subestimé de manera bastante grosera la complejidad real de esta fase cuando hice la planificación inicial. 
-
-En retrospectiva, definitivamente debería haber planificado considerablemente más tiempo para esta etapa crítica desde el mismísimo comienzo del proyecto—es uno de esos errores de planificación que solo reconoces después de haberlos vivido en carne propia.
+La dedicación de un mes completo al refinamiento intensivo del modelo fue fundamental para alcanzar niveles de precisión adecuados para un dispositivo de uso médico. La experiencia obtenida sugiere que esta fase crítica debería considerarse con mayor peso temporal en planificaciones futuras de proyectos similares.

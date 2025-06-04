@@ -1,35 +1,5 @@
 \chapter{Análisis Práctico}\label{ch:practical_analytics}
 
-\section{Objetivos Especificos}
-\subsection{Realizados}
-
-Al empezar este proyecto tenía una idea bastante clara de lo que quería conseguir, aunque ahora mirando hacia atrás me doy cuenta de que algunas cosas resultaron más complicadas de lo que pensaba inicialmente, por suerte definí los objetivos que quería lograr en esta fase de desarrollo. Entonces, los objetivos principales que finalmente logré completar son los siguientes:
-
-\begin{itemize}
-    \item Diseñar una aplicación que permita la captura raw de la información del EEG para los canales T3, T4, O1 y O2.
-    \item Diseño de un modelo de IA que sea capaz de distinguir entre distintas categorías Rojo, Verde o Desconocido.
-    \item Extracción de diferentes datos para las categorías propuestas.
-    \item Diseñar una aplicación autónoma que sea capaz de interactuar con la señal del EEG del usuario.
-    \item Asegurar que la aplicación autónoma cumpla con la norma UNE-EN 62304:2007, garantizando los requisitos para los procesos del ciclo de vida del software en dispositivos médicos.
-    \item Integrar el sistema completo en una Raspberry Pi respetando los requerimientos de tiempo real blando.
-    \item Por último, ser capaces de encender y apagar una bombilla a raíz del color pensado por el usuario.
-\end{itemize}
-
-\newpage
-
-\subsection{Deseados (Futuras Mejoras)}
-
-Aunque conseguí lo que me propuse, durante el proceso me fui dando cuenta de varias limitaciones y áreas donde podría mejorar bastante el sistema. Algunas de estas limitaciones vinieron impuestas por el tiempo disponible o los recursos que tenía a mano, pero otras fueron decisiones que tomé por el camino y que ahora veo que podrían haberse hecho mejor. Las mejoras futuras que veo más interesantes son:
-
-\begin{itemize}
-    \item Obtener un dataset más amplio con diferentes pacientes, lo que permitiría mejorar la generalización del modelo y su aplicabilidad en distintos perfiles neurológicos.
-    \item Ampliar el espectro de colores disponibles para la detección, pasando del actual sistema binario (rojo y verde) a un sistema con mayor variedad cromática.
-    \item Integración con el estándar Matter para facilitar la compatibilidad con un mayor número de dispositivos domóticos y ecosistemas de hogar inteligente.
-    \item Migrar el sistema operativo de Poky Linux a Wind River Linux para facilitar la certificación del dispositivo como producto sanitario.
-\end{itemize}
-
-\newpage
-
 \section{Requisitos funcionales y no funcionales}
 
 Definir los requisitos del sistema resultó ser más complicado de lo que esperaba al principio. Pensé que sería simplemente hacer una lista de lo que quería que hiciera el sistema, pero me di cuenta de que muchos requisitos no aparecen hasta que empiezas a implementar y surgen problemas que no habías previsto. Fue un proceso bastante iterativo donde cada fase del desarrollo revelaba nuevas necesidades.

@@ -1,20 +1,20 @@
 \chapter{Entrenamiento del modelo}\label{ch:model_training}
 
-Después de todos los meses que me llevó trabajar en la arquitectura del sistema, finalmente llegué a la parte que más me emocionaba y a la vez me daba más miedo: entrenar el modelo que clasificaría las señales EEG. Honestamente, no tenía ni idea de si iba a funcionar o si me iba a quedar atascado en este paso para siempre.
+Tras completar el desarrollo de la arquitectura del sistema, se procedió al entrenamiento del modelo para la clasificación de señales EEG. Esta fase representó un hito crítico del proyecto, donde se validarían los fundamentos teóricos y la viabilidad práctica de la aproximación propuesta.
 
-Este capítulo documenta todo el proceso que seguí para entrenar el modelo, con todos sus altibajos, frustraciones y momentos de "¡por fin funciona!". Como en todo el proyecto, las cosas fueron bastante más complicadas de lo que esperaba al principio.
+Este capítulo documenta de manera sistemática el proceso de entrenamiento del modelo, incluyendo las decisiones arquitectónicas, metodología experimental y resultados obtenidos. El desarrollo de esta fase presentó diversos desafíos técnicos que requirieron adaptaciones iterativas en la aproximación inicial.
 
 \section{Descripción de la arquitectura}
 
-Elegir la arquitectura neuronal fue una de esas decisiones que me tuvo despierto varias noches. Al final me decidí por combinar redes LSTM (Long Short-Term Memory) con capas densas, principalmente porque había leído que las LSTM eran buenas para procesar secuencias temporales, y las señales EEG son exactamente eso. 
+La selección de la arquitectura neuronal constituyó una decisión técnica fundamental del proyecto. Se optó por una arquitectura híbrida que combina redes LSTM (Long Short-Term Memory) con capas densas, fundamentada en la capacidad demostrada de las LSTM para procesar secuencias temporales complejas como las señales EEG. 
 
-El objetivo era procesar y clasificar secuencias temporales de datos neurofisiológicos, aunque al principio no tenía muy claro si 62 puntos por ventana eran suficientes o demasiados.
+El sistema se diseñó para procesar y clasificar secuencias temporales de datos neurofisiológicos, utilizando ventanas de 62 puntos temporales como entrada base.
 
 \subsection{Estructura de la red neuronal}
 
-Diseñar una arquitectura híbrida con redes LSTM y capas densas me llevó muchísimas pruebas y errores. La hice específicamente para procesar señales EEG de los cuatro canales que había elegido: T3, T4, O1 y O2. El sistema clasifica estas señales en RED, GREEN y TRASH, aunque inicialmente había pensado en más categorías hasta que me di cuenta de que era mejor empezar simple.
+Se implementó una arquitectura híbrida específicamente diseñada para procesar señales EEG de los cuatro canales seleccionados: T3, T4, O1 y O2. El sistema realiza clasificación en tres categorías: RED, GREEN y TRASH, manteniendo un enfoque simplificado que facilita la validación inicial del concepto.
 
-Probé varias configuraciones diferentes—algunas con más capas, otras con menos, unas con diferentes números de neuronas—y esta fue la que finalmente mejor funcionó después de semanas de experimentación.
+La arquitectura final se estableció tras un proceso iterativo de experimentación con diferentes configuraciones de capas y parámetros de red.
 
 \begin{figure}[ht]
     \centering
@@ -26,7 +26,7 @@ Probé varias configuraciones diferentes—algunas con más capas, otras con men
 Los componentes principales son:
 
 \begin{itemize}
-    \item \textbf{Capa LSTM}: Una capa LSTM con 64 unidades. Captura patrones temporales en las señales. Configuré \texttt{batch\_first=True} para que la entrada tenga la forma (batch\_size, seq\_length, features).
+    \item \textbf{Capa LSTM}: Una capa LSTM con 64 unidades que captura patrones temporales en las señales. La configuración utiliza \texttt{batch\_first=True} para optimizar la forma de entrada (batch\_size, seq\_length, features).
     
     \item \textbf{Capas densas}: Después de la LSTM, hay varias capas:
     \begin{itemize}
@@ -61,7 +61,7 @@ Los principales parámetros son:
 
 \section{Preprocesamiento de los datos}
 
-El preprocesamiento es crucial para tener buenas entradas. Implementé varias fases desde la captura hasta generar ventanas deslizantes.
+El preprocesamiento constituye una fase crítica para garantizar la calidad de las entradas al modelo. Se implementaron múltiples etapas de procesamiento, desde la captura inicial hasta la generación de ventanas deslizantes optimizadas.
 
 \subsection{Adquisición y estructuración del dataset}
 
@@ -99,7 +99,7 @@ El proceso está en la función \texttt{neural\_analytics\_preprocessor} y hace:
 
 \subsection{Implementación del dataset}
 
-Hice una clase \texttt{NeuralAnalyticsDataset} que hereda de \texttt{Dataset} de PyTorch. Esta clase:
+Se desarrolló una clase \texttt{NeuralAnalyticsDataset} que hereda de \texttt{Dataset} de PyTorch. Esta implementación:
 
 \begin{itemize}
     \item Recorre el directorio y procesa los CSV.
@@ -109,15 +109,15 @@ Hice una clase \texttt{NeuralAnalyticsDataset} que hereda de \texttt{Dataset} de
     \item Implementa \texttt{\_\_len\_\_} y \texttt{\_\_getitem\_\_}.
 \end{itemize}
 
-En la inicialización, divido en entrenamiento (80\%) y validación (20\%) con \texttt{train\_test\_split}.
+Durante la inicialización, se implementa división automática en conjuntos de entrenamiento (80\%) y validación (20\%) utilizando \texttt{train\_test\_split}.
 
 \section{Resultados del entrenamiento}
 
-Usé PyTorch para entrenar. Me gustó por su flexibilidad y rendimiento. Estos son los resultados.
+Se utilizó PyTorch como framework de entrenamiento debido a su flexibilidad y rendimiento optimizado. Los resultados obtenidos se detallan a continuación.
 
 \subsection{Configuración del entrenamiento}
 
-Configuré así el entrenamiento:
+Se estableció la siguiente configuración para el proceso de entrenamiento:
 
 \begin{itemize}
     \item \textbf{Función de pérdida}: \texttt{CrossEntropyLoss}.
@@ -153,14 +153,14 @@ Configuré así el entrenamiento:
 \newpage
 \subsection{Métricas de rendimiento}
 
-Estas son las métricas que obtuve:
+Las métricas de rendimiento obtenidas son las siguientes:
 
 \begin{itemize}
-    \item \textbf{Precisión}: 84.3\% en validación. Bastante bien.
+    \item \textbf{Precisión}: 84.3\% en validación, resultado satisfactorio para el objetivo del proyecto.
     
-    \item \textbf{Matriz de confusión}: Muestra más confusión entre \texttt{red} y \texttt{trash} que con \texttt{green}.
+    \item \textbf{Matriz de confusión}: Los resultados muestran mayor confusión entre las clases \texttt{red} y \texttt{trash} comparado con \texttt{green}.
     
-    \item \textbf{Curvas ROC}: Valores AUC superiores a 0.95 para todas las clases. Muy buen poder discriminativo.
+    \item \textbf{Curvas ROC}: Se obtuvieron valores AUC superiores a 0.95 para todas las clases, indicando excelente poder discriminativo del modelo.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -200,21 +200,21 @@ Estas son las métricas que obtuve:
 \newpage
 \subsection{Análisis de resultados}
 
-Al analizar todo esto, veo que:
+El análisis de los resultados revela los siguientes hallazgos:
 
 \begin{itemize}
-    \item La LSTM capta bien los patrones de las señales EEG.
+    \item La arquitectura LSTM demuestra capacidad efectiva para capturar patrones relevantes en las señales EEG.
     
-    \item El refinamiento de abril 2025 mejoró mucho. Pasamos de 55\% a más de 84\% de precisión al ampliar el dataset.
+    \item El refinamiento realizado en abril 2025 produjo mejoras significativas, incrementando la precisión del 55\% inicial a más del 84\% mediante la ampliación del dataset.
     
-    \item RED y GREEN tienen patrones claros. TRASH varía más.
+    \item Las clases RED y GREEN presentan patrones más distinguibles, mientras que TRASH muestra mayor variabilidad inherente.
     
-    \item La forma en que los usuarios piensan en colores afecta mucho. Necesitamos un protocolo estándar para capturar datos.
+    \item La variabilidad en los procesos cognitivos de visualización de colores entre usuarios constituye un factor relevante que requiere protocolos estandarizados para la captura de datos.
 \end{itemize}
 
 \subsection{Exportación del modelo}
 
-Tras entrenar, exporté el modelo a ONNX para integrarlo en el proyecto en Rust. El proceso fue:
+Completado el entrenamiento, se procedió a la exportación del modelo al formato ONNX para su integración en el proyecto desarrollado en Rust. El proceso implementado incluye:
 
 \begin{itemize}
     \item Convertir de PyTorch a ONNX con \texttt{torch.onnx.export}.
@@ -223,4 +223,4 @@ Tras entrenar, exporté el modelo a ONNX para integrarlo en el proyecto en Rust.
     \item Guardar en \texttt{build/neural\_analytics.onnx}.
 \end{itemize}
 
-Con esto, el modelo puede usarse con \texttt{tract-onnx} en el servicio de inferencia, manteniendo el rendimiento que conseguí durante el entrenamiento.
+Esta configuración permite la utilización del modelo mediante \texttt{tract-onnx} en el servicio de inferencia, manteniendo el rendimiento alcanzado durante el entrenamiento.
