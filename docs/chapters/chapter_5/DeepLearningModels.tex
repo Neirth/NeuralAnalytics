@@ -1,15 +1,15 @@
 \chapter{Modelos de Deep Learning}\label{ch:deep_learning_models}
 
-A través de este capítulo describo los modelos de Deep Learning \cite{raschka2022machine} que implementé en el proyecto, así como los conceptos fundamentales y la arquitectura de cada uno. También detallo las métricas de evaluación y el proceso de validación cruzada que utilicé para evaluar su rendimiento.
+A través de este capítulo se describen los modelos de Deep Learning \cite{raschka2022machine} implementados en el proyecto, así como los conceptos fundamentales y la arquitectura de cada uno. También se detallan las métricas de evaluación y el proceso de validación cruzada utilizado para evaluar su rendimiento.
 
-La selección de estos modelos no fue trivial. Después de analizar varias arquitecturas, me decanté por aquellas que mostraban mejor capacidad para detectar patrones temporales en señales EEG, especialmente en ventanas cortas—un requisito indispensable para la clasificación en tiempo real que buscaba conseguir.
+La selección de estos modelos constituyó un proceso de análisis técnico exhaustivo. Tras evaluar múltiples arquitecturas, se optó por aquellas que demostraron mejor capacidad para detectar patrones temporales en señales EEG, especialmente en ventanas cortas—un requisito indispensable para la clasificación en tiempo real requerida por el sistema.
 
 \section{Conceptos Fundamentales}
 
 \subsection{Ventanas Temporales}
 Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En este proyecto, estas ventanas capturan patrones de actividad cerebral asociados al pensamiento de diferentes colores. La longitud de la ventana resultó ser un parámetro crítico: si era demasiado corta, no capturaba suficiente información para la clasificación; si era demasiado larga, introducía latencias inaceptables para una aplicación en tiempo real.
 
-Tras numerosas pruebas con diferentes configuraciones, encontré que ventanas de 62 muestras ofrecían el mejor equilibrio. Esto no coincidía con lo que esperaba inicialmente basándome en la literatura, donde se sugerían ventanas más largas, pero comprobé empíricamente que este rango funcionaba mejor para mi implementación específica.
+Tras extensas pruebas con diferentes configuraciones, se determinó que ventanas de 62 muestras ofrecían el equilibrio óptimo para el sistema. Este hallazgo difirió de las expectativas iniciales basadas en la literatura técnica, donde se sugieren ventanas más extensas, pero se validó empíricamente como la configuración más eficiente para esta implementación específica.
 
 \subsection{One-Hot Encoding}
 El One-Hot Encoding \cite{raschka2022machine} es una técnica de preprocesamiento que transforma etiquetas categóricas (en este caso, colores) en vectores binarios. Por ejemplo, para tres colores:
