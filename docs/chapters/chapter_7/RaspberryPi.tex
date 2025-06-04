@@ -1,34 +1,34 @@
 \chapter{Raspberry Pi 4 Model B (8GB)}
 
 \section{Introducción}
-    Elegir la Raspberry Pi 4 Model B \cite{raspberrypi4} para este proyecto no fue inmediato, la verdad. Inicialmente había considerado otras opciones más potentes —incluso estuve mirando algunos mini-PCs x86—, pero al final este ordenador de placa única me acabó convenciendo por razones bastante prácticas. El equilibrio entre rendimiento, consumo y facilidad de desarrollo resultó ser exactamente lo que necesitaba, aunque admito que esto lo confirmé solo después de varias semanas trabajando con él y de algunos dolores de cabeza iniciales.
+    La elección de la Raspberry Pi 4 Model B \cite{raspberrypi4} para este proyecto no fue una decisión inmediata. Inicialmente, se habían considerado otras opciones con mayor potencia —incluso se evaluaron algunos mini-PCs x86—, pero finalmente este ordenador de placa única resultó convincente por razones eminentemente prácticas. El equilibrio entre rendimiento, consumo y facilidad de desarrollo demostró ser adecuado para los requerimientos del proyecto, una conclusión que, es preciso admitir, se consolidó solo después de varias semanas de trabajo y algunos desafíos iniciales.
 
-    Lo que realmente me decidió fue descubrir que incorpora un procesador ARM de 64 bits que funciona sorprendentemente bien (mejor de lo que esperaba, sinceramente), memoria RAM más que suficiente —especialmente en el modelo de 8GB que terminé eligiendo después de dudar mucho entre este y el de 4GB—, y prácticamente todas las interfaces que requería mi diseño. Lo que más tranquilidad me dio, sin embargo, fue verificar que su arquitectura ARM tiene un soporte bastante sólido por parte de los principales fabricantes. Esto era crucial porque ya había tenido experiencias bastante frustrantes con incompatibilidades en proyectos anteriores, y francamente no quería repetir esa experiencia.
+    El factor determinante para la selección fue el descubrimiento de que incorpora un procesador ARM de 64 bits con un funcionamiento notablemente eficiente (superior al esperado, con toda sinceridad), una cantidad de memoria RAM considerable —especialmente en el modelo de 8GB, que fue el elegido tras una deliberación entre este y el de 4GB—, y la práctica totalidad de las interfaces requeridas por el diseño. No obstante, la mayor seguridad provino de la verificación de que su arquitectura ARM cuenta con un soporte sólido por parte de los principales fabricantes. Este aspecto era fundamental, dadas experiencias previas con incompatibilidades en otros proyectos, una situación que se deseaba evitar.
 
 \section{Especificaciones Técnicas}
-    El modelo de 8GB de la Raspberry Pi 4 se basa en una arquitectura de hardware que me sorprendió gratamente por su relación prestaciones-precio, aunque reconozco que mis expectativas iniciales no eran demasiado altas:
+    El modelo de 8GB de la Raspberry Pi 4 se basa en una arquitectura de hardware que ofreció una relación prestaciones-precio valorada positivamente, aunque se reconoce que las expectativas iniciales eran moderadas:
 
     \subsection{Procesador y Memoria}
     \begin{itemize}
-        \item CPU: Quad-Core ARM Cortex-A72 (64 bits) a 1.5GHz —aunque en realidad puede hacer boost hasta 1.8GHz en ciertas condiciones, algo que descubrí más tarde.
-        \item GPU: VideoCore VI compatible con OpenGL ES 3.0 —suficiente para mis necesidades, aunque no esperes milagros gráficos.
-        \item Memoria RAM: 8 GB LPDDR4 SDRAM. Este fue el factor que realmente me convenció de invertir un poco más en este modelo específico, especialmente después de haberme quedado corto de memoria en proyectos anteriores.
+        \item CPU: Quad-Core ARM Cortex-A72 (64 bits) a 1.5GHz —si bien puede alcanzar hasta 1.8GHz en ciertas condiciones, un detalle que se conoció posteriormente—.
+        \item GPU: VideoCore VI compatible con OpenGL ES 3.0 —suficiente para las necesidades del proyecto, sin esperar un rendimiento gráfico excepcional—.
+        \item Memoria RAM: 8 GB LPDDR4 SDRAM. Este fue el factor que motivó la inversión adicional en este modelo específico, especialmente tras experiencias previas de limitaciones de memoria en otros desarrollos.
     \end{itemize}
 
     \subsection{Requerimientos de Energía}
-    La Raspberry Pi 4 Model B requiere una fuente de alimentación de 5V y 3A a través de USB-C. Para configuraciones que incluyan dispositivos USB adicionales, recomiendo usar una fuente con mayor capacidad —algo que aprendí por experiencia tras algunos problemas de estabilidad bastante inesperados durante las primeras pruebas. Tener esto en cuenta es fundamental, especialmente en un proyecto como este donde la estabilidad es clave. De hecho, me pasé una tarde entera pensando que tenía un problema de software cuando en realidad era simplemente que la fuente que estaba usando no daba suficiente corriente para todo el sistema.
+    La Raspberry Pi 4 Model B requiere una fuente de alimentación de 5V y 3A a través de USB-C. Para configuraciones que incluyan dispositivos USB adicionales, se recomienda el uso de una fuente con mayor capacidad —una lección aprendida tras algunos problemas de estabilidad inesperados durante las primeras pruebas—. Considerar este aspecto es fundamental, especialmente en un proyecto donde la estabilidad es un requisito principal. De hecho, se invirtió una considerable cantidad de tiempo en la depuración de un supuesto problema de software que, en realidad, se debía a una fuente de alimentación con corriente insuficiente para el sistema completo.
 
     \subsection{Interfaces y Conectividad}
     \begin{itemize}
         \item Red:
         \begin{itemize}
-            \item Gigabit Ethernet (compatible con PoE mediante un módulo adicional, aunque no lo implementé —quizás debería haberlo considerado más seriamente).
-            \item Wi-Fi 802.11 b/g/n/ac de doble banda (2.4 GHz y 5.0 GHz). En mi experiencia funciona bastante bien, aunque la señal no es tan potente como me hubiera gustado inicialmente.
-            \item Bluetooth 5.0 con BLE, que me resultó perfecto para conectar con el dispositivo BrainBit —una de esas cosas que funcionó mejor de lo esperado desde el primer momento.
+            \item Gigabit Ethernet (compatible con PoE mediante un módulo adicional, aunque esta opción no fue implementada —quizás su consideración más detenida hubiera sido pertinente—).
+            \item Wi-Fi 802.11 b/g/n/ac de doble banda (2.4 GHz y 5.0 GHz). Su funcionamiento general es adecuado, aunque la potencia de la señal podría ser superior.
+            \item Bluetooth 5.0 con BLE, que resultó idóneo para la conexión con el dispositivo BrainBit —uno de los componentes cuya integración funcionó de manera óptima desde el inicio—.
         \end{itemize}
         \item Almacenamiento:
         \begin{itemize}
-            \item Ranura para tarjeta microSD. Recomiendo encarecidamente invertir en una tarjeta de calidad —las opciones baratas me dieron más de un problema de rendimiento y algún que otro susto con corrupción de datos.
+            \item Ranura para tarjeta microSD. Se recomienda encarecidamente la inversión en una tarjeta de alta calidad —las opciones de bajo coste generaron problemas de rendimiento y algunos incidentes relacionados con la corrupción de datos—.
         \end{itemize}
         \item Puertos USB:
         \begin{itemize}
@@ -49,9 +49,9 @@
     \end{itemize}
 
     \subsection{Consideraciones Térmicas}
-    El sistema de gestión térmica de la Raspberry Pi 4 reduce automáticamente la frecuencia y el voltaje del procesador durante periodos de baja demanda, lo cual funciona bien para ahorrar energía y evitar sobrecalentamiento. Ahora bien, bajo cargas intensivas y especialmente cuando hace calor, necesitas añadir disipación adicional como disipadores o ventiladores. Esto lo confirmé de la forma más incómoda posible: cuando se me empezó a resetear durante las primeras sesiones de pruebas intensivas y me costó un rato darme cuenta de que era un problema térmico y no de software.
+    El sistema de gestión térmica de la Raspberry Pi 4 reduce automáticamente la frecuencia y el voltaje del procesador durante periodos de baja demanda, lo cual opera eficientemente para el ahorro de energía y la prevención del sobrecalentamiento. Ahora bien, bajo cargas intensivas y, especialmente, en condiciones de temperatura ambiente elevada, es necesario añadir disipación adicional, como disipadores o ventiladores. Esta necesidad se confirmó de manera directa cuando el sistema comenzó a reiniciarse durante las primeras sesiones de pruebas intensivas, y tomó cierto tiempo identificar que se trataba de un problema térmico y no de software.
 
 \section{Elección de este dispositivo para el Proyecto}
-    El modelo de 8GB de la Raspberry Pi 4 resultó ser una solución bastante versátil y compacta para lo que necesitaba desarrollar, aunque no voy a mentir: hubo momentos en los que me planteé si no habría sido mejor optar por algo más potente. Tener 8GB de RAM me dio el margen suficiente para ejecutar aplicaciones complejas sin preocuparme constantemente por limitaciones de memoria, y el rendimiento general demostró ser adecuado para procesos en tiempo real —al menos para lo que mi proyecto específico requería.
+    El modelo de 8GB de la Raspberry Pi 4 demostró ser una solución versátil y compacta para los requerimientos del desarrollo, aunque es preciso reconocer que hubo momentos en los que se sopesó la posibilidad de optar por una plataforma de mayor potencia. Disponer de 8GB de RAM proporcionó el margen suficiente para ejecutar aplicaciones complejas sin una preocupación constante por las limitaciones de memoria, y el rendimiento general se mostró adecuado para procesos en tiempo real —al menos para las exigencias específicas de este proyecto—.
     
-    Lo que más valoré al final fue la compatibilidad con sistemas operativos en tiempo real y las distribuciones Linux que ya conocía. Poder usar herramientas familiares me aceleró considerablemente el desarrollo, algo que no había anticipado completamente al principio pero que resultó ser una ventaja importante cuando los plazos empezaron a estrechar.
+    El aspecto más valorado finalmente fue la compatibilidad con sistemas operativos en tiempo real y las distribuciones Linux con las que ya se tenía familiaridad. La posibilidad de utilizar herramientas conocidas aceleró considerablemente el desarrollo, una ventaja no anticipada en su totalidad al inicio, pero que resultó de gran importancia cuando los plazos comenzaron a ser más ajustados.
