@@ -2,15 +2,15 @@
 
 \section{Requisitos funcionales y no funcionales}
 
-Definir los requisitos del sistema resultó ser más complicado de lo que esperaba al principio. Pensé que sería simplemente hacer una lista de lo que quería que hiciera el sistema, pero me di cuenta de que muchos requisitos no aparecen hasta que empiezas a implementar y surgen problemas que no habías previsto. Fue un proceso bastante iterativo donde cada fase del desarrollo revelaba nuevas necesidades.
+La definición de los requisitos del sistema resultó ser un proceso más complejo de lo anticipado inicialmente. Se había considerado que consistiría simplemente en elaborar una lista de las funcionalidades deseadas para el sistema; sin embargo, se constató que muchos requisitos no se manifiestan hasta que se inicia la implementación y surgen problemas no previstos. Configurando así un proceso marcadamente iterativo, donde cada fase del desarrollo revelaba nuevas necesidades.
 
 \subsection{Requisitos Funcionales}
 
-Los requisitos funcionales básicamente definen qué tiene que hacer el sistema. Estos fueron los que identifiqué analizando el código final:
+Los requisitos funcionales definen esencialmente las operaciones que el sistema debe realizar. A continuación, se presentan aquellos identificados a partir del análisis del código final:
 
 \begin{itemize}
     \item \textbf{RF-01}: El sistema debe permitir la conexión y desconexión con el dispositivo EEG (electroencefalograma).
-    \item \textbf{RF-02}: El sistema debe capturar los datos raw de los canales T3, T4, O1 y O2 del dispositivo EEG.
+    \item \textbf{RF-02}: El sistema debe capturar los datos crudos (raw) de los canales T3, T4, O1 y O2 del dispositivo EEG.
     \item \textbf{RF-03}: El sistema debe obtener datos de impedancia del dispositivo EEG para verificar la calidad de la señal.
     \item \textbf{RF-04}: El sistema debe permitir el cambio entre distintos modos de trabajo del dispositivo EEG.
     \item \textbf{RF-05}: El sistema debe implementar un modelo de inferencia para predecir el color en el que está pensando el usuario.
@@ -25,7 +25,7 @@ Los requisitos funcionales básicamente definen qué tiene que hacer el sistema.
 
 \subsection{Requisitos No Funcionales}
 
-Los requisitos no funcionales fue el punto más complejo de definir. Aquí es donde entran temas como el rendimiento, la seguridad, cumplimiento de normativas—cosas que a menudo pasas por alto al principio porque están más "escondidas". Algunos de estos requisitos ni siquiera los había considerado hasta que empecé a hacer las primeras pruebas del sistema y me di cuenta de que ciertas cosas no funcionaban como esperaba. Los que finalmente identifiqué son:
+La definición de los requisitos no funcionales representó el aspecto más intrincado. En esta categoría se incluyen temas como el rendimiento, la seguridad y el cumplimiento de normativas —aspectos que con frecuencia se omiten en las fases iniciales por ser menos evidentes—. Algunos de estos requisitos no habían sido siquiera considerados hasta el inicio de las primeras pruebas del sistema, momento en el cual se observó que ciertos componentes no operaban según lo esperado. Los requisitos finalmente identificados son:
 
 \begin{itemize}
     \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304:2007 para software de dispositivos médicos.\label{rnf-01}
@@ -33,9 +33,9 @@ Los requisitos no funcionales fue el punto más complejo de definir. Aquí es do
     \item \textbf{RNF-03}: \textbf{Fiabilidad}: El sistema debe validar la calidad de las señales EEG mediante los datos de impedancia antes de realizar predicciones.\label{rnf-03}
     \item \textbf{RNF-04}: \textbf{Portabilidad}: El sistema debe poder ejecutarse en una Raspberry Pi.\label{rnf-04}
     \item \textbf{RNF-05}: \textbf{Seguridad}: El sistema debe garantizar la privacidad y seguridad de los datos biométricos del usuario.\label{rnf-05}
-    \item \textbf{RNF-06}: \textbf{Interoperabilidad}: El sistema debe integrarse con dispositivos domóticos standard (bombillas inteligentes).\label{rnf-06}
+    \item \textbf{RNF-06}: \textbf{Interoperabilidad}: El sistema debe integrarse con dispositivos domóticos estándar (bombillas inteligentes).\label{rnf-06}
     \item \textbf{RNF-07}: \textbf{Mantenibilidad}: El sistema debe seguir un diseño hexagonal (puertos y adaptadores) para facilitar su mantenimiento y pruebas.\label{rnf-07}
-    \item \textbf{RNF-08}: \textbf{Usabilidad}: La interfaz gráfica debe ser intuitiva y proporcionar feedback claro sobre el estado del sistema.\label{rnf-08}
+    \item \textbf{RNF-08}: \textbf{Usabilidad}: La interfaz gráfica debe ser intuitiva y proporcionar retroalimentación clara sobre el estado del sistema.\label{rnf-08}
     \item \textbf{RNF-09}: \textbf{Escalabilidad}: La arquitectura debe permitir la inclusión de nuevos tipos de predicciones o dispositivos de salida.\label{rnf-09}
     \item \textbf{RNF-10}: \textbf{Rendimiento}: El sistema debe ser capaz de procesar y analizar señales EEG con una latencia mínima.\label{rnf-10}
 \end{itemize}
@@ -44,9 +44,9 @@ Los requisitos no funcionales fue el punto más complejo de definir. Aquí es do
 
 \section{Bibliotecas Usadas}
 
-Elegir las bibliotecas correctas me llevó bastante tiempo de investigación. Al principio pensé que sería cuestión de buscar lo más popular, pero me encontré con que muchas de las tecnologías que parecían perfectas en papel luego no funcionaban bien con los requisitos de tiempo real o directamente no compilaban para ARM. Fue uno de esos casos donde la teoría y la práctica no coinciden para nada.
+La selección de las bibliotecas adecuadas requirió un tiempo considerable de investigación. Inicialmente, se pensó que sería suficiente con identificar las opciones más populares; sin embargo, se constató que muchas tecnologías que parecían idóneas en teoría, posteriormente no operaban correctamente con los requisitos de tiempo real o no compilaban para la arquitectura ARM. Este fue un caso donde la teoría y la práctica presentaron divergencias significativas.
 
-El proyecto utiliza una mezcla de bibliotecas para diferentes propósitos. Algunas las elegí desde el principio, otras las fui incorporando conforme surgían necesidades específicas que no había previsto. A continuación las organizo por su función principal:
+El proyecto utiliza una combinación de bibliotecas para diferentes propósitos. Algunas fueron seleccionadas desde el inicio, mientras que otras se incorporaron a medida que surgían necesidades específicas no previstas. A continuación, se organizan según su función principal:
 
 \subsection{Procesamiento de Señales EEG}
 \begin{itemize}
@@ -69,7 +69,7 @@ El proyecto utiliza una mezcla de bibliotecas para diferentes propósitos. Algun
 
 \subsection{Comunicación y Control de Dispositivos}
 \begin{itemize}
-    \item \textbf{tapo}: Cliente en Rust para controlar dispositivos inteligentes Tapo, utilizado para la bombilla inteligente que responde a los pensamientos del usuario.
+    \item \textbf{tapo}: Cliente en Rust para controlar dispositivos inteligentes Tapo, utilizado para la bombilla inteligente que responde a las señales cerebrales del usuario.
     \item \textbf{presage}: Biblioteca de gestión de eventos y mensajería para la comunicación entre componentes.
 \end{itemize}
 
