@@ -1,15 +1,15 @@
 \chapter{Modelos de Deep Learning}\label{ch:deep_learning_models}
 
-A través de este capítulo se describen los modelos de Deep Learning \cite{raschka2022machine} implementados en el proyecto, así como los conceptos fundamentales y la arquitectura de cada uno. También se detallan las métricas de evaluación y el proceso de validación cruzada utilizado para evaluar su rendimiento.
+A través de este capítulo, se describen los modelos de Deep Learning \cite{raschka2022machine} implementados en el proyecto, así como los conceptos fundamentales y la arquitectura de cada uno. También se detallan las métricas de evaluación y el proceso de validación cruzada utilizado para evaluar su rendimiento.
 
-La selección de estos modelos constituyó un proceso de análisis técnico exhaustivo. Tras evaluar múltiples arquitecturas, se optó por aquellas que demostraron mejor capacidad para detectar patrones temporales en señales EEG, especialmente en ventanas cortas—un requisito indispensable para la clasificación en tiempo real requerida por el sistema.
+La selección de estos modelos constituyó un proceso de análisis técnico detallado. Tras la evaluación de múltiples arquitecturas, se optó por aquellas que demostraron una capacidad superior para detectar patrones temporales en señales EEG, especialmente en ventanas cortas —un requisito fundamental para la clasificación en tiempo real demandada por el sistema—.
 
 \section{Conceptos Fundamentales}
 
 \subsection{Ventanas Temporales}
-Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En este proyecto, estas ventanas capturan patrones de actividad cerebral asociados al pensamiento de diferentes colores. La longitud de la ventana resultó ser un parámetro crítico: si era demasiado corta, no capturaba suficiente información para la clasificación; si era demasiado larga, introducía latencias inaceptables para una aplicación en tiempo real.
+Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En este proyecto, estas ventanas capturan patrones de actividad cerebral asociados al pensamiento de diferentes colores. La longitud de la ventana se reveló como un parámetro de alta sensibilidad: si era demasiado corta, no capturaba suficiente información para la clasificación; si era excesivamente larga, introducía latencias consideradas inaceptables para una aplicación en tiempo real.
 
-Tras extensas pruebas con diferentes configuraciones, se determinó que ventanas de 62 muestras ofrecían el equilibrio óptimo para el sistema. Este hallazgo difirió de las expectativas iniciales basadas en la literatura técnica, donde se sugieren ventanas más extensas, pero se validó empíricamente como la configuración más eficiente para esta implementación específica.
+Tras pruebas exhaustivas con diferentes configuraciones, se determinó que ventanas de 62 muestras ofrecían el equilibrio más adecuado para el sistema. Este hallazgo difirió de las expectativas iniciales basadas en la literatura técnica, donde se suelen sugerir ventanas más extensas, pero fue validado empíricamente como la configuración de mayor eficiencia para esta implementación específica.
 
 \subsection{One-Hot Encoding}
 El One-Hot Encoding \cite{raschka2022machine} es una técnica de preprocesamiento que transforma etiquetas categóricas (en este caso, colores) en vectores binarios. Por ejemplo, para tres colores:
@@ -27,16 +27,16 @@ El One-Hot Encoding \cite{raschka2022machine} es una técnica de preprocesamient
     \label{fig:one_hot_encoding}
 \end{figure}
 
-Esta técnica es crucial cuando trabajamos con datos categóricos sin relación ordinal entre sí. A diferencia de la codificación de etiquetas ordinales, donde asignamos un valor numérico a cada categoría según un orden predefinido, One-Hot Encoding crea una columna nueva para cada categoría posible.
+Esta técnica es de gran utilidad cuando se trabaja con datos categóricos sin relación ordinal entre sí. A diferencia de la codificación de etiquetas ordinales, donde se asigna un valor numérico a cada categoría según un orden predefinido, One-Hot Encoding crea una nueva columna para cada categoría posible.
 
-Por ejemplo, si tenemos una columna de \textquotedblleft color\textquotedblright{} con las opciones \textquotedblleft rojo\textquotedblright{}, \textquotedblleft verde\textquotedblright{} y \textquotedblleft azul\textquotedblright{}, esta técnica la transforma en tres columnas nuevas. Cada fila tendrá un 1 en la columna de su color correspondiente y 0 en las demás.
+Por ejemplo, si existe una columna \textquotedblleft color\textquotedblright{} con las opciones \textquotedblleft rojo\textquotedblright{}, \textquotedblleft verde\textquotedblright{} y \textquotedblleft azul\textquotedblright{}, esta técnica la transforma en tres columnas nuevas. Cada fila tendrá un 1 en la columna de su color correspondiente y 0 en las demás.
 
-Al principio dudé entre utilizar esta técnica o una codificación ordinal más simple, pues en ciertos experimentos preliminares había observado comportamientos similares con ambas. Sin embargo, conceptualmente el One-Hot Encoding representa mejor la naturaleza de los datos—no existe una relación ordinal inherente entre los colores—así que opté por implementar este enfoque más robusto.
+Inicialmente, existió una indecisión entre utilizar esta técnica o una codificación ordinal más simple, pues en ciertos experimentos preliminares se habían observado comportamientos similares con ambas. Sin embargo, conceptualmente el One-Hot Encoding representa de manera más fidedigna la naturaleza de los datos —no existe una relación ordinal inherente entre los colores— por lo que se optó por implementar este enfoque, considerado más robusto.
 
 \section{Arquitectura del Modelo}
 
 \subsection{Función de Activación ReLU}
-La función ReLU (Rectified Linear Unit) se convirtió en un componente esencial de mi modelo por características que la hacen especialmente adecuada:
+La función ReLU (Rectified Linear Unit) se consolidó como un componente esencial del modelo implementado, debido a características que la hacen especialmente adecuada:
 
 \begin{figure}[h!]
     \centering
@@ -47,49 +47,49 @@ La función ReLU (Rectified Linear Unit) se convirtió en un componente esencial
     \label{fig:relu_equation}
 \end{figure}
 
-ReLU es una función de activación no lineal que resuelve el problema del desvanecimiento del gradiente presente en funciones como tanh o sigmoide. Este problema ocurre cuando, por ejemplo, para valores de entrada grandes ($z_1 = 20$ y $z_2 = 25$), las funciones tanh y sigmoide producen salidas prácticamente idénticas ($\sigma(z_1) \approx \sigma(z_2) \approx 1.0$) debido a su comportamiento asintótico.
+ReLU es una función de activación no lineal que aborda el problema del desvanecimiento del gradiente, presente en funciones como tanh o sigmoide. Este problema ocurre cuando, por ejemplo, para valores de entrada grandes ($z_1 = 20$ y $z_2 = 25$), las funciones tanh y sigmoide producen salidas prácticamente idénticas ($\sigma(z_1) \approx \sigma(z_2) \approx 1.0$) debido a su comportamiento asintótico.
 
-Las principales ventajas que me llevaron a seleccionar ReLU son:
+Las principales ventajas que condujeron a la selección de ReLU son:
 
 \begin{itemize}
-    \item \textbf{Gradiente Constante}: Para valores positivos de entrada, la derivada es siempre 1, evitando el desvanecimiento del gradiente.
+    \item \textbf{Gradiente Constante}: Para valores positivos de entrada, la derivada es siempre 1, lo que evita el desvanecimiento del gradiente.
     \item \textbf{Eficiencia Computacional}: Su implementación es simple y rápida, requiriendo solo una comparación con cero.
     \item \textbf{No Linealidad}: A pesar de su simplicidad, mantiene la capacidad para aprender funciones complejas.
     \item \textbf{Activación Dispersa}: Produce activaciones dispersas, ya que cualquier entrada negativa se convierte en cero.
 \end{itemize}
 
-Durante la fase de experimentación, probé diferentes funciones de activación, incluyendo Leaky ReLU y ELU, pero no observé mejoras significativas en el rendimiento que justificaran la complejidad adicional. La implementación de ReLU estándar resultó ser la opción más práctica y eficiente para mi caso de uso.
+Durante la fase de experimentación, se probaron diferentes funciones de activación, incluyendo Leaky ReLU y ELU, pero no se observaron mejoras significativas en el rendimiento que justificaran la complejidad adicional. La implementación de ReLU estándar resultó ser la opción más práctica y eficiente para el caso de uso específico de este proyecto.
 
 \subsection{LSTM (Long Short-Term Memory)}
 
-Las LSTM fueron diseñadas para superar el problema del desvanecimiento del gradiente, común en redes neuronales recurrentes (RNN) estándar. Este problema ocurre por la multiplicación repetida de gradientes durante la retropropagación a través del tiempo (BPTT), haciendo que los gradientes se vuelvan extremadamente pequeños (desvanecimiento) o grandes (explosión).
+Las LSTM fueron diseñadas para superar el problema del desvanecimiento del gradiente, frecuente en redes neuronales recurrentes (RNN) estándar. Este problema tiene lugar por la multiplicación repetida de gradientes durante la retropropagación a través del tiempo (BPTT), lo que provoca que los gradientes se vuelvan extremadamente pequeños (desvanecimiento) o grandes (explosión).
 
-Mi primera aproximación al proyecto utilizaba RNNs convencionales, pero pronto me encontré con limitaciones al procesar secuencias temporales largas. Las LSTM ofrecían una solución elegante a este problema, aunque con mayor complejidad computacional—un factor que inicialmente me preocupaba dado el requisito de ejecución en tiempo real.
+La prima aproximación al proyecto utilizaba RNNs convencionales, pero pronto se encontraron limitaciones al procesar secuencias temporales largas. Las LSTM ofrecían una solución efectiva a este problema, aunque con una mayor complejidad computacional —un factor que inicialmente generó cierta preocupación, dado el requisito de ejecución en tiempo real—.
 
-Para entender mejor este problema, consideremos una RNN con una sola unidad oculta. La derivada de la función de pérdida respecto a la entrada neta tiene un factor multiplicativo que puede volverse muy pequeño o muy grande según el peso recurrente. Si este peso es menor que 1, el gradiente se desvanece; si es mayor que 1, explota.
+Para una mejor comprensión de este problema, considérese una RNN con una sola unidad oculta. La derivada de la función de pérdida respecto a la entrada neta posee un factor multiplicativo que puede volverse muy pequeño o muy grande según el peso recurrente. Si este peso es menor que 1, el gradiente se desvanece; si es mayor que 1, explota.
 
-Las LSTM abordan esto mediante celdas de memoria que mantienen información durante períodos largos. Cada celda incluye tres tipos de puertas: olvido, entrada y salida.
+Las LSTM abordan esta cuestión mediante celdas de memoria que mantienen información durante períodos prolongados. Cada celda incluye tres tipos de puertas: olvido, entrada y salida.
 
 \begin{itemize}
-    \item \textbf{Puerta de Olvido (Forget Gate)}: Decide qué información descartar de la memoria. Se calcula:
+    \item \textbf{Puerta de Olvido (Forget Gate)}: Decide qué información descartar de la memoria. Se calcula mediante:
     \begin{equation}
         f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)
     \end{equation}
-    \item \textbf{Puerta de Entrada (Input Gate)}: Decide qué nueva información almacenar. Se calcula:
+    \item \textbf{Puerta de Entrada (Input Gate)}: Decide qué nueva información almacenar. Se calcula como:
     \begin{equation}
         i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)
     \end{equation}
-    \item \textbf{Valor Candidato (Candidate Value)}: Representa la nueva información potencial. Se calcula:
+    \item \textbf{Valor Candidato (Candidate Value)}: Representa la nueva información potencial. Se calcula con:
     \begin{equation}
         \tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)
     \end{equation}
-    \item \textbf{Puerta de Salida (Output Gate)}: Decide qué parte de la memoria se usará para la salida. Se calcula:
+    \item \textbf{Puerta de Salida (Output Gate)}: Decide qué parte de la memoria se usará para la salida. Se calcula así:
     \begin{equation}
         o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)
     \end{equation}
 \end{itemize}
 
-La celda de memoria se actualiza así:
+La celda de memoria se actualiza de la siguiente forma:
 \begin{equation}
     C_t = f_t \cdot C_{t-1} + i_t \cdot \tilde{C}_t
 \end{equation}
@@ -99,10 +99,10 @@ Y la salida se calcula como:
     h_t = o_t \cdot \tanh(C_t)
 \end{equation}
 
-Estas ecuaciones pueden resultar intimidantes al principio, pero la intuición detrás de ellas es bastante clara: las LSTM aprenden a controlar qué información recordar, actualizar u olvidar en cada paso temporal. Al implementar esta arquitectura, pude capturar dependencias temporales en las señales EEG que resultaron cruciales para distinguir patrones asociados a diferentes colores.
+Estas ecuaciones pueden parecer complejas en una primera instancia, pero la intuición subyacente es relativamente clara: las LSTM aprenden a controlar qué información recordar, actualizar u olvidar en cada paso temporal. Al implementar esta arquitectura, fue posible capturar dependencias temporales en las señales EEG que resultaron fundamentales para distinguir patrones asociados a diferentes colores.
 
 \subsection{Función Softmax}
-La función Softmax es una versión suavizada de argmax; en lugar de dar un único índice de clase, proporciona la probabilidad de cada una. Esto permite calcular probabilidades significativas en configuraciones multiclase.
+La función Softmax es una versión suavizada de argmax; en lugar de proporcionar un único índice de clase, ofrece la probabilidad de cada una. Esto permite calcular probabilidades significativas en configuraciones multiclase.
 
 En Softmax, la probabilidad de que una muestra con entrada neta $z$ pertenezca a la clase $i$ se calcula con un término de normalización en el denominador, que suma las funciones lineales ponderadas exponencialmente:
 
@@ -115,20 +115,20 @@ En Softmax, la probabilidad de que una muestra con entrada neta $z$ pertenezca a
     \label{fig:softmax_equation}
 \end{figure}
 
-Las probabilidades resultantes suman 1, como cabría esperar. También es notable que la etiqueta predicha es la misma que al aplicar argmax a la salida logística.
+Las probabilidades resultantes suman 1, como es de esperar. También es destacable que la etiqueta predicha es la misma que al aplicar argmax a la salida logística.
 
-Durante el desarrollo del modelo, consideré brevemente utilizar una capa sigmoide final con entrenamiento independiente para cada clase (enfoque one-vs-all), pero la implementación con Softmax resultó más elegante y directa, además de proporcionar interpretaciones probabilísticas más intuitivas de las predicciones.
+Durante el desarrollo del modelo, se consideró brevemente la utilización de una capa sigmoide final con entrenamiento independiente para cada clase (enfoque one-vs-all), pero la implementación con Softmax resultó más depurada y directa, además de proporcionar interpretaciones probabilísticas más intuitivas de las predicciones.
 
 \section{Evaluación del Modelo}
 
 \subsection{Métricas de Evaluación}
-Para evaluar el rendimiento del modelo utilicé un conjunto de métricas complementarias:
+Para evaluar el rendimiento del modelo, se utilizó un conjunto de métricas complementarias:
 \begin{itemize}
     \item \textbf{Accuracy}: Proporción de predicciones correctas sobre el total. Aunque es una métrica intuitiva, no siempre refleja el rendimiento real cuando las clases están desbalanceadas.
     
-    \item \textbf{Matriz de Confusión}: Visualización detallada de aciertos y errores por clase. Esta herramienta me resultó particularmente útil para identificar patrones específicos de confusión entre colores, lo que me permitió ajustar el preprocesamiento de señales para mejorar la discriminación en casos problemáticos.
+    \item \textbf{Matriz de Confusión}: Visualización detallada de aciertos y errores por clase. Esta herramienta resultó de particular utilidad para identificar patrones específicos de confusión entre colores, lo que permitió ajustar el preprocesamiento de señales para mejorar la discriminación en casos problemáticos.
     
-    \item \textbf{ROC-AUC}: Área bajo la curva ROC para evaluación multiclase. Esta métrica resultó especialmente valiosa por su robustez ante el desbalanceo de clases, un problema que surgió en algunas sesiones de recopilación de datos donde ciertos colores mostraban frecuencias de aparición variables.
+    \item \textbf{ROC-AUC}: Área bajo la curva ROC para evaluación multiclase. Esta métrica se consideró especialmente valiosa por su robustez ante el desbalanceo de clases, un problema que se manifestó en algunas sesiones de recopilación de datos donde ciertos colores mostraban frecuencias de aparición variables.
 \end{itemize}
 
-La combinación de estas métricas me proporcionó una visión completa del rendimiento del modelo en diferentes escenarios y condiciones, guiando el proceso iterativo de mejora hasta alcanzar resultados satisfactorios para la aplicación en tiempo real.
+La combinación de estas métricas proporcionó una visión integral del rendimiento del modelo en diferentes escenarios y condiciones, guiando el proceso iterativo de mejora hasta alcanzar resultados considerados satisfactorIOS para la aplicación en tiempo real.
