@@ -1,21 +1,21 @@
 \chapter{Implementación del Core}\label{ch:core_implementing}
 
-Después de completar el diseño arquitectónico del sistema, pensé que implementar el núcleo de Neural Analytics sería relativamente directo. Tenía la estructura conceptual clara y creía que traducirla a código funcional no presentaría mayores complicaciones—pero esta suposición resultó completamente incorrecta. Este capítulo documenta el proceso completo de construcción del núcleo del sistema, abarcando la arquitectura hexagonal, el patrón Model-View-Intent (MVI) y la integración con componentes externos.
+Tras completar el diseño arquitectónico del sistema, se procedió a la implementación del núcleo de Neural Analytics. Esta fase requirió la traducción de los conceptos arquitectónicos a código funcional, proceso que reveló complejidades técnicas no previstas durante el diseño inicial. Este capítulo documenta de manera sistemática la construcción del núcleo del sistema, incluyendo la implementación de la arquitectura hexagonal, el patrón Model-View-Intent (MVI) y la integración con componentes externos.
 
-Debo admitir que esta fase resultó mucho más complicada de lo que esperaba. Los problemas técnicos aparecían constantemente, me tocó hacer múltiples refactorizaciones y tuve que profundizar mucho más en cada tecnología de lo que había planeado inicialmente. Lo que estimé como unas semanas de desarrollo se extendió a varios meses de debugging, optimización y reescritura de código.
+La implementación de esta fase presentó desafíos técnicos significativos que requirieron múltiples iteraciones de refactorización y optimización. El desarrollo se extendió considerablemente respecto a las estimaciones iniciales debido a la necesidad de profundizar en aspectos específicos de cada tecnología empleada.
 
 \section{Arquitectura Hexagonal}
 
-La arquitectura hexagonal (\citeyear{martin2017clean})—también conocida como arquitectura de puertos y adaptadores—se convirtió en la base de todo Neural Analytics. Durante la implementación me di cuenta de que no tenía ni idea de cómo dividir correctamente un proyecto de esta complejidad, algo que había pasado por alto completamente durante la planificación.
+La arquitectura hexagonal (\citeyear{martin2017clean})—también conocida como arquitectura de puertos y adaptadores—constituyó la base estructural de Neural Analytics. La implementación reveló la complejidad inherente de dividir correctamente un proyecto de esta envergadura, aspecto que requirió consideración adicional durante el desarrollo.
 
-Esta arquitectura sigue los principios de \citefullauthor{martin2017clean} sobre arquitectura limpia, que básicamente te dicen que separes bien la lógica de negocio de todo lo demás. En teoría sonaba genial—mejor mantenimiento, testing más fácil, escalabilidad—pero cuando me puse a implementarlo de verdad me di cuenta de que era bastante más complicado de lo que esperaba.
+Esta arquitectura implementa los principios establecidos por \citefullauthor{martin2017clean} sobre arquitectura limpia, fundamentados en la separación clara entre lógica de negocio e infraestructura externa. Aunque teóricamente estos principios ofrecen ventajas significativas—mejor mantenimiento, testing simplificado, escalabilidad mejorada—su implementación práctica presentó complejidades considerables que requirieron adaptaciones iterativas.
 
 \subsection{Estructura General}
 
-Organizar el paquete \texttt{neural\_analytics\_core} siguiendo los principios hexagonales requirió varias semanas de experimentación, refactorizaciones constantes y múltiples pruebas de concepto. Inicialmente la estructura carecía de coherencia—componentes dispersos sin un criterio organizacional claro. Gradualmente, tras numerosas iteraciones, logré una organización más sistemática:
+La organización del paquete \texttt{neural\_analytics\_core} siguiendo los principios hexagonales requirió un proceso iterativo de refinamiento arquitectónico. La estructura inicial careció de coherencia organizacional, requiriendo múltiples refactorizaciones hasta alcanzar una organización sistemática:
 
 \begin{itemize}
-    \item \textbf{Dominio}: Aquí va toda la lógica principal de la aplicación, diseñada para funcionar sin depender de tecnologías externas. Conseguir que esto fuera realmente independiente resultó mucho más difícil de lo que decían los libros.
+    \item \textbf{Dominio}: Contiene toda la lógica principal de la aplicación, diseñada para funcionar independientemente de tecnologías externas. Lograr esta independencia real resultó más complejo que lo indicado en la literatura técnica.
     \begin{itemize}
         \item \texttt{models}: Define las entidades y objetos de valor del dominio. Esta parte fue bastante directa.
         \item \texttt{services}: Implementa servicios específicos del dominio como la inferencia del modelo. Organizar bien las responsabilidades me llevó varias vueltas porque al principio tenía todo mezclado.
@@ -39,7 +39,7 @@ Al principio tenía toda la lógica de BrainFlow mezclada con la lógica de nego
 
 \subsubsection{Puertos de Entrada}
 
-El puerto principal de entrada es el \texttt{EegHeadsetPort}, que diseñé para definir todas las operaciones que necesitaba para hablar con el dispositivo EEG. Mi diseño inicial era bastante básico y resultó insuficiente cuando empecé a implementar de verdad. Conforme avancé me di cuenta de que necesitaba métodos adicionales, casos raros mucho más complejos y validaciones que ni había contemplado.
+El puerto principal de entrada es el \texttt{EegHeadsetPort}, que se diseñó para definir todas las operaciones necesarias para comunicarse con el dispositivo EEG. El diseño inicial resultó insuficiente durante la implementación real. Durante el desarrollo se identificó la necesidad de métodos adicionales, casos complejos adicionales y validaciones que no habían sido contempladas inicialmente.
 
 Este puerto especifica métodos esenciales como:
 
@@ -279,7 +279,7 @@ La arquitectura que implementé cumple directamente con varios de los requisitos
 Durante el desarrollo del sistema, esta arquitectura demostró varias ventajas prácticas que no había anticipado completamente al principio:
 
 \begin{itemize}
-    \item \textbf{Desarrollo modular}: La arquitectura me permitió trabajar de forma modular en la interfaz gráfica y en los adaptadores de hardware sin que se interfirieran entre sí, lo cual fue fundamental para poder implementar el proyecto yo solo y mantener la productividad.
+    \item \textbf{Desarrollo modular}: La arquitectura permitió trabajar de forma modular en la interfaz gráfica y en los adaptadores de hardware sin interferencias entre componentes, lo cual fue fundamental para poder implementar el proyecto manteniendo la productividad del desarrollo.
     
     \item \textbf{Pruebas simplificadas}: Implementé un adaptador simulado (\texttt{MockHeadsetAdapter}) que me permite probar todo el sistema sin depender del hardware físico. Este enfoque optimizó muchísimo los ciclos de desarrollo y debugging, evitando las limitaciones de tener que conectar el hardware real cada vez.
     
@@ -299,7 +299,7 @@ La arquitectura que implementé ha tenido un impacto muy positivo en la calidad 
     
     \item \textbf{Extensibilidad}: La característica extensible principal que implementé es la capacidad de actualizar el modelo de inferencia sin modificar el código de la aplicación. Esta modularidad permite entrenar y desplegar nuevos modelos de detección de patrones cerebrales sin afectar otros componentes del sistema.
     
-    \item \textbf{Portabilidad}: El sistema funciona bien tanto en macOS (mi entorno de desarrollo) como en Linux (Raspberry Pi) sin necesidad de hacer adaptaciones importantes en la lógica de negocio. Esto confirma que las decisiones arquitectónicas que tomé funcionaron bien.
+    \item \textbf{Portabilidad}: El sistema funciona bien tanto en macOS (entorno de desarrollo) como en Linux (Raspberry Pi) sin necesidad de hacer adaptaciones importantes en la lógica de negocio. Esto confirma que las decisiones arquitectónicas adoptadas resultaron efectivas.
 \end{itemize}
 
 En resumen, todo este proceso de implementación basado en arquitectura hexagonal me ha dado una base sólida que no solo cumple con los requisitos actuales del proyecto Neural Analytics, sino que también permite su evolución futura de manera sostenible y alineada con estándares médicos y tecnológicos emergentes. Las decisiones arquitectónicas resultaron ser acertadas, aunque el proceso de implementación fue bastante más complejo de lo que esperaba al principio.
