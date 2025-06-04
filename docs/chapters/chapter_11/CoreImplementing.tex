@@ -12,195 +12,195 @@ Esta arquitectura implementa los principios establecidos por \citefullauthor{mar
 
 \subsection{Estructura General}
 
-La organización del paquete \texttt{neural\_analytics\_core} siguiendo los principios hexagonales requirió un proceso iterativo de refinamiento arquitectónico. La estructura inicial careció de coherencia organizacional, requiriendo múltiples refactorizaciones hasta alcanzar una organización sistemática:
+La organización del paquete \texttt{neural\_analytics\_core} siguiendo los principios hexagonales requirió un proceso iterativo de refinamiento arquitectónico. La estructura inicial careció de coherencia organizacional, lo que exigió múltiples refactorizaciones hasta alcanzar una organización sistemática:
 
 \begin{itemize}
-    \item \textbf{Dominio}: Contiene toda la lógica principal de la aplicación, diseñada para funcionar independientemente de tecnologías externas. Lograr esta independencia real resultó más complejo que lo indicado en la literatura técnica.
+    \item \textbf{Dominio}: Contiene toda la lógica principal de la aplicación, diseñada para funcionar independientemente de tecnologías externas. Lograr esta independencia real resultó más complejo de lo indicado en la literatura técnica.
     \begin{itemize}
-        \item \texttt{models}: Define las entidades y objetos de valor del dominio. Esta parte fue bastante directa.
-        \item \texttt{services}: Implementa servicios específicos del dominio como la inferencia del modelo. Organizar bien las responsabilidades me llevó varias vueltas porque al principio tenía todo mezclado.
-        \item \texttt{ports}: Define las interfaces que conectan el dominio con el exterior. Diseñar estas interfaces me tomó bastante tiempo y varias revisiones hasta que quedaron bien.
-        \item \texttt{use\_cases}: Implementa los casos de uso que coordinan todo el flujo. Cada uno pasó por varias versiones hasta que funcionó como quería.
-        \item \texttt{state\_machine}: Maneja los estados de la aplicación con una máquina de estados. Esta fue la parte más complicada, tanto de entender como de implementar.
+        \item \texttt{models}: Define las entidades y objetos de valor del dominio. Esta parte fue relativamente directa.
+        \item \texttt{services}: Implementa servicios específicos del dominio como la inferencia del modelo. Organizar adecuadamente las responsabilidades requirió varias iteraciones, ya que inicialmente existía una mezcla de conceptos.
+        \item \texttt{ports}: Define las interfaces que conectan el dominio con el exterior. El diseño de estas interfaces consumió un tiempo considerable y múltiples revisiones hasta alcanzar una definición satisfactoria.
+        \item \texttt{use\_cases}: Implementa los casos de uso que coordinan todo el flujo. Cada uno atravesó varias versiones hasta operar según lo esperado.
+        \item \texttt{state\_machine}: Maneja los estados de la aplicación con una máquina de estados. Esta fue la sección más compleja, tanto en su comprensión como en su implementación.
     \end{itemize}
     
-    \item \textbf{Infraestructura}: Aquí van todos los adaptadores que implementan los puertos del dominio. Al principio esto estaba fatal organizado, tuve que reorganizarlo varias veces hasta que tuvo sentido.
+    \item \textbf{Infraestructura}: En esta sección se ubican todos los adaptadores que implementan los puertos del dominio. Inicialmente, esta organización era deficiente, por lo que fue necesario reorganizarla en varias ocasiones hasta que adquirió una estructura lógica.
     \begin{itemize}
-        \item \texttt{adapters/input}: Adaptadores para dispositivos de entrada como el EEG. El adaptador de BrainFlow me dio bastantes problemas de integración y estabilidad.
-        \item \texttt{adapters/output}: Adaptadores para dispositivos de salida como las bombillas inteligentes. Por suerte este fue mucho más fácil de implementar.
+        \item \texttt{adapters/input}: Adaptadores para dispositivos de entrada como el EEG. El adaptador de BrainFlow presentó diversos problemas de integración y estabilidad.
+        \item \texttt{adapters/output}: Adaptadores para dispositivos de salida como las bombillas inteligentes. Afortunadamente, este fue mucho más sencillo de implementar.
     \end{itemize}
 \end{itemize}
 
 \subsection{Puertos y Adaptadores}
 
-Los puertos definen interfaces abstractas que el dominio usa para hablar con el exterior, mientras que los adaptadores dan implementaciones concretas de estas interfaces. Aunque en los libros esta separación parece muy clara, cuando lo implementas te das cuenta de que hay muchos problemas que no esperabas.
+Los puertos definen interfaces abstractas que el dominio utiliza para comunicarse con el exterior, mientras que los adaptadores proporcionan implementaciones concretas de estas interfaces. Aunque en la teoría esta separación parece muy clara, durante la implementación se manifiestan numerosos problemas no anticipados.
 
-Al principio tenía toda la lógica de BrainFlow mezclada con la lógica de negocio—un desastre total que iba en contra de todo lo que quería conseguir arquitectónicamente. Me tocó refactorizar varias veces hasta conseguir separar bien las responsabilidades sin romper nada.
+Inicialmente, toda la lógica de BrainFlow estaba mezclada con la lógica de negocio —una situación subóptima que contravenía los objetivos arquitectónicos—. Fue necesario refactorizar en varias ocasiones para separar adecuadamente las responsabilidades sin comprometer la funcionalidad.
 
 \subsubsection{Puertos de Entrada}
 
-El puerto principal de entrada es el \texttt{EegHeadsetPort}, que se diseñó para definir todas las operaciones necesarias para comunicarse con el dispositivo EEG. El diseño inicial resultó insuficiente durante la implementación real. Durante el desarrollo se identificó la necesidad de métodos adicionales, casos complejos adicionales y validaciones que no habían sido contempladas inicialmente.
+El puerto principal de entrada es el \texttt{EegHeadsetPort}, diseñado para definir todas las operaciones necesarias para la comunicación con el dispositivo EEG. El diseño inicial resultó insuficiente durante la implementación real. En el transcurso del desarrollo, se identificó la necesidad de métodos adicionales, casos complejos y validaciones que no habían sido contemplados originalmente.
 
 Este puerto especifica métodos esenciales como:
 
 \begin{itemize}
-    \item Métodos de gestión de conexión: conectar, verificar estado y desconectar del dispositivo. Estos fueron los más fáciles de implementar.
-    \item Métodos de extracción de datos: obtener datos de impedancia y datos en bruto de los canales EEG. Aquí fue donde realmente me di cuenta de lo complejo que es procesar señales biomédicas y todas sus rarezas.
-    \item Métodos de configuración: cambiar y consultar el modo de trabajo del dispositivo. Implementar estos métodos me reveló muchas particularidades del BrainBit que la documentación oficial no mencionaba para nada.
+    \item Métodos de gestión de conexión: conectar, verificar estado y desconectar del dispositivo. Estos fueron los más sencillos de implementar.
+    \item Métodos de extracción de datos: obtener datos de impedancia y datos en bruto de los canales EEG. Aquí se hizo patente la complejidad inherente al procesamiento de señales biomédicas y sus particularidades.
+    \item Métodos de configuración: cambiar y consultar el modo de trabajo del dispositivo. La implementación de estos métodos reveló muchas especificidades del BrainBit que la documentación oficial no mencionaba explícitamente.
 \end{itemize}
 
-Diseñar este puerto para que funcionara bien con hilos concurrentes y se pudiera compartir de forma segura entre diferentes componentes del sistema me requirió investigar bastante sobre el modelo de concurrencia de Rust. El sistema de ownership y lifetime management de Rust es bastante estricto y me obligó a estudiar a fondo estos conceptos—algo que no había pensado para nada cuando planifiqué el proyecto.
+Diseñar este puerto para que funcionara correctamente con hilos concurrentes y se pudiera compartir de forma segura entre diferentes componentes del sistema requirió una investigación considerable sobre el modelo de concurrencia de Rust. El sistema de propiedad (ownership) y gestión de vida útil (lifetime management) de Rust es bastante estricto, lo que obligó a un estudio profundo de estos conceptos —un aspecto no previsto en la planificación inicial del proyecto—.
 
 \subsubsection{Puertos de Salida}
 
-El puerto principal de salida es el \texttt{SmartBulbPort}, diseñado para definir todas las operaciones que necesito para controlar bombillas inteligentes. Este puerto resultó mucho más fácil de implementar comparado con el puerto de entrada, aunque tuvo sus propios problemas relacionados con la comunicación por red.
+El puerto principal de salida es el \texttt{SmartBulbPort}, diseñado para definir todas las operaciones necesarias para controlar bombillas inteligentes. Este puerto resultó mucho más fácil de implementar en comparación con el puerto de entrada, aunque presentó sus propios desafíos relacionados con la comunicación por red.
 
 Este puerto especifica:
 
 \begin{itemize}
     \item Métodos de conexión y desconexión con el dispositivo domótico. Estos fueron los más directos de implementar.
-    \item Un método para cambiar el color de la bombilla basado en lo que detecta del EEG. Implementar esto me hizo pensar bastante en cómo traducir el concepto abstracto de "color detectado" a comandos específicos del dispositivo, manteniendo la arquitectura limpia.
-    \item Un método para verificar el estado de la conexión con el dispositivo. Esta funcionalidad resultó más importante de lo que pensaba para manejar bien los errores, especialmente después de ver comportamientos raros durante las primeras pruebas.
+    \item Un método para cambiar el color de la bombilla basado en la detección del EEG. Implementar esto requirió una reflexión considerable sobre cómo traducir el concepto abstracto de "color detectado" a comandos específicos del dispositivo, manteniendo la arquitectura limpia.
+    \item Un método para verificar el estado de la conexión con el dispositivo. Esta funcionalidad resultó más importante de lo previsto para manejar errores adecuadamente, especialmente tras observar comportamientos anómalos durante las primeras pruebas.
 \end{itemize}
 
-El diseño mantiene compatibilidad con múltiples hilos y encaja con el patrón de actores que implementé en el sistema. Conseguir esto en Rust me obligó a investigar a fondo los traits y mecanismos de sincronización, que al final resultó ser muy útil para otras partes del proyecto.
+El diseño mantiene compatibilidad con múltiples hilos y se ajusta al patrón de actores implementado en el sistema. Lograr esto en Rust obligó a una investigación exhaustiva de los traits y mecanismos de sincronización, lo cual, finalmente, resultó muy útil para otras partes del proyecto.
 
 \subsubsection{Adaptadores}
 
-Los adaptadores implementan los puertos para tecnologías específicas, y aquí es donde se concentra toda la complejidad técnica de integrar bibliotecas externas que muchas veces no se llevan bien entre ellas:
+Los adaptadores implementan los puertos para tecnologías específicas, y es aquí donde se concentra toda la complejidad técnica de integrar bibliotecas externas, que a menudo no presentan una compatibilidad ideal entre sí:
 
 \begin{itemize}
-    \item \texttt{BrainFlowAdapter}: Implementa \texttt{EegHeadsetPort} usando la biblioteca BrainFlow para comunicarse con el dispositivo BrainBit. Este adaptador fue uno de los mayores dolores de cabeza del proyecto, me llevó semanas conseguir que funcionara de forma estable y confiable.
-    \item \texttt{TapoSmartBulbAdapter}: Implementa \texttt{SmartBulbPort} para controlar bombillas inteligentes Tapo. Por suerte este adaptador fue mucho más sencillo y me permitió implementarlo sin tantos problemas.
+    \item \texttt{BrainFlowAdapter}: Implementa \texttt{EegHeadsetPort} usando la biblioteca BrainFlow para comunicarse con el dispositivo BrainBit. Este adaptador fue uno de los componentes que generó mayores dificultades en el proyecto; conseguir un funcionamiento estable y fiable llevó semanas de trabajo.
+    \item \texttt{TapoSmartBulbAdapter}: Implementa \texttt{SmartBulbPort} para controlar bombillas inteligentes Tapo. Afortunadamente, este adaptador fue mucho más sencillo y su implementación transcurrió sin tantos problemas.
 \end{itemize}
 
 \section{Consumo del SDK de BrainFlow}
 
-BrainFlow es una biblioteca open-source que te da una API unificada para dispositivos de neurointerfaz (BCI), lo que facilita mucho la adquisición, procesamiento y visualización de datos cerebrales. Neural Analytics usa BrainFlow para comunicarse con el dispositivo BrainBit, pero integrar esta biblioteca resultó mucho más complicado de lo que la documentación hacía parecer. Los ejemplos básicos te dan una falsa sensación de que va a ser fácil—la realidad fue bastante diferente.
+BrainFlow es una biblioteca de código abierto que proporciona una API unificada para dispositivos de neurointerfaz (BCI), lo que facilita en gran medida la adquisición, procesamiento y visualización de datos cerebrales. Neural Analytics utiliza BrainFlow para comunicarse con el dispositivo BrainBit. No obstante, la integración de esta biblioteca resultó considerablemente más complicada de lo que la documentación aparentaba. Los ejemplos básicos pueden dar una falsa sensación de simplicidad; la realidad fue bastante diferente.
 
-Elegí BrainFlow después de evaluar varias alternativas, mirando cosas como qué tan maduro estaba el proyecto, si funcionaba en diferentes plataformas y si era compatible con varios dispositivos. Sin embargo, cuando me puse a implementarlo de verdad me di cuenta de que era mucho más complejo de lo que esperaba, con muchos casos raros y particularidades que no estaban bien documentadas.
+Se eligió BrainFlow tras evaluar varias alternativas, considerando aspectos como la madurez del proyecto, su funcionamiento en diferentes plataformas y la compatibilidad con diversos dispositivos. Sin embargo, al iniciar la implementación real, se constató una complejidad superior a la esperada, con muchos casos de uso particulares y especificidades no documentadas adecuadamente.
 
 \subsection{Inicialización y Configuración}
 
-El adaptador \texttt{BrainFlowAdapter} inicializa el dispositivo BrainBit usando la API de BrainFlow. Conseguir que este proceso fuera robusto y estable me llevó muchas iteraciones, debugging intenso y tener que analizar casos raros que no estaban documentados. El proceso que finalmente implementé incluye:
+El adaptador \texttt{BrainFlowAdapter} inicializa el dispositivo BrainBit usando la API de BrainFlow. Conseguir que este proceso fuera robusto y estable requirió múltiples iteraciones, depuración intensa y el análisis de casos no documentados. El proceso finalmente implementado incluye:
 
 \begin{enumerate}
-    \item Construir los parámetros de configuración para el dispositivo, especificando la dirección MAC del BrainBit y un timeout apropiado para la conexión. Encontrar el timeout óptimo me llevó muchísimas pruebas empíricas porque el sistema se colgaba constantemente si no ajustaba bien este valor.
-    \item Seleccionar el identificador de placa que corresponde al modelo BrainBit. Aunque suena simple, la documentación oficial tenía ambigüedades importantes sobre qué identificadores usar, así que tuve que analizar código de ejemplo y hacer un poco de ingeniería inversa para dar con los valores correctos.
-    \item Crear una instancia del gestor de placa (BoardShim) que maneja toda la comunicación con el dispositivo. Esta parte falló varias veces antes de que consiguiera que funcionara de forma consistente.
+    \item Construir los parámetros de configuración para el dispositivo, especificando la dirección MAC del BrainBit y un tiempo de espera (timeout) apropiado para la conexión. Encontrar el timeout óptimo requirió numerosas pruebas empíricas, ya que el sistema experimentaba bloqueos constantes si este valor no se ajustaba correctamente.
+    \item Seleccionar el identificador de placa que corresponde al modelo BrainBit. Aunque parezca simple, la documentación oficial presentaba ambigüedades importantes sobre qué identificadores utilizar, por lo que fue necesario analizar código de ejemplo y realizar cierta ingeniería inversa para determinar los valores correctos.
+    \item Crear una instancia del gestor de placa (BoardShim) que maneja toda la comunicación con el dispositivo. Esta parte falló en varias ocasiones antes de lograr un funcionamiento consistente.
 \end{enumerate}
 
-Este proceso establece un canal de comunicación bidireccional con el dispositivo EEG que permite tanto configurar como recibir datos en tiempo real. En la práctica me encontré con muchos casos raros que no esperaba, donde el sistema se comportaba de forma muy diferente a lo que decía la teoría.
+Este proceso establece un canal de comunicación bidireccional con el dispositivo EEG que permite tanto configurar como recibir datos en tiempo real. En la práctica, se encontraron muchos casos no previstos donde el sistema se comportaba de forma muy diferente a lo descrito teóricamente.
 
 \subsection{Adquisición de Datos}
 
-Implementar la adquisición de datos EEG fue uno de los procesos más complejos y frustrantes de todo el proyecto, aquí fue donde empezaron los problemas más serios relacionados con el procesamiento de señales biomédicas. El método que finalmente conseguí que funcionara, después de muchas iteraciones y debugging intenso, funciona así:
+La implementación de la adquisición de datos EEG fue uno de los procesos más complejos y laboriosos de todo el proyecto; aquí comenzaron los problemas más serios relacionados con el procesamiento de señales biomédicas. El método que finalmente se logró implementar de forma funcional, después de muchas iteraciones y depuración intensa, opera de la siguiente manera:
 
-El adaptador extrae datos EEG de cuatro canales específicos (T3, T4, O1 y O2) mediante un proceso que tuve que estructurar muy bien:
+El adaptador extrae datos EEG de cuatro canales específicos (T3, T4, O1 y O2) mediante un proceso que tuvo que ser estructurado cuidadosamente:
 
 \begin{enumerate}
-    \item \textbf{Validación previa}: Verifico que el dispositivo esté conectado antes de intentar obtener datos, para asegurar que no se rompa nada si se desconecta.
+    \item \textbf{Validación previa}: Se verifica que el dispositivo esté conectado antes de intentar obtener datos, para asegurar la integridad del sistema en caso de desconexión.
     
-    \item \textbf{Obtención de datos crudos}: Le pido al dispositivo un buffer con las últimas 256 muestras de todos los canales disponibles.
+    \item \textbf{Obtención de datos crudos}: Se solicita al dispositivo un búfer con las últimas 256 muestras de todos los canales disponibles.
     
-    \item \textbf{Selección de canales}: Extraigo específicamente los canales T3, T4, O1 y O2, que corresponden a las regiones temporales y occipitales del cerebro que son relevantes para detectar patrones visuales.
+    \item \textbf{Selección de canales}: Se extraen específicamente los canales T3, T4, O1 y O2, que corresponden a las regiones temporales y occipitales del cerebro relevantes para detectar patrones visuales.
     
-    \item \textbf{Estructuración de datos}: Organizo los datos extraídos en un mapa donde la clave es el nombre del canal y el valor es un vector de números que representa la señal a lo largo del tiempo.
+    \item \textbf{Estructuración de datos}: Se organizan los datos extraídos en un mapa donde la clave es el nombre del canal y el valor es un vector de números que representa la señal a lo largo del tiempo.
 \end{enumerate}
 
-Esta forma de capturar los datos me permite obtener señales EEG de las regiones del cerebro que son importantes para detectar los patrones que se generan cuando piensas en colores.
+Esta forma de capturar los datos permite obtener señales EEG de las regiones del cerebro que son importantes para detectar los patrones generados durante la ideación de colores.
 
 \section{Patrón Model-View-Intent (MVI)}
 
-Neural Analytics usa el patrón Model-View-Intent (MVI) para gestionar la comunicación entre la interfaz de usuario y el núcleo de la aplicación. Elegí este patrón porque promete un flujo de datos unidireccional que debería facilitar la depuración y el mantenimiento—al menos eso decía la teoría.
+Neural Analytics utiliza el patrón Model-View-Intent (MVI) para gestionar la comunicación entre la interfaz de usuario y el núcleo de la aplicación. Se eligió este patrón por su promesa de un flujo de datos unidireccional que, teóricamente, debería facilitar la depuración y el mantenimiento.
 
-Aunque ya conocía MVI a nivel conceptual, implementarlo desde cero en Rust me hizo entender realmente si este patrón simplifica tanto el testing como el mantenimiento del código como prometen los libros. El proceso inicial fue bastante caótico—me llevó muchísimo tiempo y varias vueltas conseguir que todos los componentes funcionaran bien juntos sin que se rompiera todo constantemente.
+Aunque MVI ya era conocido a nivel conceptual, su implementación desde cero en Rust permitió comprender en profundidad si este patrón realmente simplifica las pruebas y el mantenimiento del código en la medida que la literatura sugiere. El proceso inicial fue bastante complejo; llevó un tiempo considerable y varias iteraciones conseguir que todos los componentes funcionaran conjuntamente sin fallos recurrentes.
 
 \subsection{Componentes del Patrón MVI}
 
-Organizar los componentes siguiendo el patrón MVI me llevó un montón de intentos hasta conseguir una arquitectura que tuviera sentido y funcionara sin colgarse constantemente:
+La organización de los componentes siguiendo el patrón MVI requirió múltiples intentos hasta lograr una arquitectura coherente y funcional sin bloqueos constantes:
 
 \begin{itemize}
-    \item \textbf{Model}: Lo represento con el contexto \texttt{NeuralAnalyticsContext}, que mantiene todo el estado de la aplicación en un solo sitio. Centralizar el estado me simplificó mucho las tareas de debugging cuando las cosas se rompían.
-    \item \textbf{View}: La desarrollé en el paquete \texttt{neural\_analytics\_gui} usando Slint, que resultó ser bastante más fácil de usar de lo que esperaba una vez que me acostumbré a su sintaxis.
-    \item \textbf{Intent}: Los represento con comandos que se envían al \texttt{CommandBus}, donde cada comando hace cambios específicos en el estado. Decidir qué tan granulares hacer los comandos me tomó bastante análisis porque no quería que fuera demasiado complicado de manejar.
+    \item \textbf{Model}: Representado por el contexto \texttt{NeuralAnalyticsContext}, que mantiene todo el estado de la aplicación en una única ubicación. Centralizar el estado simplificó notablemente las tareas de depuración cuando surgían problemas.
+    \item \textbf{View}: Desarrollada en el paquete \texttt{neural\_analytics\_gui} usando Slint, que resultó ser considerablemente más fácil de utilizar de lo esperado una vez superada la curva de aprendizaje inicial de su sintaxis.
+    \item \textbf{Intent}: Representados por comandos que se envían al \texttt{CommandBus}, donde cada comando efectúa cambios específicos en el estado. Decidir el nivel de granularidad de los comandos requirió un análisis detallado para evitar una complejidad excesiva en su manejo.
 \end{itemize}
 
 \subsection{Flujo de Datos}
 
-Implementar el flujo de datos siguiendo el patrón MVI me obligó a refactorizar varias veces hasta conseguir que funcionara de forma coherente y estable:
+La implementación del flujo de datos siguiendo el patrón MVI obligó a refactorizar en varias ocasiones hasta conseguir un funcionamiento coherente y estable:
 
 \begin{enumerate}
-    \item \textbf{Intención del usuario}: El usuario interactúa con la interfaz gráfica haciendo clicks en botones o cambiando configuraciones.
-    \item \textbf{Comando}: La GUI genera un comando específico que se envía al núcleo. Diseñar estos comandos para que fueran claros y sin ambigüedades me costó más de lo que esperaba—cada comando tenía que ser completamente explícito para evitar que el sistema se comportara de forma rara.
-    \item \textbf{Procesamiento}: Un caso de uso específico procesa el comando. Aquí me di cuenta de que necesitaba mucha más lógica de validación de la que había pensado inicialmente, porque los usuarios pueden hacer cosas inesperadas que hay que manejar bien.
-    \item \textbf{Actualización del modelo}: El caso de uso actualiza el estado del contexto. Esta parte fue bastante directa una vez que tenía claro cómo funcionaba todo.
-    \item \textbf{Emisión de eventos}: Los cambios en el estado generan eventos automáticamente. Tuve que optimizar esto para evitar generar eventos innecesarios que saturaran el sistema.
-    \item \textbf{Actualización de la vista}: Los eventos los captura el manejador de eventos de la GUI, que actualiza la interfaz. La sincronización entre hilos me dio bastantes problemas hasta que conseguí que fuera estable.
+    \item \textbf{Intención del usuario}: El usuario interactúa con la interfaz gráfica mediante acciones como clics en botones o cambios en configuraciones.
+    \item \textbf{Comando}: La GUI genera un comando específico que se envía al núcleo. Diseñar estos comandos para que fueran claros y sin ambigüedades requirió más esfuerzo del previsto; cada comando debía ser completamente explícito para evitar comportamientos anómalos del sistema.
+    \item \textbf{Procesamiento}: Un caso de uso específico procesa el comando. En este punto, se constató la necesidad de una lógica de validación mucho más robusta de la inicialmente contemplada, ya que los usuarios pueden realizar acciones inesperadas que deben ser gestionadas adecuadamente.
+    \item \textbf{Actualización del modelo}: El caso de uso actualiza el estado del contexto. Esta parte fue relativamente directa una vez que el funcionamiento general estuvo claro.
+    \item \textbf{Emisión de eventos}: Los cambios en el estado generan eventos automáticamente. Fue necesario optimizar este mecanismo para evitar la generación de eventos innecesarios que pudieran saturar el sistema.
+    \item \textbf{Actualización de la vista}: Los eventos son capturados por el manejador de eventos de la GUI, que actualiza la interfaz. La sincronización entre hilos presentó bastantes problemas hasta que se logró un funcionamiento estable.
 \end{enumerate}
 
 \subsection{Manejador de Eventos}
 
-Implementar el manejador de eventos en \texttt{neural\_analytics\_gui} para procesar correctamente los eventos del núcleo y actualizar la interfaz gráfica me llevó bastante desarrollo intensivo y muchísimo debugging. Al final conseguí que funcionara así:
+La implementación del manejador de eventos en \texttt{neural\_analytics\_gui} para procesar correctamente los eventos del núcleo y actualizar la interfaz gráfica requirió un desarrollo intensivo y una depuración minuciosa. Finalmente, se logró el siguiente funcionamiento:
 
 \begin{enumerate}
-    \item \textbf{Recepción del evento}: El manejador recibe el nombre del evento y los datos asociados (impedancias, datos del dispositivo, color detectado). Parsear bien estos datos me dio problemas al principio porque algunos eventos tenían información muy específica.
+    \item \textbf{Recepción del evento}: El manejador recibe el nombre del evento y los datos asociados (impedancias, datos del dispositivo, color detectado). El análisis sintáctico (parsing) correcto de estos datos presentó dificultades iniciales, ya que algunos eventos contenían información muy específica.
     
-    \item \textbf{Sincronización con el hilo de la interfaz gráfica}: Como los eventos se generan en hilos diferentes al de la UI, tuve que implementar un mecanismo para modificar la interfaz de forma segura. Esta parte me obligó a investigar mucho las restricciones de concurrencia de Rust y entender bien el modelo de ownership.
+    \item \textbf{Sincronización con el hilo de la interfaz gráfica}: Dado que los eventos se generan en hilos diferentes al de la UI, fue necesario implementar un mecanismo para modificar la interfaz de forma segura. Esta parte obligó a una investigación profunda de las restricciones de concurrencia de Rust y a una comprensión detallada del modelo de propiedad (ownership).
     
-    \item \textbf{Recuperación del contexto de la ventana}: El sistema obtiene una referencia a la ventana principal usando referencias débiles. Conseguir esto sin crear ciclos de referencia o fugas de memoria me obligó a buscar mucho en foros y documentación de Rust.
+    \item \textbf{Recuperación del contexto de la ventana}: El sistema obtiene una referencia a la ventana principal usando referencias débiles. Lograr esto sin crear ciclos de referencia o fugas de memoria exigió una consulta exhaustiva de foros y documentación de Rust.
     
-    \item \textbf{Procesamiento condicional}: Dependiendo del tipo de evento que recibo, se ejecutan acciones específicas. Esta lógica la tuve que replantear varias veces para que no fuera un código imposible de mantener:
+    \item \textbf{Procesamiento condicional}: Dependiendo del tipo de evento recibido, se ejecutan acciones específicas. Esta lógica tuvo que ser replanteada varias veces para evitar un código de difícil mantenimiento:
     \begin{itemize}
-        \item Para el evento de inicialización del núcleo, se muestra la vista de bienvenida. Esta fue la más fácil de implementar.
-        \item Cuando el dispositivo EEG se conecta, cambio a la vista de calibración. Aquí tuve que añadir validaciones para asegurar que la conexión fuera estable antes de continuar.
-        \item Otros eventos activan transiciones de vista o actualizaciones de datos específicas. Cada tipo de evento necesitó su propia lógica, y me di cuenta de que había muchos más casos raros de los que esperaba.
+        \item Para el evento de inicialización del núcleo, se muestra la vista de bienvenida. Esta fue la implementación más sencilla.
+        \item Cuando el dispositivo EEG se conecta, se cambia a la vista de calibración. Aquí fue necesario añadir validaciones para asegurar que la conexión fuera estable antes de continuar.
+        \item Otros eventos activan transiciones de vista o actualizaciones de datos específicas. Cada tipo de evento necesitó su propia lógica, y se constató la existencia de muchos más casos particulares de los esperados.
     \end{itemize}
 \end{enumerate}
 
-Este diseño me permitió conseguir una separación clara entre la lógica de negocio (núcleo) y la presentación (interfaz gráfica), siguiendo el patrón MVI, aunque entender cómo implementarlo correctamente me llevó bastante tiempo.
+Este diseño permitió lograr una separación clara entre la lógica de negocio (núcleo) y la presentación (interfaz gráfica), siguiendo el patrón MVI, aunque la comprensión de su correcta implementación llevó un tiempo considerable.
 
 \section{Interconexión con el sistema domótico}
 
-Integrar Neural Analytics con dispositivos domóticos para que los pensamientos del usuario se vean reflejados en el mundo real era una de las partes que más me emocionaba del proyecto conceptualmente. Sin embargo, me topé con muchos problemas técnicos que no había visto venir. La implementación actual usa bombillas inteligentes Tapo—las elegí porque las tenía disponibles y me parecieron convenientes para empezar a hacer pruebas.
+La integración de Neural Analytics con dispositivos domóticos para que los pensamientos del usuario se reflejen en el entorno físico era una de las partes conceptualmente más estimulantes del proyecto. Sin embargo, surgieron muchos problemas técnicos no previstos. La implementación actual utiliza bombillas inteligentes Tapo, elegidas por su disponibilidad y conveniencia para las pruebas iniciales.
 
-Diseñé la arquitectura pensando en que en el futuro podría integrar otros sistemas, porque desde el principio sabía que Tapo no sería la única solución domótica que querría usar a largo plazo.
+Se diseñó la arquitectura considerando la futura integración de otros sistemas, ya que desde el principio se previó que Tapo no sería la única solución domótica a utilizar a largo plazo.
 
 \subsection{Adaptador para Bombillas Inteligentes}
 
-Desarrollar el adaptador \texttt{TapoSmartBulbAdapter} que implementara el puerto \texttt{SmartBulbPort} para controlar las bombillas inteligentes Tapo fue relativamente fácil en comparación con la integración con BrainFlow. Al final conseguí que funcionara considerando varios aspectos técnicos:
+El desarrollo del adaptador \texttt{TapoSmartBulbAdapter}, que implementa el puerto \texttt{SmartBulbPort} para controlar las bombillas inteligentes Tapo, fue relativamente sencillo en comparación con la integración de BrainFlow. Finalmente, se logró un funcionamiento que consideraba varios aspectos técnicos:
 
 \begin{itemize}
-    \item \textbf{Estado interno}: El adaptador mantiene referencias al cliente de comunicación con dispositivos Tapo, una instancia específica del modelo de bombilla P110 y un indicador del estado de conexión. Al principio implementé estos componentes como variables globales, lo cual me creó problemas terribles durante el debugging.
+    \item \textbf{Estado interno}: El adaptador mantiene referencias al cliente de comunicación con dispositivos Tapo, una instancia específica del modelo de bombilla P110 y un indicador del estado de conexión. Inicialmente, estos componentes se implementaron como variables globales, lo que generó problemas significativos durante la depuración.
     
-    \item \textbf{Establecimiento de conexión}: Implementé mediante una librería de terceros la capacidad de autenticación y conexión segura con la bombilla inteligente, configurando las credenciales necesarias y estableciendo una sesión persistente. Entender la documentación de la librería compatible de Tapo me costó bastante, porque los ejemplos disponibles estaban en Python en lugar de Rust.
+    \item \textbf{Establecimiento de conexión}: Se implementó mediante una librería de terceros la capacidad de autenticación y conexión segura con la bombilla inteligente, configurando las credenciales necesarias y estableciendo una sesión persistente. La comprensión de la documentación de la librería compatible de Tapo requirió un esfuerzo considerable, ya que los ejemplos disponibles estaban en Python en lugar de Rust.
     
-    \item \textbf{Control de color}: Esta parte me llevó mucho tiempo porque tuve que implementar la lógica para traducir entre los conceptos de alto nivel del dominio (\textquotedblleft rojo\textquotedblright{}, \textquotedblleft verde\textquotedblright{}) y los comandos específicos de la API de Tapo:
+    \item \textbf{Control de color}: Esta parte consumió mucho tiempo, ya que fue necesario implementar la lógica para traducir entre los conceptos de alto nivel del dominio (\textquotedblleft rojo\textquotedblright{}, \textquotedblleft verde\textquotedblright{}) y los comandos específicos de la API de Tapo:
     \begin{itemize}
-        \item Para \textquotedblleft rojo\textquotedblright{}: configuro la bombilla con parámetros de color rojo intenso. Conseguir que el color fuera suficientemente llamativo me obligó a hacer muchas pruebas de calibración.
-        \item Para \textquotedblleft verde\textquotedblright{}: configuro la bombilla con parámetros de color verde mediano. Aquí tuve que encontrar un equilibrio, porque un verde muy intenso se veía horrible.
-        \item Para otros valores: configuro un estado neutro o de apagado. Esta fue la opción más simple de implementar.
+        \item Para \textquotedblleft rojo\textquotedblright{}: se configura la bombilla con parámetros de color rojo intenso. Lograr que el color fuera suficientemente llamativo obligó a realizar numerosas pruebas de calibración.
+        \item Para \textquotedblleft verde\textquotedblright{}: se configura la bombilla con parámetros de color verde mediano. Aquí fue necesario encontrar un equilibrio, ya que un verde muy intenso resultaba visualmente desagradable.
+        \item Para otros valores: se configura un estado neutro o de apagado. Esta fue la opción más simple de implementar.
     \end{itemize}
     
-    \item \textbf{Gestión de errores}: Implementé un sistema robusto para manejar excepciones y errores, porque me di cuenta de que los dispositivos de red pueden fallar de formas impredecibles. Los timeouts de red me dieron bastantes problemas hasta que conseguí ajustarlos bien.
+    \item \textbf{Gestión de errores}: Se implementó un sistema robusto para manejar excepciones y errores, puesto que se constató que los dispositivos de red pueden fallar de formas impredecibles. Los tiempos de espera (timeouts) de red generaron bastantes problemas hasta que se lograron ajustar correctamente.
 \end{itemize}
 
-Esta abstracción permite que el sistema principal funcione con conceptos de alto nivel sin necesidad de saber los detalles específicos de cómo hablar con las bombillas Tapo, que resultaron ser bastante más complejos de lo que esperaba.
+Esta abstracción permite que el sistema principal funcione con conceptos de alto nivel sin necesidad de conocer los detalles específicos de comunicación con las bombillas Tapo, que resultaron ser considerablemente más complejos de lo esperado.
 
 \subsection{Integración con la Máquina de Estados}
 
-Integrar el sistema domótico en el flujo de la aplicación a través de casos de uso específicos que funcionaran sobre el contexto de la aplicación me llevó bastante planificación. El caso de uso para actualizar el estado de la bombilla que finalmente conseguí que funcionara, después de muchas iteraciones y debugging, funciona así:
+La integración del sistema domótico en el flujo de la aplicación, a través de casos de uso específicos que operaran sobre el contexto de la aplicación, requirió una planificación detallada. El caso de uso para actualizar el estado de la bombilla, que finalmente se logró implementar de forma funcional tras muchas iteraciones y depuración, opera de la siguiente manera:
 
 \begin{enumerate}
-    \item \textbf{Recepción del contexto y comando}: El caso de uso recibe acceso al contexto global de la aplicación y el comando específico para actualizar el estado de la bombilla. Esta parte fue bastante directa de implementar.
+    \item \textbf{Recepción del contexto y comando}: El caso de uso recibe acceso al contexto global de la aplicación y el comando específico para actualizar el estado de la bombilla. Esta parte fue relativamente directa de implementar.
     
-    \item \textbf{Extracción del color detectado}: Consulto el contexto para determinar el último color que identificó en el pensamiento del usuario. Aquí tuve que añadir muchas validaciones para asegurar que existiera un color detectado válido y no datos raros que pudieran romper el sistema.
+    \item \textbf{Extracción del color detectado}: Se consulta el contexto para determinar el último color identificado en el pensamiento del usuario. Aquí fue necesario añadir numerosas validaciones para asegurar la existencia de un color detectado válido y no datos anómalos que pudieran comprometer el sistema.
     
-    \item \textbf{Adquisición de acceso exclusivo}: Usando un mecanismo de bloqueo de escritura, obtengo acceso exclusivo al adaptador de la bombilla inteligente para evitar race conditions. Esta parte me dio bastantes problemas porque al principio tenía race conditions que aparecían de forma impredecible y eran muy difíciles de reproducir.
+    \item \textbf{Adquisición de acceso exclusivo}: Usando un mecanismo de bloqueo de escritura, se obtiene acceso exclusivo al adaptador de la bombilla inteligente para evitar condiciones de carrera (race conditions). Esta parte generó bastantes problemas inicialmente, ya que las condiciones de carrera aparecían de forma impredecible y eran muy difíciles de reproducir.
     
-    \item \textbf{Actualización del estado}: Llamo al método para cambiar el color de la bombilla, pasando el color detectado como parámetro. En este punto verifico si todo el pipeline funciona correctamente o si hay algún fallo en la cadena de procesamiento.
+    \item \textbf{Actualización del estado}: Se llama al método para cambiar el color de la bombilla, pasando el color detectado como parámetro. En este punto se verifica si todo el pipeline funciona correctamente o si existe algún fallo en la cadena de procesamiento.
     
-    \item \textbf{Manejo de errores}: Implementé un sistema de propagación de errores para notificar adecuadamente si algo sale mal durante el proceso. Esto resultó más crítico de lo que pensaba, porque los dispositivos de red fallan con bastante frecuencia.
+    \item \textbf{Manejo de errores}: Se implementó un sistema de propagación de errores para notificar adecuadamente si algo falla durante el proceso. Esto resultó más crítico de lo previsto, ya que los dispositivos de red fallan con relativa frecuencia.
 \end{enumerate}
 
 Esta integración permite que los cambios en la detección del pensamiento del usuario se reflejen casi inmediatamente en el entorno físico, creando el bucle cerrado de interacción entre el cerebro y el entorno que era el objetivo principal del proyecto.
@@ -208,98 +208,98 @@ Esta integración permite que los cambios en la detección del pensamiento del u
 \newpage
 \subsection{Preparación para una futura integración con Matter}
 
-Diseñé este proyecto usando la arquitectura hexagonal pensando precisamente en la futura integración de Matter, porque sabía que Tapo no sería la única solución domótica que querría usar a largo plazo. Matter es un estándar de conectividad para IoT que promete interoperabilidad entre dispositivos de diferentes fabricantes, lo cual me daría mucha más flexibilidad tecnológica en el futuro.
+Este proyecto se diseñó utilizando la arquitectura hexagonal pensando precisamente en la futura integración de Matter, ya que se anticipó que Tapo no sería la única solución domótica a utilizar a largo plazo. Matter es un estándar de conectividad para IoT que promete interoperabilidad entre dispositivos de diferentes fabricantes, lo cual proporcionaría mucha más flexibilidad tecnológica en el futuro.
 
-Para soportar Matter en versiones futuras, tendré que:
+Para soportar Matter en versiones futuras, será necesario:
 
 \begin{enumerate}
-    \item Implementar un nuevo adaptador que cumpla con el \texttt{SmartBulbPort} usando la API de Matter. Esto debería ser relativamente directo si el diseño de la interfaz está bien hecho, aunque la experiencia me ha enseñado que las implementaciones reales suelen tener complejidades que no esperas.
+    \item Implementar un nuevo adaptador que cumpla con el puerto \texttt{SmartBulbPort} utilizando la API de Matter. Esto debería ser relativamente directo si el diseño de la interfaz está bien realizado, aunque la experiencia ha enseñado que las implementaciones reales suelen presentar complejidades no esperadas.
     \item Registrar el nuevo adaptador en el sistema de inyección de dependencias. Esta parte ya está preparada en la arquitectura actual.
-    \item Configurar la aplicación para usar el adaptador de Matter en lugar del adaptador Tapo. Según el diseño arquitectónico que implementé, esto debería ser un simple cambio de configuración.
+    \item Configurar la aplicación para usar el adaptador de Matter en lugar del adaptador Tapo. Según el diseño arquitectónico implementado, esto debería ser un simple cambio de configuración.
 \end{enumerate}
 
-Este ejemplo ilustra cómo la arquitectura hexagonal me permite extender el sistema con nuevas tecnologías sin modificar la lógica de negocio central, cumpliendo el objetivo inicial de flexibilidad y extensibilidad que me planteé durante la fase de diseño.
+Este ejemplo ilustra cómo la arquitectura hexagonal permite extender el sistema con nuevas tecnologías sin modificar la lógica de negocio central, cumpliendo el objetivo inicial de flexibilidad y extensibilidad planteado durante la fase de diseño.
 
 \section{Implementación de la interfaz gráfica}
 
-Desarrollar la interfaz gráfica de Neural Analytics usando el framework Slint fue una decisión que tomé después de evaluar varias opciones disponibles. Slint ofrece interfaces gráficas declarativas y eficientes para aplicaciones escritas en Rust, y su sintaxis resultó ser bastante más intuitiva que otras alternativas que probé durante el proceso de selección.
+El desarrollo de la interfaz gráfica de Neural Analytics usando el framework Slint fue una decisión tomada tras evaluar varias opciones disponibles. Slint ofrece interfaces gráficas declarativas y eficientes para aplicaciones escritas en Rust, y su sintaxis resultó ser considerablemente más intuitiva que otras alternativas probadas durante el proceso de selección.
 
 \subsection{Estructura de la GUI}
 
-Organizar la GUI me llevó muchos intentos hasta conseguir una estructura coherente y que fuera fácil de mantener para modificaciones futuras:
+La organización de la GUI requirió múltiples intentos hasta conseguir una estructura coherente y de fácil mantenimiento para futuras modificaciones:
 
 \begin{itemize}
-    \item \textbf{Vistas principales}: Diferentes pantallas que corresponden a los estados del sistema. Cada vista la diseñé priorizando que fuera simple y clara funcionalmente.
-    \item \textbf{Componentes reutilizables}: Elementos de interfaz como botones, etiquetas y visualizaciones. Reutilizar componentes me optimizó muchísimo los tiempos de desarrollo una vez que me acostumbré al sistema de Slint.
-    \item \textbf{Manejadores de eventos}: Funciones que procesan acciones del usuario y eventos del sistema. Esta implementación me obligó a prestar especial atención a la sincronización adecuada para evitar conflictos entre hilos.
+    \item \textbf{Vistas principales}: Diferentes pantallas que corresponden a los estados del sistema. Cada vista se diseñó priorizando la simplicidad y claridad funcional.
+    \item \textbf{Componentes reutilizables}: Elementos de interfaz como botones, etiquetas y visualizaciones. La reutilización de componentes optimizó significativamente los tiempos de desarrollo una vez que se adquirió familiaridad con el sistema de Slint.
+    \item \textbf{Manejadores de eventos}: Funciones que procesan acciones del usuario y eventos del sistema. Esta implementación obligó a prestar especial atención a la sincronización adecuada para evitar conflictos entre hilos.
 \end{itemize}
 
 \subsection{Integración con el Core}
 
-Establecer comunicación efectiva entre la interfaz gráfica y el núcleo principalmente a través del manejador de eventos me llevó mucho desarrollo intensivo y debugging detallado. El proceso que implementé incluye:
+El establecimiento de una comunicación efectiva entre la interfaz gráfica y el núcleo, principalmente a través del manejador de eventos, requirió un desarrollo intensivo y una depuración detallada. El proceso implementado incluye:
 
 \begin{enumerate}
-    \item \textbf{Inicialización de la interfaz gráfica}: Creo la ventana principal de la aplicación usando Slint, que proporciona una interfaz declarativa eficiente una vez que entiendes cómo funciona.
+    \item \textbf{Inicialización de la interfaz gráfica}: Se crea la ventana principal de la aplicación usando Slint, que proporciona una interfaz declarativa eficiente una vez que se comprende su funcionamiento.
     
-    \item \textbf{Gestión de referencias}: Almaceno una referencia débil a la ventana principal en una variable global protegida por un mutex. Este patrón evita problemas de ciclos de referencia mientras permite que los callbacks asíncronos puedan acceder a la interfaz.
+    \item \textbf{Gestión de referencias}: Se almacena una referencia débil a la ventana principal en una variable global protegida por un mutex. Este patrón evita problemas de ciclos de referencia mientras permite que los callbacks asíncronos puedan acceder a la interfaz.
     
-    \item \textbf{Configuración de manejadores de eventos}: Configuro los callbacks para responder a las acciones del usuario. Esta configuración incluye aspectos críticos:
+    \item \textbf{Configuración de manejadores de eventos}: Se configuran los callbacks para responder a las acciones del usuario. Esta configuración incluye aspectos críticos:
     \begin{itemize}
-        \item Cuando el usuario inicia el proceso principal, lanzo un hilo asíncrono que inicializa el núcleo. El manejo de la concurrencia me dio bastantes problemas técnicos.
-        \item El núcleo recibe como parámetro un manejador de eventos que le permite notificar cambios a la interfaz gráfica. Establecer esta comunicación estable me llevó varias iteraciones de desarrollo.
+        \item Cuando el usuario inicia el proceso principal, se lanza un hilo asíncrono que inicializa el núcleo. El manejo de la concurrencia presentó bastantes problemas técnicos.
+        \item El núcleo recibe como parámetro un manejador de eventos que le permite notificar cambios a la interfaz gráfica. Establecer esta comunicación estable requirió varias iteraciones de desarrollo.
     \end{itemize}
     
-    \item \textbf{Ejecución del bucle de eventos}: Finalmente, inicio el bucle de eventos principal de la interfaz gráfica, que procesará las interacciones del usuario y actualizará la visualización según los eventos recibidos. Esta funcionalidad fue bastante directa una vez que establecí correctamente los componentes anteriores.
+    \item \textbf{Ejecución del bucle de eventos}: Finalmente, se inicia el bucle de eventos principal de la interfaz gráfica, que procesará las interacciones del usuario y actualizará la visualización según los eventos recibidos. Esta funcionalidad fue relativamente directa una vez que se establecieron correctamente los componentes anteriores.
 \end{enumerate}
 
-Este diseño permite que la interfaz gráfica y el núcleo funcionen de manera asíncrona, aprovechando múltiples hilos para tareas intensivas como el procesamiento de señales EEG, mientras mantiene la interfaz de usuario receptiva. Implementar esta funcionalidad me llevó muchos ajustes y optimizaciones hasta conseguir un comportamiento estable.
+Este diseño permite que la interfaz gráfica y el núcleo funcionen de manera asíncrona, aprovechando múltiples hilos para tareas intensivas como el procesamiento de señales EEG, mientras mantiene la interfaz de usuario receptiva. La implementación de esta funcionalidad conllevó múltiples ajustes y optimizaciones hasta conseguir un comportamiento estable.
 
 \newpage
 \section{Conclusiones y Justificación de Decisiones Arquitectónicas}
 
-Después de completar la implementación del núcleo de Neural Analytics con arquitectura hexagonal, puedo decir que las decisiones arquitectónicas que tomé al principio respondían efectivamente a problemas específicos que fueron surgiendo durante el desarrollo. Mirando hacia atrás, esta arquitectura me dio ventajas importantes para un sistema tan complejo como el procesamiento de señales EEG orientado a aplicaciones médicas.
+Después de completar la implementación del núcleo de Neural Analytics con arquitectura hexagonal, se puede afirmar que las decisiones arquitectónicas tomadas inicialmente respondieron efectivamente a problemas específicos que fueron surgiendo durante el desarrollo. En retrospectiva, esta arquitectura proporcionó ventajas importantes para un sistema de la complejidad del procesamiento de señales EEG orientado a aplicaciones médicas.
 
 \subsection{Alineación con los Requisitos del Proyecto}
 
-La arquitectura que implementé cumple directamente con varios de los requisitos fundamentales que establecí en las primeras fases del proyecto. Algunos de estos beneficios los pude ver durante la implementación, cuando me enfrenté a problemas técnicos que no esperaba:
+La arquitectura implementada cumple directamente con varios de los requisitos fundamentales establecidos en las primeras fases del proyecto. Algunos de estos beneficios se pudieron constatar durante la implementación, al enfrentar problemas técnicos no esperados:
 
 \begin{itemize}
-    \item \textbf{Portabilidad (\hyperref[rnf-04]{RNF-04})}: La interfaz de puertos (\texttt{EegHeadsetPort}) me permite cambiar el dispositivo BrainBit por cualquier otro compatible con BrainFlow (o incluso otro SDK) sin modificar el núcleo del sistema. Esta flexibilidad me facilitó muchísimo las pruebas del sistema en diferentes plataformas como la Raspberry Pi.
+    \item \textbf{Portabilidad (\hyperref[rnf-04]{RNF-04})}: La interfaz de puertos (\texttt{EegHeadsetPort}) permite cambiar el dispositivo BrainBit por cualquier otro compatible con BrainFlow (o incluso otro SDK) sin modificar el núcleo del sistema. Esta flexibilidad facilitó considerablemente las pruebas del sistema en diferentes plataformas como la Raspberry Pi.
     
     \item \textbf{Interoperabilidad (\hyperref[rnf-06]{RNF-06})}: El diseño facilita la integración con diferentes sistemas domóticos a través del puerto \texttt{SmartBulbPort}, y prepara el terreno para adoptar el estándar Matter en el futuro cuando sea más viable tecnológicamente.
     
-    \item \textbf{Cumplimiento normativo (\hyperref[rnf-01]{RNF-01})}: La separación clara de componentes facilita mucho la validación y verificación según la norma UNE-EN 62304:2007, que es crítica para software de dispositivos médicos y fue un requisito fundamental desde el principio del proyecto.
+    \item \textbf{Cumplimiento normativo (\hyperref[rnf-01]{RNF-01})}: La separación clara de componentes facilita en gran medida la validación y verificación según la norma UNE-EN 62304:2007, que es crítica para software de dispositivos médicos y fue un requisito fundamental desde el inicio del proyecto.
     
-    \item \textbf{Tiempo Real (\hyperref[rnf-02]{RNF-02})}: La arquitectura permite que los componentes críticos de procesamiento de señales funcionen en sus propios hilos, independientes de la interfaz de usuario. Esta separación de responsabilidades resultó fundamental para conseguir un buen rendimiento, evitando que la interfaz se colgara durante el procesamiento intensivo de datos.
+    \item \textbf{Tiempo Real (\hyperref[rnf-02]{RNF-02})}: La arquitectura permite que los componentes críticos de procesamiento de señales funcionen en sus propios hilos, independientes de la interfaz de usuario. Esta separación de responsabilidades resultó fundamental para conseguir un buen rendimiento, evitando que la interfaz se bloqueara durante el procesamiento intensivo de datos.
 \end{itemize}
 
 \newpage
 \subsection{Beneficios Observados Durante el Desarrollo}
 
-Durante el desarrollo del sistema, esta arquitectura demostró varias ventajas prácticas que no había anticipado completamente al principio:
+Durante el desarrollo del sistema, esta arquitectura demostró varias ventajas prácticas que no habían sido anticipadas completamente al principio:
 
 \begin{itemize}
     \item \textbf{Desarrollo modular}: La arquitectura permitió trabajar de forma modular en la interfaz gráfica y en los adaptadores de hardware sin interferencias entre componentes, lo cual fue fundamental para poder implementar el proyecto manteniendo la productividad del desarrollo.
     
-    \item \textbf{Pruebas simplificadas}: Implementé un adaptador simulado (\texttt{MockHeadsetAdapter}) que me permite probar todo el sistema sin depender del hardware físico. Este enfoque optimizó muchísimo los ciclos de desarrollo y debugging, evitando las limitaciones de tener que conectar el hardware real cada vez.
+    \item \textbf{Pruebas simplificadas}: Se implementó un adaptador simulado (\texttt{MockHeadsetAdapter}) que permite probar todo el sistema sin depender del hardware físico. Este enfoque optimizó considerablemente los ciclos de desarrollo y depuración, evitando las limitaciones de tener que conectar el hardware real en cada ocasión.
     
-    \item \textbf{Evolución tecnológica}: Cuando tuve que actualizar la biblioteca BrainFlow a su versión más reciente, solo necesité modificar el adaptador correspondiente, sin tocar el resto del sistema. Esto confirmó que el diseño arquitectónico funcionaba como esperaba.
+    \item \textbf{Evolución tecnológica}: Cuando fue necesario actualizar la biblioteca BrainFlow a su versión más reciente, solo se requirió modificar el adaptador correspondiente, sin afectar el resto del sistema. Esto confirmó que el diseño arquitectónico funcionaba según lo esperado.
     
-    \item \textbf{Trazabilidad}: La estructura facilitó mucho el seguimiento del cumplimiento de requisitos durante las revisiones de calidad del software, proceso que resultó más crítico de lo que pensaba para la validación del proyecto.
+    \item \textbf{Trazabilidad}: La estructura facilitó en gran medida el seguimiento del cumplimiento de requisitos durante las revisiones de calidad del software, proceso que resultó más crítico de lo pensado para la validación del proyecto.
 \end{itemize}
 
 \subsection{Impacto en la Calidad del Software}
 
-La arquitectura que implementé ha tenido un impacto muy positivo en la calidad final del sistema, con resultados que puedo verificar objetivamente:
+La arquitectura implementada ha tenido un impacto muy positivo en la calidad final del sistema, con resultados que se pueden verificar objetivamente:
 
 \begin{itemize}
     \item \textbf{Fiabilidad (\hyperref[rnf-03]{RNF-03})}: El sistema ha demostrado un comportamiento predecible ante desconexiones del hardware y valida la calidad de las señales EEG mediante los datos de impedancia antes de hacer predicciones. Esta validación previa evita falsos positivos que podrían comprometer la confiabilidad del sistema.
     
-    \item \textbf{Mantenibilidad (\hyperref[rnf-07]{RNF-07})}: El patrón MVI y la máquina de estados proporcionan un flujo de datos unidireccional que facilita muchísimo la depuración y el mantenimiento del código. Este enfoque me permite seguir sistemáticamente el flujo de datos para identificar y resolver problemas de manera eficiente.
+    \item \textbf{Mantenibilidad (\hyperref[rnf-07]{RNF-07})}: El patrón MVI y la máquina de estados proporcionan un flujo de datos unidireccional que facilita considerablemente la depuración y el mantenimiento del código. Este enfoque permite seguir sistemáticamente el flujo de datos para identificar y resolver problemas de manera eficiente.
     
-    \item \textbf{Extensibilidad}: La característica extensible principal que implementé es la capacidad de actualizar el modelo de inferencia sin modificar el código de la aplicación. Esta modularidad permite entrenar y desplegar nuevos modelos de detección de patrones cerebrales sin afectar otros componentes del sistema.
+    \item \textbf{Extensibilidad}: La característica extensible principal implementada es la capacidad de actualizar el modelo de inferencia sin modificar el código de la aplicación. Esta modularidad permite entrenar y desplegar nuevos modelos de detección de patrones cerebrales sin afectar otros componentes del sistema.
     
-    \item \textbf{Portabilidad}: El sistema funciona bien tanto en macOS (entorno de desarrollo) como en Linux (Raspberry Pi) sin necesidad de hacer adaptaciones importantes en la lógica de negocio. Esto confirma que las decisiones arquitectónicas adoptadas resultaron efectivas.
+    \item \textbf{Portabilidad}: El sistema funciona adecuadamente tanto en macOS (entorno de desarrollo) como en Linux (Raspberry Pi) sin necesidad de realizar adaptaciones importantes en la lógica de negocio. Esto confirma que las decisiones arquitectónicas adoptadas resultaron efectivas.
 \end{itemize}
 
-En resumen, todo este proceso de implementación basado en arquitectura hexagonal me ha dado una base sólida que no solo cumple con los requisitos actuales del proyecto Neural Analytics, sino que también permite su evolución futura de manera sostenible y alineada con estándares médicos y tecnológicos emergentes. Las decisiones arquitectónicas resultaron ser acertadas, aunque el proceso de implementación fue bastante más complejo de lo que esperaba al principio.
+En resumen, todo este proceso de implementación basado en arquitectura hexagonal ha proporcionado una base sólida que no solo cumple con los requisitos actuales del proyecto Neural Analytics, sino que también permite su evolución futura de manera sostenible y alineada con estándares médicos y tecnológicos emergentes. Las decisiones arquitectónicas resultaron ser acertadas, aunque el proceso de implementación fue considerablemente más complejo de lo esperado al principio.

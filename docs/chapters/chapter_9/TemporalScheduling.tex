@@ -9,13 +9,13 @@ La organización del desarrollo del proyecto siguió una estructura metodológic
 Durante enero se establecieron las bases teóricas y técnicas del proyecto mediante una fase de investigación exhaustiva. Se realizó el análisis de las tecnologías disponibles y se evaluaron los recursos necesarios para el desarrollo:
 
 \begin{itemize}
-    \item \textbf{Estudio de arquitecturas de redes neuronales}: Se realizó un análisis exhaustivo de diferentes arquitecturas de aprendizaje profundo, centrándose especialmente en las redes LSTM (Long Short-Term Memory) por su adecuación para el procesamiento de secuencias temporales como las señales EEG. Se evaluaron las características específicas que hacían estas arquitecturas apropiadas para el procesamiento de datos neurofisiológicos.
+    \item \textbf{Estudio de arquitecturas de redes neuronales}: Se efectuó un análisis detallado de diferentes arquitecturas de aprendizaje profundo, con un enfoque particular en las redes LSTM (Long Short-Term Memory) por su adecuación para el procesamiento de secuencias temporales como las señales EEG. Se evaluaron las características específicas que hacían estas arquitecturas apropiadas para el procesamiento de datos neurofisiológicos.
     
-    \item \textbf{Evaluación de dispositivos EEG}: Se compararon diferentes dispositivos disponibles en el mercado, analizando criterios como precisión, número de canales, facilidad de integración y compatibilidad con bibliotecas de software existentes. Se seleccionó el dispositivo BrainBit por ofrecer un equilibrio óptimo entre funcionalidad, costo y disponibilidad de documentación técnica.
+    \item \textbf{Evaluación de dispositivos EEG}: Se compararon diferentes dispositivos disponibles en el mercado, analizando criterios como precisión, número de canales, facilidad de integración y compatibilidad con bibliotecas de software existentes. Se seleccionó el dispositivo BrainBit por ofrecer un equilibrio adecuado entre funcionalidad, costo y disponibilidad de documentación técnica.
     
-    \item \textbf{Investigación de bibliotecas de adquisición de datos}: Se evaluaron múltiples bibliotecas para la captura de datos EEG, seleccionando finalmente BrainFlow debido a su compatibilidad con diversos dispositivos y la robustez de su documentación técnica, factores críticos para el desarrollo de aplicaciones médicas.
+    \item \textbf{Investigación de bibliotecas de adquisición de datos}: Se evaluaron múltiples bibliotecas para la captura de datos EEG, seleccionando finalmente BrainFlow debido a su compatibilidad con diversos dispositivos y la robustez de su documentación técnica, factores de alta relevancia para el desarrollo de aplicaciones médicas.
     
-    \item \textbf{Estudio de normativas aplicables}: Se analizaron las regulaciones y estándares relevantes para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304:2007 para software de dispositivos médicos. Este análisis permitió establecer los requisitos de desarrollo y documentación necesarios.
+    \item \textbf{Estudio de normativas aplicables}: Se analizaron las regulaciones y estándares pertinentes para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304:2007 para software de dispositivos médicos. Este análisis permitió establecer los requisitos de desarrollo y documentación correspondientes.
     
     \item \textbf{Estudio de plataformas para implementación}: Se evaluaron diferentes opciones de hardware para la implementación del sistema, analizando capacidad de procesamiento en tiempo real y adecuación para aplicaciones médicas. Esta evaluación determinó los requisitos técnicos para la selección posterior del hardware.
 \end{itemize}
@@ -49,41 +49,41 @@ Se desarrolló este módulo como primer componente del sistema, estableciendo la
     
     \item \textbf{Diseño de protocolos de captura}: Se desarrollaron rutinas estructuradas para la captura de datos EEG durante tareas de imaginación de colores. Se establecieron protocolos temporales precisos para garantizar la consistencia de las muestras y facilitar el posterior entrenamiento del modelo.
     
-    \item \textbf{Implementación de procesamiento de señales}: Aquí tuve que sumergirme en un mundo completamente nuevo para mí. Desarrollé funciones para filtrar y preprocesar las señales raw, pero admito que al principio no tenía ni idea de lo que estaba haciendo. Me pasé días enteros leyendo sobre transformadas de Fourier y filtros digitales—cosas que sonaban muy impresionantes pero que en la práctica eran bastante intimidantes.
+    \item \textbf{Implementación de procesamiento de señales}: Esta etapa implicó una inmersión en un área de conocimiento que resultaba novedosa. Se desarrollaron funciones para filtrar y preprocesar las señales raw, si bien es preciso admitir que inicialmente existía una comprensión limitada del proceso. Se invirtió un tiempo considerable en el estudio de transformadas de Fourier y filtros digitales —conceptos teóricamente notables pero de aplicación práctica compleja—.
     
-    \item \textbf{Almacenamiento y etiquetado de datos}: Implementé un sistema para almacenar y etiquetar automáticamente todo lo que iba capturando. Era súper importante que fuera automático porque sabía que si tenía que hacerlo manualmente, iba a meter la pata constantemente. Aunque me costó más trabajo del esperado hacer que el etiquetado fuera realmente confiable.
+    \item \textbf{Almacenamiento y etiquetado de datos}: Se implementó un sistema para almacenar y etiquetar automáticamente los datos capturados. La automatización de este proceso se consideró de alta importancia para evitar errores manuales. No obstante, lograr un etiquetado fiable requirió un esfuerzo superior al estimado.
 \end{itemize}
 
 \subsubsection{Desarrollo del Programa de Entrenamiento del Modelo (neural\_analytics\_model)}
 
-Esta parte me pilló desprevenido completamente. Mientras intentaba resolver los problemas de extracción de datos, se me ocurrió la brillante idea de desarrollar el módulo de entrenamiento en paralelo. En retrospectiva no sé ni cómo se me ocurrió hacer dos cosas tan complejas a la vez, pero sorprendentemente no fue tan caótico como sonaba en teoría. 
+Esta fase presentó desafíos imprevistos. Durante la resolución de problemas en la extracción de datos, surgió la idea de desarrollar el módulo de entrenamiento en paralelo. En retrospectiva, la simultaneidad de estas dos tareas complejas podría parecer cuestionable, pero el resultado no fue tan caótico como podría haberse previsto.
 
-Lo que me funcionó fue ir probando el pipeline de entrenamiento con los primeros datos que conseguía extraer, aunque fuera información parcial. Esto me permitió detectar problemas mucho antes—como cuando me di cuenta de que el preprocesamiento que estaba haciendo eliminaba información crucial para la clasificación. Cosas que solo descubres cuando intentas entrenar con datos reales.
+Una estrategia funcional consistió en probar el pipeline de entrenamiento con los primeros datos extraídos, incluso si eran parciales. Esto permitió la detección temprana de problemas —como la constatación de que el preprocesamiento eliminaba información crucial para la clasificación—. Son aspectos que frecuentemente solo se descubren al trabajar con datos reales.
 
-El módulo de entrenamiento se convirtió en una especie de laboratorio personal donde experimenté con muchas configuraciones diferentes:
+El módulo de entrenamiento se convirtió en un entorno de experimentación para diversas configuraciones:
 
 \begin{itemize}
-    \item \textbf{Diseño de arquitectura LSTM}: Aquí entré en territorio completamente desconocido para mí. Tuve que diseñar una red neuronal basada en capas LSTM optimizada específicamente para clasificar patrones en señales EEG, pero la verdad es que al principio no tenía ni idea de por dónde empezar. Estuve varias semanas leyendo papers y probando configuraciones casi aleatoriamente hasta que empecé a entender qué parámetros realmente importaban. Hubo días enteros en que pensaba haber encontrado la arquitectura perfecta, solo para descubrir al día siguiente que no funcionaba nada bien con datos diferentes.
+    \item \textbf{Diseño de arquitectura LSTM}: Esta tarea implicó adentrarse en un terreno poco explorado previamente. Fue necesario diseñar una red neuronal basada en capas LSTM, optimizada específicamente para clasificar patrones en señales EEG. Inicialmente, la definición del punto de partida presentó dificultades. Se dedicaron varias semanas a la revisión de literatura científica y a la prueba de configuraciones, en algunos casos de forma exploratoria, hasta comprender los parámetros de mayor impacto. Hubo períodos en los que una arquitectura parecía óptima, para luego descubrir su bajo rendimiento con conjuntos de datos diferentes.
     
-    \item \textbf{Implementación en PyTorch}: Elegí PyTorch básicamente porque había leído que era más intuitivo que TensorFlow, pero enfrentarme a su sintaxis viniendo de otros frameworks fue como aprender a conducir después de montar en bicicleta toda la vida. Las primeras semanas fueron brutales—cada cosa sencilla que quería hacer me llevaba horas porque no entendía bien cómo funcionaban los tensores. Hubo noches en que me quedé despierto solo intentando que un simple entrenamiento funcionara sin errores.
+    \item \textbf{Implementación en PyTorch}: Se eligió PyTorch por su reputación de ser más intuitivo que TensorFlow. Sin embargo, la adaptación a su sintaxis desde otros frameworks representó una curva de aprendizaje pronunciada. Las primeras semanas fueron intensas; tareas conceptualmente simples requerían horas de esfuerzo debido a la falta de familiaridad con el manejo de tensores. Hubo ocasiones en que se dedicaron noches enteras a lograr que un entrenamiento básico se ejecutara sin errores.
     
-    \item \textbf{Rutinas de entrenamiento y validación}: Esta fue la parte más artesanal de todo el proceso. Desarrollé procedimientos para entrenar el modelo de manera eficiente y validarlo con diferentes conjuntos de datos, pero conseguir que el entrenamiento fuera estable se convirtió en mi pesadilla personal. El modelo tenía días buenos y días malos—a veces convergía perfectamente en pocas épocas, y otras veces se negaba a aprender nada coherente por más que ajustara parámetros. Era desesperante.
+    \item \textbf{Rutinas de entrenamiento y validación}: Este fue uno de los aspectos más laboriosos del proceso. Se desarrollaron procedimientos para entrenar el modelo de manera eficiente y validarlo con diferentes conjuntos de datos. No obstante, conseguir la estabilidad del entrenamiento se convirtió en un desafío recurrente. El modelo exhibía variabilidad en su comportamiento —en ocasiones convergía adecuadamente en pocas épocas, mientras que en otras no lograba aprender patrones coherentes a pesar de los ajustes de parámetros—. Esta situación generaba frustración.
     
-    \item \textbf{Exportación a formato ONNX}: Esto me costó más trabajo del esperado. Implementé la conversión para poder usar el modelo después en Rust, pero la compatibilidad entre PyTorch y ONNX resultó ser más problemática de lo que las documentaciones sugerían. Había operaciones que funcionaban perfectamente en PyTorch pero que ONNX no sabía cómo interpretar. Me pasé días enteros reescribiendo partes del modelo solo para que la exportación funcionara correctamente.
+    \item \textbf{Exportación a formato ONNX}: Esta tarea requirió más esfuerzo del previsto. Se implementó la conversión para utilizar el modelo posteriormente en Rust, pero la compatibilidad entre PyTorch y ONNX demostró ser más problemática de lo que la documentación sugería. Ciertas operaciones que funcionaban correctamente en PyTorch no eran interpretadas adecuadamente por ONNX. Se invirtieron varios días en reescribir partes del modelo para asegurar una exportación exitosa.
 \end{itemize}
 
 \subsubsection{Desarrollo del Core del Sistema (neural\_analytics\_core)}
 
-Y aquí llegamos a lo que se convirtió en el boss final de todo el proyecto. Esta parte me consumió una cantidad absurda de tiempo—mucho más de lo que había calculado, y eso que ya había sido bastante conservador con mis estimaciones temporales. 
+Esta sección se erigió como el componente central y más demandante del proyecto. Consumió una cantidad de tiempo considerablemente mayor a la estimada, a pesar de que las previsiones iniciales ya contemplaban un margen amplio.
 
-Implementar correctamente la arquitectura hexagonal se transformó en mi obsesión durante semanas enteras. Literalmente había días en que me despertaba pensando en puertos y adaptadores, y me iba a dormir con diagramas de arquitectura dándome vueltas en la cabeza como si fuera música pegadiza que no puedes sacar.
+La correcta implementación de la arquitectura hexagonal se convirtió en un foco de atención principal durante semanas. Hubo períodos en los que la reflexión sobre puertos, adaptadores y diagramas de arquitectura ocupaba gran parte del pensamiento cotidiano.
 
 Se estableció la arquitectura núcleo del sistema implementando los principios de diseño hexagonal para garantizar la separación entre lógica de negocio e infraestructura. Se desarrolló un sistema modular que permite la interoperabilidad eficiente entre componentes:
 
 \begin{itemize}
     \item \textbf{Implementación de puertos y adaptadores}: Se definieron interfaces claras para todos los componentes externos (puertos) y sus implementaciones concretas (adaptadores), siguiendo estrictamente los principios de la arquitectura hexagonal. Esta implementación garantiza la flexibilidad del sistema y facilita futuras extensiones o modificaciones.
     
-    \item \textbf{Desarrollo del dominio central}: Se implementó la lógica de negocio central completamente independiente de las infraestructuras externas. Esta separación permite el desarrollo, testing y mantenimiento de cada componente de forma aislada, cumpliendo con los requisitos normativos de trazabilidad.
+    \item \textbf{Desarrollo del dominio central}: Se implementó la lógica de negocio central de forma completamente independiente de las infraestructuras externas. Esta separación permite el desarrollo, testing y mantenimiento de cada componente de forma aislada, cumpliendo con los requisitos normativos de trazabilidad.
     
     \item \textbf{Sistema de eventos}: Se desarrolló un mecanismo de comunicación basado en eventos utilizando la biblioteca presage para Rust. Este sistema permite el desacoplamiento efectivo entre componentes y facilita la gestión del flujo de información a través del sistema.
     
@@ -160,7 +160,7 @@ La distribución temporal del proyecto refleja la complejidad técnica de cada f
 \newpage
 \section{Diagrama de Gantt}
 
-Aquí está la representación visual de cómo se fueron solapando las diferentes fases. Me gusta este tipo de diagramas porque realmente te permiten ver cómo se superpusieron las tareas en el tiempo—algo que no es tan obvio cuando solo miras las fechas:
+A continuación, se presenta la representación visual de cómo se solaparon las diferentes fases. Este tipo de diagramas permite observar la superposición temporal de las tareas, un aspecto que no resulta tan evidente al examinar únicamente las fechas:
 
 \begin{figure}[ht]
     \centering
@@ -238,11 +238,11 @@ Aquí está la representación visual de cómo se fueron solapando las diferente
 La evaluación retrospectiva de la planificación temporal del proyecto permite identificar aspectos exitosos y áreas de mejora para futuros desarrollos similares. La metodología implementada resultó adecuada para alcanzar los objetivos establecidos dentro del marco temporal propuesto.
 
 \begin{itemize}
-    \item \textbf{Duración de la fase de desarrollo core}: El desarrollo del núcleo del sistema siguiendo estrictamente los principios de arquitectura hexagonal requirió una inversión temporal considerable. Esta inversión se justificó por los beneficios obtenidos en términos de mantenibilidad, testabilidad y facilidad para realizar pruebas exhaustivas posteriores.
+    \item \textbf{Duración de la fase de desarrollo core}: El desarrollo del núcleo del sistema, siguiendo estrictamente los principios de arquitectura hexagonal, requirió una inversión temporal considerable. Esta inversión se justificó por los beneficios obtenidos en términos de mantenibilidad, testabilidad y facilidad para realizar pruebas exhaustivas posteriores.
     
     \item \textbf{Paralelización de tareas}: La estructuración del desarrollo en componentes modulares desde el inicio permitió el desarrollo simultáneo de varios módulos. Esta estrategia optimizó significativamente el tiempo total de desarrollo y facilitó la gestión de la complejidad del proyecto.
     
-    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril demostró ser más crítica de lo inicialmente estimado. La ampliación del dataset con muestras diversas y representativas incrementó significativamente el rendimiento del modelo, justificando la inversión temporal adicional requerida.
+    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril demostró ser de mayor criticidad de lo inicialmente estimado. La ampliación del dataset con muestras diversas y representativas incrementó significativamente el rendimiento del modelo, justificando la inversión temporal adicional requerida.
     
     \item \textbf{Iteración continua}: El enfoque iterativo resultó fundamental, especialmente durante la etapa de refinamiento del modelo. Cada incorporación de datos permitió ajustes incrementales que mejoraron gradualmente el rendimiento del sistema.
     

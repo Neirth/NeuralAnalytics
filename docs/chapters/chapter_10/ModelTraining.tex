@@ -1,18 +1,18 @@
 \chapter{Entrenamiento del modelo}\label{ch:model_training}
 
-Tras completar el desarrollo de la arquitectura del sistema, se procedió al entrenamiento del modelo para la clasificación de señales EEG. Esta fase representó un hito crítico del proyecto, donde se validarían los fundamentos teóricos y la viabilidad práctica de la aproximación propuesta.
+Tras completar el desarrollo de la arquitectura del sistema, se procedió al entrenamiento del modelo para la clasificación de señales EEG. Esta fase representó un hito de alta relevancia para el proyecto, donde se validarían los fundamentos teóricos y la viabilidad práctica de la aproximación propuesta.
 
-Este capítulo documenta de manera sistemática el proceso de entrenamiento del modelo, incluyendo las decisiones arquitectónicas, metodología experimental y resultados obtenidos. El desarrollo de esta fase presentó diversos desafíos técnicos que requirieron adaptaciones iterativas en la aproximación inicial.
+Este capítulo documenta de manera sistemática el proceso de entrenamiento del modelo, incluyendo las decisiones arquitectónicas, la metodología experimental y los resultados obtenidos. El desarrollo de esta fase presentó diversos desafíos técnicos que requirieron adaptaciones iterativas en la aproximación inicial.
 
 \section{Descripción de la arquitectura}
 
-La selección de la arquitectura neuronal constituyó una decisión técnica fundamental del proyecto. Se optó por una arquitectura híbrida que combina redes LSTM (Long Short-Term Memory) con capas densas, fundamentada en la capacidad demostrada de las LSTM para procesar secuencias temporales complejas como las señales EEG. 
+La selección de la arquitectura neuronal constituyó una decisión técnica fundamental del proyecto. Se optó por una arquitectura híbrida que combina redes LSTM (Long Short-Term Memory) con capas densas, elección fundamentada en la capacidad demostrada de las LSTM para procesar secuencias temporales complejas como las señales EEG.
 
 El sistema se diseñó para procesar y clasificar secuencias temporales de datos neurofisiológicos, utilizando ventanas de 62 puntos temporales como entrada base.
 
 \subsection{Estructura de la red neuronal}
 
-Se implementó una arquitectura híbrida específicamente diseñada para procesar señales EEG de los cuatro canales seleccionados: T3, T4, O1 y O2. El sistema realiza clasificación en tres categorías: RED, GREEN y TRASH, manteniendo un enfoque simplificado que facilita la validación inicial del concepto.
+Se implementó una arquitectura híbrida específicamente diseñada para procesar señales EEG de los cuatro canales seleccionados: T3, T4, O1 y O2. El sistema realiza una clasificación en tres categorías: RED, GREEN y TRASH, manteniendo un enfoque simplificado que facilita la validación inicial del concepto.
 
 La arquitectura final se estableció tras un proceso iterativo de experimentación con diferentes configuraciones de capas y parámetros de red.
 
@@ -28,7 +28,7 @@ Los componentes principales son:
 \begin{itemize}
     \item \textbf{Capa LSTM}: Una capa LSTM con 64 unidades que captura patrones temporales en las señales. La configuración utiliza \texttt{batch\_first=True} para optimizar la forma de entrada (batch\_size, seq\_length, features).
     
-    \item \textbf{Capas densas}: Después de la LSTM, hay varias capas:
+    \item \textbf{Capas densas}: Después de la LSTM, se encuentran varias capas:
     \begin{itemize}
         \item Primera capa densa: Reduce de 64 a 32 unidades.
         \item Activación ReLU: Añade no-linealidad.
@@ -37,14 +37,14 @@ Los componentes principales son:
     \end{itemize}
 \end{itemize}
 
-El flujo de datos es así:
+El flujo de datos se describe a continuación:
 
 \begin{enumerate}
-    \item Entra una secuencia de 62 puntos, cada uno con 4 características.
-    \item La LSTM procesa esto y saca 64 características por punto.
+    \item Ingresa una secuencia de 62 puntos, cada uno con 4 características.
+    \item La LSTM procesa esta secuencia y extrae 64 características por punto.
     \item Se toma el último estado de la secuencia.
-    \item Este pasa por las capas densas con ReLU.
-    \item La capa final con Softmax da la probabilidad para cada clase.
+    \item Este estado atraviesa las capas densas con activación ReLU.
+    \item La capa final con Softmax proporciona la probabilidad para cada clase.
 \end{enumerate}
 
 \subsection{Parámetros del modelo}
@@ -52,11 +52,11 @@ El flujo de datos es así:
 Los principales parámetros son:
 
 \begin{itemize}
-    \item \texttt{INPUT\_SIZE = 4}: Los cuatro canales.
+    \item \texttt{INPUT\_SIZE = 4}: Corresponde a los cuatro canales.
     \item \texttt{HIDDEN\_SIZE = 64}: Unidades en la capa LSTM.
-    \item \texttt{NUM\_CLASSES = 3}: Las tres categorías.
-    \item \texttt{WINDOW\_SIZE = 62}: Tamaño de ventana para secuencias.
-    \item \texttt{BATCH\_SIZE = 64}: Muestras por lote en entrenamiento.
+    \item \texttt{NUM\_CLASSES = 3}: Las tres categorías de clasificación.
+    \item \texttt{WINDOW\_SIZE = 62}: Tamaño de la ventana para las secuencias.
+    \item \texttt{BATCH\_SIZE = 64}: Número de muestras por lote durante el entrenamiento.
 \end{itemize}
 
 \section{Preprocesamiento de los datos}
@@ -65,51 +65,51 @@ El preprocesamiento constituye una fase crítica para garantizar la calidad de l
 
 \subsection{Adquisición y estructuración del dataset}
 
-El dataset tiene esta estructura:
+El dataset presenta la siguiente estructura:
 
 \begin{itemize}
-    \item \textbf{Organización por clases}: Archivos CSV en directorios según clase:
+    \item \textbf{Organización por clases}: Archivos CSV almacenados en directorios según la clase:
     \begin{itemize}
-        \item \texttt{/red/}: Datos mientras el usuario piensa en rojo.
-        \item \texttt{/green/}: Datos mientras piensa en verde.
-        \item \texttt{/trash/}: Datos que no encajan en lo anterior.
+        \item \texttt{/red/}: Datos registrados mientras el usuario piensa en el color rojo.
+        \item \texttt{/green/}: Datos registrados mientras el usuario piensa en el color verde.
+        \item \texttt{/trash/}: Datos que no se corresponden con las categorías anteriores.
     \end{itemize}
     
-    \item \textbf{Formato}: Cada CSV tiene mediciones de T3, T4, O1 y O2 en columnas.
+    \item \textbf{Formato}: Cada archivo CSV contiene mediciones de los canales T3, T4, O1 y O2 en columnas.
 \end{itemize}
 
 \subsection{Etapas de preprocesamiento}
 
-El proceso está en la función \texttt{neural\_analytics\_preprocessor} y hace:
+El proceso se encuentra encapsulado en la función \texttt{neural\_analytics\_preprocessor} y realiza las siguientes operaciones:
 
 \begin{enumerate}
     \item \textbf{Normalización}: Escala los canales EEG al rango [0,1].
     
-    \item \textbf{Extracción de etiquetas}: Saca la clase del nombre del directorio.
+    \item \textbf{Extracción de etiquetas}: Obtiene la clase a partir del nombre del directorio.
     
-    \item \textbf{Codificación one-hot}: Convierte etiquetas a vectores:
+    \item \textbf{Codificación one-hot}: Convierte las etiquetas categóricas a vectores binarios:
     \begin{itemize}
         \item \texttt{red}: [1, 0, 0]
         \item \texttt{green}: [0, 1, 0]
         \item \texttt{trash}: [0, 0, 1]
     \end{itemize}
     
-    \item \textbf{Ventanas deslizantes}: Para cada CSV, crea ventanas con solapamiento.
+    \item \textbf{Ventanas deslizantes}: Para cada archivo CSV, crea ventanas con solapamiento.
 \end{enumerate}
 
 \subsection{Implementación del dataset}
 
-Se desarrolló una clase \texttt{NeuralAnalyticsDataset} que hereda de \texttt{Dataset} de PyTorch. Esta implementación:
+Se desarrolló una clase \texttt{NeuralAnalyticsDataset} que hereda de \texttt{Dataset}, propia de PyTorch. Esta implementación:
 
 \begin{itemize}
-    \item Recorre el directorio y procesa los CSV.
-    \item Aplica el preprocesamiento.
-    \item Guarda ventanas y etiquetas.
-    \item Convierte a tensores de PyTorch.
-    \item Implementa \texttt{\_\_len\_\_} y \texttt{\_\_getitem\_\_}.
+    \item Recorre el directorio y procesa los archivos CSV.
+    \item Aplica el preprocesamiento definido.
+    \item Almacena las ventanas y sus etiquetas correspondientes.
+    \item Convierte los datos a tensores de PyTorch.
+    \item Implementa los métodos \texttt{\_\_len\_\_} y \texttt{\_\_getitem\_\_}.
 \end{itemize}
 
-Durante la inicialización, se implementa división automática en conjuntos de entrenamiento (80\%) y validación (20\%) utilizando \texttt{train\_test\_split}.
+Durante la inicialización, se implementa una división automática en conjuntos de entrenamiento (80\%) y validación (20\%) utilizando la función \texttt{train\_test\_split}.
 
 \section{Resultados del entrenamiento}
 
@@ -122,13 +122,13 @@ Se estableció la siguiente configuración para el proceso de entrenamiento:
 \begin{itemize}
     \item \textbf{Función de pérdida}: \texttt{CrossEntropyLoss}.
     
-    \item \textbf{Optimizador}: Adam con tasa inicial 0.001.
+    \item \textbf{Optimizador}: Adam con una tasa de aprendizaje inicial de 0.001.
     
-    \item \textbf{Planificador}: \texttt{ReduceLROnPlateau} que reduce la tasa si la pérdida se estanca.
+    \item \textbf{Planificador}: \texttt{ReduceLROnPlateau}, que reduce la tasa de aprendizaje si la pérdida se estanca.
     
-    \item \textbf{Épocas}: 1000, con evaluaciones periódicas.
+    \item \textbf{Épocas}: 1000, con evaluaciones periódicas del rendimiento.
     
-    \item \textbf{Monitorización}: TensorBoard para ver métricas en tiempo real.
+    \item \textbf{Monitorización}: TensorBoard para la visualización de métricas en tiempo real.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -156,11 +156,11 @@ Se estableció la siguiente configuración para el proceso de entrenamiento:
 Las métricas de rendimiento obtenidas son las siguientes:
 
 \begin{itemize}
-    \item \textbf{Precisión}: 84.3\% en validación, resultado satisfactorio para el objetivo del proyecto.
+    \item \textbf{Precisión}: 84.3\% en el conjunto de validación, un resultado considerado satisfactorio para el objetivo del proyecto.
     
-    \item \textbf{Matriz de confusión}: Los resultados muestran mayor confusión entre las clases \texttt{red} y \texttt{trash} comparado con \texttt{green}.
+    \item \textbf{Matriz de confusión}: Los resultados muestran una mayor confusión entre las clases \texttt{red} y \texttt{trash} en comparación con la clase \texttt{green}.
     
-    \item \textbf{Curvas ROC}: Se obtuvieron valores AUC superiores a 0.95 para todas las clases, indicando excelente poder discriminativo del modelo.
+    \item \textbf{Curvas ROC}: Se obtuvieron valores AUC superiores a 0.95 para todas las clases, lo que indica un excelente poder discriminativo del modelo.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -203,11 +203,11 @@ Las métricas de rendimiento obtenidas son las siguientes:
 El análisis de los resultados revela los siguientes hallazgos:
 
 \begin{itemize}
-    \item La arquitectura LSTM demuestra capacidad efectiva para capturar patrones relevantes en las señales EEG.
+    \item La arquitectura LSTM demuestra una capacidad efectiva para capturar patrones relevantes en las señales EEG.
     
-    \item El refinamiento realizado en abril 2025 produjo mejoras significativas, incrementando la precisión del 55\% inicial a más del 84\% mediante la ampliación del dataset.
+    \item El refinamiento realizado en abril de 2025 produjo mejoras significativas, incrementando la precisión del 55\% inicial a más del 84\% mediante la ampliación del dataset.
     
-    \item Las clases RED y GREEN presentan patrones más distinguibles, mientras que TRASH muestra mayor variabilidad inherente.
+    \item Las clases RED y GREEN presentan patrones más distinguibles, mientras que la clase TRASH muestra una mayor variabilidad inherente.
     
     \item La variabilidad en los procesos cognitivos de visualización de colores entre usuarios constituye un factor relevante que requiere protocolos estandarizados para la captura de datos.
 \end{itemize}

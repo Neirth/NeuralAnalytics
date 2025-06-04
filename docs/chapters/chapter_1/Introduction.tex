@@ -1,58 +1,58 @@
 % Chapter 2: Introducción
 \chapter{Introducción}
 
-Este trabajo aborda —desde una perspectiva integradora— el diseño y desarrollo de un sistema innovador de automatización del hogar que combina tecnología de interfaz cerebro-computadora (BCI) con dispositivos de iluminación inteligentes. El propósito fundamental del proyecto se centra en desarrollar una solución no invasiva que permita el control del entorno doméstico mediante la lectura e interpretación de ondas cerebrales, empleando específicamente dispositivos TP-Link Tapo como elementos de control.
+El presente trabajo aborda —desde una perspectiva integradora— el diseño y desarrollo de un sistema innovador de automatización del hogar que combina tecnología de interfaz cerebro-computadora (BCI) con dispositivos de iluminación inteligentes. El propósito fundamental del proyecto se centra en el desarrollo de una solución no invasiva que posibilite el control del entorno doméstico mediante la lectura e interpretación de ondas cerebrales, empleando específicamente dispositivos TP-Link Tapo como elementos de control.
 
-La arquitectura implementada se sustenta en dos pilares fundamentales: por un lado, el procesamiento de señales electroencefalográficas (EEG) mediante técnicas de aprendizaje profundo y, por otro, el estricto cumplimiento de la normativa UNE-EN 62304 para dispositivos y/o software médicos. Para garantizar que el sistema responda en tiempo real —aspecto crítico en esta aplicación—, se ha optado por utilizar Poky Linux del Proyecto Yocto como sistema operativo base. Esta elección responde a su notable flexibilidad y facilidad de personalización, además de facilitar una posible migración futura a Wind River Linux en caso de comercializar este proyecto como producto médico.
+La arquitectura implementada se sustenta en dos pilares fundamentales: por una parte, el procesamiento de señales electroencefalográficas (EEG) mediante técnicas de aprendizaje profundo y, por otra, el estricto cumplimiento de la normativa UNE-EN 62304 para dispositivos y/o software médicos. Para asegurar que el sistema responda en tiempo real —un aspecto de considerable importancia en esta aplicación—, se ha optado por la utilización de Poky Linux del Proyecto Yocto como sistema operativo base. Esta elección obedece a su apreciable flexibilidad y facilidad de personalización, además de facilitar una posible migración futura a Wind River Linux en caso de que se contemple la comercialización de este proyecto como producto médico.
 
 \section{Motivación}
-El desarrollo de interfaces cerebro-computadora y sus aplicaciones potenciales representa un campo de creciente relevancia en la ingeniería biomédica contemporánea. Este proyecto constituye una síntesis de múltiples disciplinas: la tecnología, los sistemas operativos en tiempo real, la medicina y la innovación. El trabajo con un sistema que integra procesamiento de señales cerebrales con control domótico permite explorar un campo que promete revolucionar la interacción persona-máquina en los próximos años, abordándolo desde una perspectiva tanto técnica como práctica.
+El desarrollo de interfaces cerebro-computadora y sus aplicaciones potenciales representa un campo de notable relevancia en la ingeniería biomédica contemporánea. Este proyecto configura una síntesis de múltiples disciplinas: la tecnología, los sistemas operativos en tiempo real, la medicina y la innovación. El trabajo con un sistema que integra procesamiento de señales cerebrales con control domótico permite la exploración de un campo que se proyecta como revolucionario para la interacción persona-máquina en los próximos años, abordándolo desde una perspectiva tanto técnica como práctica.
 
-La decisión de trabajar con actuadores domóticos comunes, concretamente bombillas inteligentes, permite demostrar —de manera visual e intuitiva— el funcionamiento del sistema BCI, haciendo tangible una tecnología que muchas veces resulta abstracta o inalcanzable. Este enfoque práctico, además, facilita enormemente la comprensión del sistema y su impacto potencial en contextos cotidianos.
+La decisión de operar con actuadores domóticos comunes, concretamente bombillas inteligentes, tiene como finalidad demostrar —de manera visual e intuitiva— el funcionamiento del sistema BCI, haciendo tangible una tecnología que con frecuencia puede percibirse como abstracta o de difícil acceso. Este enfoque práctico, adicionalmente, facilita de manera considerable la comprensión del sistema y su impacto potencial en contextos cotidianos.
 
-El aspecto normativo del proyecto, aunque técnicamente desafiante, representa una oportunidad única para entender el proceso completo de desarrollo desde una idea innovadora hasta un producto viable en el mercado médico. Cumplir con la normativa UNE-EN 62304, implementar un sistema en tiempo real y desarrollar una metodología robusta enriquece significativamente la comprensión sobre lo que implica desarrollar tecnología médica responsable y segura.
+El aspecto normativo del proyecto, si bien presenta desafíos técnicos, representa una valiosa oportunidad para la comprensión del proceso completo de desarrollo, desde una idea innovadora hasta un producto viable en el mercado médico. El cumplimiento de la normativa UNE-EN 62304, la implementación de un sistema en tiempo real y el desarrollo de una metodología robusta enriquecen de forma significativa la comprensión sobre las implicaciones de desarrollar tecnología médica responsable y segura.
 
 \section{Objetivos}
-Este proyecto tiene como finalidad principal el desarrollo de un sistema de control domótico basado en interfaces cerebro-computadora, con la intención de hacer más accesible esta tecnología en entornos cotidianos.
+Este proyecto tiene como finalidad principal el desarrollo de un sistema de control domótico basado en interfaces cerebro-computadora, con la intención de incrementar la accesibilidad de esta tecnología en entornos cotidianos.
 
-Para alcanzar esta meta, se han establecido los siguientes objetivos específicos:
+Para la consecución de esta meta, se han establecido los siguientes objetivos específicos:
 
 \begin{itemize}
-    \item \textbf{Cumplimiento del estándar UNE-EN 62304}: Crear una solución que se ajuste a la normativa UNE-EN 62304, garantizando así la seguridad y fiabilidad del software médico mediante una metodología de desarrollo rigurosa y bien documentada.
+    \item \textbf{Cumplimiento del estándar UNE-EN 62304}: La creación de una solución que se ajuste a la normativa UNE-EN 62304, garantizando así la seguridad y fiabilidad del software médico mediante una metodología de desarrollo rigurosa y bien documentada.
     
-    \item \textbf{Implementar un clasificador de señales EEG}: Desarrollar e implementar un modelo de aprendizaje profundo para la clasificación eficiente de señales EEG, utilizando PyTorch como framework principal y centrándose especialmente en la detección de patrones asociados a la visualización de colores.
+    \item \textbf{Implementar un clasificador de señales EEG}: El desarrollo e implementación de un modelo de aprendizaje profundo para la clasificación eficiente de señales EEG, utilizando PyTorch como framework principal y con un enfoque particular en la detección de patrones asociados a la visualización de colores.
     
-    \item \textbf{Desarrollar un sistema de control BCI}: Construir un sistema funcional que permita controlar dispositivos de iluminación inteligente mediante señales EEG, empleando la diadema Brainbit como dispositivo para la adquisición de dichas señales.
+    \item \textbf{Desarrollar un sistema de control BCI}: La construcción de un sistema funcional que permita controlar dispositivos de iluminación inteligente mediante señales EEG, empleando la diadema Brainbit como dispositivo para la adquisición de dichas señales.
     
-    \item \textbf{Generar una imagen para la RPi4}: Crear y optimizar una imagen de sistema operativo personalizada basada en Poky Linux, asegurando un entorno de ejecución con garantías de tiempo real blando para el procesamiento de señales EEG.
+    \item \textbf{Generar una imagen para la RPi4}: La creación y optimización de una imagen de sistema operativo personalizada basada en Poky Linux, asegurando un entorno de ejecución con garantías de tiempo real blando para el procesamiento de señales EEG.
 \end{itemize}
 
 Estos objetivos han sido definidos considerando tanto los aspectos técnicos como normativos del proyecto, manteniendo un equilibrio entre la innovación tecnológica y la viabilidad práctica en entornos reales.
 
 \newpage
 \section{Metodología}
-El desarrollo del proyecto sigue una metodología estructurada en varias fases que garantiza el cumplimiento de los objetivos establecidos:
+El desarrollo del proyecto sigue una metodología estructurada en varias fases que asegura el cumplimiento de los objetivos establecidos:
 
 \subsection{Fase de Investigación}
 \begin{itemize}
-    \item Estudio exhaustivo de la literatura disponible sobre procesamiento de señales EEG
-    \item Análisis detallado de requisitos normativos para dispositivos médicos
-    \item Evaluación de tecnologías y frameworks disponibles en el mercado actual
+    \item Un estudio exhaustivo de la literatura disponible sobre procesamiento de señales EEG.
+    \item Un análisis detallado de los requisitos normativos para dispositivos médicos.
+    \item Una evaluación de las tecnologías y los frameworks disponibles en el mercado actual.
 \end{itemize}
 
 \subsection{Fase de Desarrollo}
 \begin{itemize}
-    \item Implementación del modelo de clasificación en PyTorch mediante múltiples iteraciones
-    \item Desarrollo del motor de inferencia en Rust, seleccionado por su rendimiento y seguridad
-    \item Integración con el SDK de BrainFlow para la adquisición de señales EEG
-    \item Creación de la imagen personalizada de Poky Linux, optimizando componentes
+    \item La implementación del modelo de clasificación en PyTorch, llevada a cabo mediante múltiples iteraciones.
+    \item El desarrollo del motor de inferencia en Rust, lenguaje seleccionado por su rendimiento y características de seguridad.
+    \item La integración con el SDK de BrainFlow para la adquisición de señales EEG.
+    \item La creación de la imagen personalizada de Poky Linux, con optimización de sus componentes.
 \end{itemize}
 
 \subsection{Fase de Validación}
 \begin{itemize}
-    \item Pruebas rigurosas de rendimiento y fiabilidad en distintos escenarios
-    \item Verificación del cumplimiento normativo, documentando cada aspecto relevante
-    \item Evaluación de la usabilidad del sistema en condiciones reales de operación
+    \item Pruebas rigurosas de rendimiento y fiabilidad efectuadas en distintos escenarios.
+    \item La verificación del cumplimiento normativo, documentando cada aspecto relevante del proceso.
+    \item Una evaluación de la usabilidad del sistema bajo condiciones reales de operación.
 \end{itemize}
 
-La vertiente práctica del proyecto incluye una descripción detallada del proceso de desarrollo, abarcando desde el entrenamiento del modelo de aprendizaje profundo hasta la integración con el resto de componentes del sistema.
+La vertiente práctica del proyecto incluye una descripción detallada del proceso de desarrollo, que abarca desde el entrenamiento del modelo de aprendizaje profundo hasta su integración con el resto de los componentes del sistema.

@@ -1,26 +1,26 @@
 \chapter{Sistemas operativos en Tiempo Real}\label{ch:real_time_oses}
 
-Los sistemas operativos en tiempo real (RTOS) \cite{Siewert_Pratt_2016} son una rama del software que busca garantizar ejecución de tareas en plazos temporales específicos, pues el concepto mismo de computación en tiempo real nace de la necesidad de procesar y responder a eventos externos con restricciones de tiempo bien definidas. Entonces, la corrección del sistema no solo depende de la lógica de los resultados, sino también del momento exacto en que estos se producen.
+Los sistemas operativos en tiempo real (RTOS) \cite{Siewert_Pratt_2016} representan una rama del software orientada a garantizar la ejecución de tareas en plazos temporales específicos. El concepto mismo de computación en tiempo real surge de la necesidad de procesar y responder a eventos externos con restricciones de tiempo bien definidas. En consecuencia, la corrección del sistema no solo depende de la lógica de los resultados, sino también del momento exacto en que estos se producen.
 
 Las características que diferencian a un RTOS de sistemas operativos convencionales son:
 
 \begin{itemize}
-    \item \textbf{Determinismo}: Propiedad fundamental donde dada una entrada y estado inicial, nos va a devolver siempre la misma salida en tiempos predecibles.
+    \item \textbf{Determinismo}: Propiedad fundamental donde, dada una entrada y un estado inicial, el sistema devolverá siempre la misma salida en tiempos predecibles.
     \item \textbf{Concurrencia}: Capacidad para gestionar varias tareas en espacios temporales limitados sin comprometer plazos críticos.
     \item \textbf{Interrupciones}: Mecanismos para responder a eventos externos de forma rápida y predecible.
     \item \textbf{Planificación}: Algoritmos que controlan el orden y tiempo de ejecución de tareas según su criticidad temporal.
 \end{itemize}
 
-En el campo de los sistemas embebidos, un RTOS actúa como intermediario entre el hardware y las operaciones de control. El ejemplo clásico de los controladores de vuelo en aeronaves es quizá el más ilustrativo, donde cualquier fallo en los tiempos de respuesta puede tener efectos catastróficos. Estos sistemas aparecen también en satélites artificiales, que suelen tener varios RTOS ejecutando en paralelo para controlar tanto las funciones del vehículo como los instrumentos científicos, todo trabajando de forma armónica.
+En el campo de los sistemas embebidos, un RTOS actúa como intermediario entre el hardware y las operaciones de control. El ejemplo clásico de los controladores de vuelo en aeronaves resulta particularmente ilustrativo, donde cualquier fallo en los tiempos de respuesta puede tener efectos catastróficos. Estos sistemas también se encuentran en satélites artificiales, que suelen operar con varios RTOS en paralelo para controlar tanto las funciones del vehículo como los instrumentos científicos, trabajando de forma coordinada.
 
-Al investigar aplicaciones de RTOS, he encontrado muchos sectores donde son vitales: en entornos industriales para control de procesos críticos; en aviónica para sistemas de navegación (con certificaciones súper estrictas); en defensa para sistemas de radar; y —importante para este proyecto— en el sector médico, donde dispositivos como marcapasos, respiradores y bombas de infusión necesitan respuestas predecibles para garantizar seguridad del paciente.
+Al investigar las aplicaciones de RTOS, se han identificado numerosos sectores donde son vitales: en entornos industriales para el control de procesos críticos; en aviónica para sistemas de navegación (sujetos a certificaciones de alta exigencia); en defensa para sistemas de radar; y —aspecto relevante para este proyecto— en el sector médico, donde dispositivos como marcapasos, respiradores y bombas de infusión requieren respuestas predecibles para garantizar la seguridad del paciente.
 
 \newpage
 \section{Taxonomía de Sistemas en Tiempo Real}
-    La clasificación básica de RTOS se basa en la criticidad de sus restricciones temporales. Esta taxonomía viene de Liu y Layland en 1973 \cite{Siewert_Pratt_2016} y distingue principalmente entre sistemas estrictos (\textit{hard real-time}) y flexibles (\textit{soft real-time}). Mi entendimiento de estas categorías cambió bastante al ver aplicaciones reales, pues la línea entre ambas no es tan clara como dicen los libros.
+    La clasificación básica de RTOS se fundamenta en la criticidad de sus restricciones temporales. Esta taxonomía, propuesta por Liu y Layland en 1973 \cite{Siewert_Pratt_2016}, distingue principalmente entre sistemas estrictos (\textit{hard real-time}) y flexibles (\textit{soft real-time}). La comprensión de estas categorías evolucionó significativamente al observar aplicaciones reales, donde la línea divisoria entre ambas no siempre es tan nítida como se describe en la literatura teórica.
 
     \subsection{Sistemas de Tiempo Real Estricto}
-        Los sistemas estrictos (\textbf{hard real-time}) no toleran ninguna desviación en sus plazos temporales. Si se incumple un plazo, se considera un fallo crítico del sistema —algo que da bastante miedo cuando piensas en sus aplicaciones en entornos críticos. Su comportamiento se puede expresar matemáticamente como:
+        Los sistemas estrictos (\textbf{hard real-time}) no toleran ninguna desviación en sus plazos temporales. El incumplimiento de un plazo se considera un fallo crítico del sistema —una consideración de peso dadas sus aplicaciones en entornos críticos—. Su comportamento se puede expresar matemáticamente como:
 
         \begin{figure}[h!]
             \centering
@@ -35,16 +35,16 @@ Al investigar aplicaciones de RTOS, he encontrado muchos sectores donde son vita
 
         Algunos de los casos de uso más comunes para estos sistemas son:
         \begin{itemize}
-            \item \textbf{Control nuclear}: Donde la precisión temporal es crítica para la seguridad
-            \item \textbf{Sistemas ABS}: Responden en microsegundos para evitar accidentes
-            \item \textbf{Robótica quirúrgica}: Necesitan sincronización precisa durante operaciones
+            \item \textbf{Control nuclear}: Donde la precisión temporal es crítica para la seguridad.
+            \item \textbf{Sistemas ABS}: Responden en microsegundos para evitar accidentes.
+            \item \textbf{Robótica quirúrgica}: Necesitan sincronización precisa durante operaciones.
         \end{itemize}
 
-    La implementación requiere algoritmos \textbf{preemptivos} con prioridades estáticas, donde el tiempo máximo de ejecución debe ser predecible. Normalmente usan Rate Monotonic (RM) o Earliest Deadline First (EDF). Cuando intenté implementar esto en mis pruebas iniciales, me di cuenta que garantizar determinismo absoluto en hardware normal es casi imposible y me tocó replantear algunas decisiones.
+    La implementación requiere algoritmos \textbf{preemptivos} con prioridades estáticas, donde el tiempo máximo de ejecución debe ser predecible. Normalmente se utilizan Rate Monotonic (RM) o Earliest Deadline First (EDF). Durante las pruebas iniciales de implementación, se constató que garantizar un determinismo absoluto en hardware estándar es prácticamente imposible, lo que llevó a replantear algunas decisiones de diseño.
 
     \newpage
     \subsection{Sistemas de Tiempo Real Flexible}
-        Los sistemas flexibles (\textbf{soft real-time}) toleran cierta variabilidad en sus plazos, funcionando con un modelo estadístico. Es algo así como:
+        Los sistemas flexibles (\textbf{soft real-time}) toleran cierta variabilidad en sus plazos, funcionando con un modelo estadístico. Esto se puede representar como:
 
         \begin{figure}[h!]
             \centering
@@ -58,156 +58,156 @@ Al investigar aplicaciones de RTOS, he encontrado muchos sectores donde son vita
 
         Las aplicaciones más comunes son:
         \begin{itemize}
-            \item \textbf{Streaming multimedia}: Perder algunos frames de vez en cuando no arruina la experiencia
-            \item \textbf{Redes de monitorización}: Toleran retrasos ocasionales en actualizar datos
-            \item \textbf{Trading algorítmico}: Les importa más el rendimiento promedio que garantías absolutas
+            \item \textbf{Streaming multimedia}: La pérdida ocasional de algunos frames no deteriora significativamente la experiencia.
+            \item \textbf{Redes de monitorización}: Toleran retrasos esporádicos en la actualización de datos.
+            \item \textbf{Trading algorítmico}: Se prioriza el rendimiento promedio sobre garantías absolutas.
         \end{itemize}
 
-        Estos sistemas usan planificadores basados en \textbf{tiempo compartido} con prioridades dinámicas. Para mi interfaz cerebro-computadora, este enfoque fue mejor, ya que pequeñas variaciones en los tiempos no afectan mucho la experiencia. Después de analizar bien los requisitos temporales, vi claramente que este modelo no solo cumplía lo necesario, sino que ofrecía mejor balance entre complejidad y prestaciones.
+        Estos sistemas usan planificadores basados en \textbf{tiempo compartido} con prioridades dinámicas. Para la interfaz cerebro-computadora de este proyecto, dicho enfoque resultó más adecuado, ya que pequeñas variaciones en los tiempos no afectan de manera sustancial la experiencia. Tras un análisis detallado de los requisitos temporales, se evidenció que este modelo no solo cumplía con lo necesario, sino que ofrecía un mejor equilibrio entre complejidad y prestaciones.
 
     \subsection{Consideraciones de Implementación}
         La decisión entre sistemas estrictos o flexibles depende de varios factores:
         \begin{itemize}
-            \item \textbf{Riesgos}: ¿Qué pasa si se incumple un plazo temporal?
-            \item \textbf{Hardware disponible}: Limitaciones de procesamiento y memoria
-            \item \textbf{Presupuesto}: Balance entre garantías temporales y complejidad
-            \item \textbf{Regulaciones}: Requisitos de certificación según donde se use
+            \item \textbf{Riesgos}: ¿Cuáles son las consecuencias si se incumple un plazo temporal?
+            \item \textbf{Hardware disponible}: Limitaciones de procesamiento y memoria.
+            \item \textbf{Presupuesto}: Balance entre garantías temporales y complejidad.
+            \item \textbf{Regulaciones}: Requisitos de certificación según el ámbito de aplicación.
         \end{itemize}
 
 \newpage
 \section{Soluciones Comerciales para Hard Real-Time}
 
     \subsection{VxWorks (Wind River Systems)}
-        VxWorks es el referente en sistemas embebidos críticos, especialmente en aviónica, aeroespacial y médico. Cuando empecé a estudiarlo, su documentación me pareció abrumadora. Sus características principales:
+        VxWorks es una referencia en sistemas embebidos críticos, especialmente en aviónica, aeroespacial y el sector médico. Al iniciar su estudio, la documentación asociada pudo parecer extensa. Sus características principales son:
 
         \subsubsection{Certificaciones y Normativas}
             \begin{itemize}
-                \item DO-178C Level A para sistemas aeroespaciales
-                \item IEC 62304 para dispositivos médicos
-                \item ISO 26262 ASIL D para automoción
+                \item DO-178C Level A para sistemas aeroespaciales.
+                \item IEC 62304 para dispositivos médicos.
+                \item ISO 26262 ASIL D para automoción.
             \end{itemize}
         \subsubsection{Características Técnicas}
             \begin{itemize}
-                \item \textbf{Kernel}: Microkernel determinista con latencias $\le$ 50 ns
-                \item \textbf{Memoria}: MMU con protección y aislamiento
-                \item \textbf{Scheduler}: 256 niveles de prioridad y herencia
-                \item \textbf{IPC}: Comunicación con latencia determinista
-                \item \textbf{Multiproceso}: Soporte para SMP y AMP con aislamiento
+                \item \textbf{Kernel}: Microkernel determinista con latencias $\le$ 50 ns.
+                \item \textbf{Memoria}: MMU con protección y aislamiento.
+                \item \textbf{Scheduler}: 256 niveles de prioridad y herencia.
+                \item \textbf{IPC}: Comunicación con latencia determinista.
+                \item \textbf{Multiproceso}: Soporte para SMP y AMP con aislamiento.
             \end{itemize}
 
-        Al evaluar VxWorks me impresionó ver dónde se usa —desde rovers de Marte hasta dispositivos médicos certificados. Pero los costes de licencia para obtener un SDK personalizado eran prohibitivos para un proyecto que está en fase de prototipo.
+        Al evaluar VxWorks, resultó notable su utilización en aplicaciones como rovers de Marte y dispositivos médicos certificados. No obstante, los costes de licencia para obtener un SDK personalizado se consideraron elevados para un proyecto en fase de prototipo.
 
     \newpage
     \subsection{QNX Neutrino (BlackBerry)}
-        QNX Neutrino, que compró BlackBerry en 2010, destaca por su microkernel distribuido y fiabilidad. Es curioso que BlackBerry, después de casi desaparecer del mercado de móviles, mantenga este producto tecnológico tan avanzado:
+        QNX Neutrino, adquirido por BlackBerry en 2010, destaca por su microkernel distribuido y fiabilidad. Resulta interesante que BlackBerry, tras una reorientación de su mercado de móviles, mantenga este producto tecnológico avanzado:
 
         \subsubsection{Arquitectura}
             \begin{itemize}
-                \item \textbf{Microkernel}: Núcleo muy pequeño, menos de 100KB
-                \item \textbf{Servicios}: Arquitectura modular en espacio de usuario
-                \item \textbf{IPC}: Mensajería con mecanismo copy-on-write
-                \item \textbf{Recuperación}: Reinicio de componentes sin afectar al sistema
+                \item \textbf{Microkernel}: Núcleo de tamaño reducido, inferior a 100KB.
+                \item \textbf{Servicios}: Arquitectura modular en espacio de usuario.
+                \item \textbf{IPC}: Mensajería con mecanismo copy-on-write.
+                \item \textbf{Recuperación}: Reinicio de componentes sin afectar al sistema.
             \end{itemize}
 
         \subsubsection{Características Avanzadas}
             \begin{itemize}
-                \item \textbf{Tiempo Real}: Latencias garantizadas $\le$ 100 $\mu$s
-                \item \textbf{Seguridad}: Modelo de seguridad con ASLR
-                \item \textbf{Certificaciones}: IEC 61508 SIL3, IEC 62304 Clase C
+                \item \textbf{Tiempo Real}: Latencias garantizadas $\le$ 100 $\mu$s.
+                \item \textbf{Seguridad}: Modelo de seguridad con ASLR.
+                \item \textbf{Certificaciones}: IEC 61508 SIL3, IEC 62304 Clase C.
             \end{itemize}
 
-        QNX me gustó mucho por su uso en dispositivos médicos. Su problema principal no fue tanto el coste —BlackBerry tiene licencias para desarrollo— sino que no tiene buen soporte para Rust, lo que complicaba integrar las librerías que consumía este proyecto. Después de tratar de hacerlo funcionar, decidí que no valía la pena invertir más tiempo y dejé de lado esta opción.
+        QNX presentó un atractivo considerable por su uso en dispositivos médicos. Su principal inconveniente no radicó tanto en el coste —BlackBerry ofrece licencias para desarrollo— sino en la limitada compatibilidad con Rust, lo que dificultaba la integración de las librerías utilizadas en este proyecto. Tras intentos de integración, se determinó que la inversión de tiempo adicional no resultaba justificable y se descartó esta opción.
 
     \newpage
     \subsection{Zephyr RTOS (Linux Foundation)}
-        Zephyr es la alternativa open-source para sistemas embebidos críticos. Este proyecto, inicialmente iniciado por Wind River y más adelante donado a la Linux Foundation, ha crecido rápidamente y tiene un ecosistema de desarrolladores muy activo. Me pareció una opción interesante para el prototipo:
+        Zephyr es la alternativa open-source para sistemas embebidos críticos. Este proyecto, iniciado por Wind River y posteriormente donado a la Linux Foundation, ha experimentado un crecimiento rápido y cuenta con un ecosistema de desarrolladores activo. Se consideró una opción interesante para el prototipo:
 
         \subsubsection{Diseño y Arquitectura}
             \begin{itemize}
-                \item \textbf{Kernel}: Configurable como monolítico o microkernel
-                \item \textbf{Tamaño}: Desde 8KB hasta 512KB según configuración
-                \item \textbf{Scheduler}: Hasta 32 niveles de prioridad
-                \item \textbf{Certificación}: En proceso para IEC 61508 SIL 3/4
+                \item \textbf{Kernel}: Configurable como monolítico o microkernel.
+                \item \textbf{Tamaño}: Desde 8KB hasta 512KB según configuración.
+                \item \textbf{Scheduler}: Hasta 32 niveles de prioridad.
+                \item \textbf{Certificación}: En proceso para IEC 61508 SIL 3/4.
             \end{itemize}
 
         \subsubsection{Características Destacadas}
             \begin{itemize}
-                \item \textbf{Drivers}: Más de 350 controladores para periféricos
-                \item \textbf{Redes}: Soporte para protocolos IoT (BLE, Thread, LoRaWAN)
-                \item \textbf{Seguridad}: Subsistema con aislamiento
-                \item \textbf{Desarrollo}: Herramientas de depuración avanzadas
+                \item \textbf{Drivers}: Más de 350 controladores para periféricos.
+                \item \textbf{Redes}: Soporte para protocolos IoT (BLE, Thread, LoRaWAN).
+                \item \textbf{Seguridad}: Subsistema con aislamiento.
+                \item \textbf{Desarrollo}: Herramientas de depuración avanzadas.
             \end{itemize}
 
-        Aunque Zephyr era atractivo y sin coste económico, tenía también las complicaciones del soporte de librerías en Rust. Sin embargo, dadas sus características, preferí mirar otras opciones que pudieran contar con el núcleo de Linux y así aprovechar el ecosistema de librerías que ya tenía.
+        Aunque Zephyr resultaba atractivo y no implicaba costes económicos directos, presentaba también complicaciones relativas al soporte de librerías en Rust. Dadas sus características, se optó por explorar otras opciones que pudieran contar con el núcleo de Linux y así aprovechar el ecosistema de librerías existente.
 
 \newpage
 \section{Soluciones Comerciales para Soft Real-Time}
     \subsection{Wind River Linux (Wind River Systems)}
-        Wind River Linux es una solución comercial basada en Yocto para sistemas con requisitos temporales flexibles. Cuando la descubrí, me pareció una versión más accesible de VxWorks, con enfoque más moderno:
+        Wind River Linux es una solución comercial basada en Yocto para sistemas con requisitos temporales flexibles. Al ser descubierta, se percibió como una versión más accesible de VxWorks, con un enfoque contemporáneo:
 
         \subsubsection{Características Principales}
             \begin{itemize}
-                \item \textbf{Base}: Kernel Linux 5.10 LTS con parche PREEMPT\_RT
-                \item \textbf{Certificaciones}: ISO 9001:2015 y precertificación IEC 62304
-                \item \textbf{Seguridad}: Monitorización de vulnerabilidades y mitigación
-                \item \textbf{Conformidad}: Documentación SBOM y Open Chain 2.1
+                \item \textbf{Base}: Kernel Linux 5.10 LTS con parche PREEMPT\_RT.
+                \item \textbf{Certificaciones}: ISO 9001:2015 y precertificación IEC 62304.
+                \item \textbf{Seguridad}: Monitorización de vulnerabilidades y mitigación.
+                \item \textbf{Conformidad}: Documentación SBOM y Open Chain 2.1.
             \end{itemize}
 
         \subsubsection{Capacidades Industriales}
             \begin{itemize}
-                \item \textbf{Soporte}: Mantenimiento garantizado 5 años, extensible
-                \item \textbf{Actualizaciones}: Sistema OTA mediante OSTree
-                \item \textbf{Validación}: Más de 60.000 tests automatizados
-                \item \textbf{Servicios}: Soporte técnico y consultoría
+                \item \textbf{Soporte}: Mantenimiento garantizado por 5 años, extensible.
+                \item \textbf{Actualizaciones}: Sistema OTA mediante OSTree.
+                \item \textbf{Validación}: Más de 60.000 tests automatizados.
+                \item \textbf{Servicios}: Soporte técnico y consultoría.
             \end{itemize}
 
-        Al principio consideré seriamente Wind River Linux por su precertificación IEC 62304, importante para dispositivos médicos. Pero los costes de licencia y soporte eran demasiado altos para esta fase del proyecto, así que busqué opté por una alternativa más económica para diseñar el prototipo.
+        Inicialmente, se consideró seriamente Wind River Linux por su precertificación IEC 62304, un factor importante para dispositivos médicos. Sin embargo, los costes de licencia y soporte resultaron demasiado elevados para la fase actual del proyecto, por lo que se optó por una alternativa más económica para el diseño del prototipo.
 
     \newpage
     \subsection{Poky Linux (Proyecto Yocto)}
-        Poky es la distribución de referencia del Proyecto Yocto para sistemas Linux embebidos con capacidades de tiempo real flexible. Cuando empecé a usarlo, me pareció muy flexible, aunque aprender a usarlo fue más complicado de lo que esperaba:
+        Poky es la distribución de referencia del Proyecto Yocto para sistemas Linux embebidos con capacidades de tiempo real flexible. Al comenzar su utilización, se percibió como una herramienta muy flexible, aunque su curva de aprendizaje fue más pronunciada de lo esperado inicialmente:
 
         \subsubsection{Características Técnicas}
             \begin{itemize}
-                \item \textbf{Kernel}: Linux con parche PREEMPT\_RT
-                \item \textbf{Tiempo Real}: Latencias configurables según necesidades
-                \item \textbf{Optimización}: Control fino sobre tamaño y rendimiento
-                \item \textbf{Personalización}: Capacidad para quitar componentes innecesarios
+                \item \textbf{Kernel}: Linux con parche PREEMPT\_RT.
+                \item \textbf{Tiempo Real}: Latencias configurables según necesidades.
+                \item \textbf{Optimización}: Control fino sobre tamaño y rendimiento.
+                \item \textbf{Personalización}: Capacidad para eliminar componentes innecesarios.
             \end{itemize}
 
         \subsubsection{Consideraciones de Desarrollo}
             \begin{itemize}
-                \item \textbf{Mantenimiento}: Actualización manual de parches de seguridad
-                \item \textbf{Soporte}: Basado en comunidad, sin garantías comerciales
-                \item \textbf{Certificación}: Requiere proceso propio
-                \item \textbf{Validación}: Hay que desarrollar pruebas específicas
+                \item \textbf{Mantenimiento}: Actualización manual de parches de seguridad.
+                \item \textbf{Soporte}: Basado en comunidad, sin garantías comerciales.
+                \item \textbf{Certificación}: Requiere proceso propio.
+                \item \textbf{Validación}: Es necesario desarrollar pruebas específicas.
             \end{itemize}
 
-        Durante mi análisis, Poky resultó ser la opción con mejor equilibrio entre capacidades, flexibilidad y costes. Me permitió crear una imagen personalizada ajustada exactamente a los requisitos. Aunque no tiene certificaciones como Wind River Linux, su base en Yocto me da la opción de migrar a una solución más robusta si el proyecto avanza hacia la comercialización.
+        Durante el análisis, Poky demostró ser la opción con el mejor equilibrio entre capacidades, flexibilidad y costes. Permitió la creación de una imagen personalizada ajustada exactamente a los requisitos del proyecto. Aunque carece de certificaciones como Wind River Linux, su base en Yocto ofrece la posibilidad de migrar a una solución más robusta si el proyecto avanza hacia la comercialización.
 
 \newpage
 \section{Elección de RTOS para el Proyecto}
-    Elegí Poky Linux como sistema operativo para este proyecto por varios motivos:
+    Se eligió Poky Linux como sistema operativo para este proyecto por varios motivos:
 
     \subsection{Requisitos Temporales del Sistema}
-        Mi proyecto necesita un sistema flexible (\textbf{soft real-time}) porque:
+        El proyecto requiere un sistema flexible (\textbf{soft real-time}) porque:
         \begin{itemize}
-            \item La detección de patrones EEG para identificación de colores no necesita latencias críticas
-            \item Un retraso en la respuesta no pone en peligro al usuario
-            \item El control de iluminación con TP-Link Tapo tolera cierta variabilidad
+            \item La detección de patrones EEG para la identificación de colores no necesita latencias críticas.
+            \item Un retraso en la respuesta no pone en peligro al usuario.
+            \item El control de iluminación con TP-Link Tapo tolera cierta variabilidad.
         \end{itemize}
 
-        Analizando el peor caso (un retraso al cambiar la iluminación), vi que las consecuencias no justificaban la complejidad de un sistema estricto.
+        Analizando el peor escenario (un retraso al cambiar la iluminación), se concluyó que las consecuencias no justificaban la complejidad de un sistema estricto.
 
     \subsection{Consideraciones Técnicas}
-        Poky Linux tiene ventajas importantes para mi aplicación:
+        Poky Linux presenta ventajas importantes para esta aplicación:
         \begin{itemize}
-            \item \textbf{Flexibilidad}: Permite crear una imagen personalizada según requisitos.
-            \item \textbf{Compatibilidad}: Se integra de forma sencilla con las librerías que consumo durante el desarrollo del proyecto.
-            \item \textbf{Tiempo Real}: El parche PREEMPT\_RT da las garantías temporales necesarias.
+            \item \textbf{Flexibilidad}: Permite crear una imagen personalizada según los requisitos.
+            \item \textbf{Compatibilidad}: Se integra de forma sencilla con las librerías consumidas durante el desarrollo del proyecto.
+            \item \textbf{Tiempo Real}: El parche PREEMPT\_RT proporciona las garantías temporales necesarias.
         \end{itemize}
 
     \subsection{Aspectos Regulatorios y Económicos}
-        Aunque Poky Linux no tiene precertificaciones como Wind River Linux, su base en Yocto facilita migrar a Wind River Linux si necesito certificaciones para comercialización. Esta decisión no fue fácil —pasé semanas analizando pros y contras, incluso hablando con gente del sector médico. Al final, esta estrategia me permite optimizar costes iniciales y mantener flexibilidad en esta fase, con la tranquilidad de tener un camino hacia la certificación si el proyecto se convierte en producto comercial.
+        Aunque Poky Linux no cuenta con precertificaciones como Wind River Linux, su base en Yocto facilita la migración a Wind River Linux si se requieren certificaciones para la comercialización. Esta decisión no fue inmediata; implicó semanas de análisis de ventajas y desventajas, incluyendo consultas con profesionales del sector médico. Finalmente, esta estrategia permite la optimización de costes iniciais y el mantenimiento de la flexibilidad en la fase actual, con la previsión de un camino hacia la certificación si el proyecto se convierte en un producto comercial.
 
-    Esta combinación de factores hace que Poky Linux sea la mejor opción para esta fase del proyecto, con buen equilibrio entre rendimiento, flexibilidad y costes. Como pasa muchas veces en ingeniería, la solución óptima no es la más avanzada técnicamente, sino la que mejor se adapta al problema concreto que estamos resolviendo.
+    Esta combinación de factores hace que Poky Linux sea la opción más adecuada para esta fase del proyecto, ofreciendo un buen equilibrio entre rendimiento, flexibilidad y costes. Como sucede con frecuencia en ingeniería, la solución óptima no siempre es la más avanzada tecnicamente, sino aquella que mejor se adapta al problema concreto que se está resolviendo.
