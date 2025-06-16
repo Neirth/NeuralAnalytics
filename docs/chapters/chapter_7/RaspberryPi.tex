@@ -1,57 +1,64 @@
 \chapter{Raspberry Pi 4 Model B (8GB)}
 
 \section{Introducción}
-    La elección de la Raspberry Pi 4 Model B \cite{raspberrypi4} para este proyecto no fue una decisión inmediata. Inicialmente, se habían considerado otras opciones con mayor potencia —incluso se evaluaron algunos mini-PCs x86—, pero finalmente este ordenador de placa única resultó convincente por razones eminentemente prácticas. El equilibrio entre rendimiento, consumo y facilidad de desarrollo demostró ser adecuado para los requerimientos del proyecto, una conclusión que, es preciso admitir, se consolidó solo después de varias semanas de trabajo y algunos desafíos iniciales.
 
-    El factor determinante para la selección fue el descubrimiento de que incorpora un procesador ARM de 64 bits con un funcionamiento notablemente eficiente (superior al esperado, con toda sinceridad), una cantidad de memoria RAM considerable —especialmente en el modelo de 8GB, que fue el elegido tras una deliberación entre este y el de 4GB—, y la práctica totalidad de las interfaces requeridas por el diseño. No obstante, la mayor seguridad provino de la verificación de que su arquitectura ARM cuenta con un soporte sólido por parte de los principales fabricantes. Este aspecto era fundamental, dadas experiencias previas con incompatibilidades en otros proyectos, una situación que se deseaba evitar.
+La selección de la Raspberry Pi 4 Model B \cite{raspberrypi4} se fundamentó en un análisis comparativo de múltiples opciones de hardware, incluyendo mini-PCs x86 y otras plataformas embebidas. Este ordenador de placa única constituye una solución apropiada por razones técnicas y económicas. El equilibrio entre rendimiento, consumo energético y facilidad de desarrollo satisface los requerimientos específicos de aplicaciones embebidas de tiempo real.
+
+Los factores determinantes incluyen un procesador ARM de 64 bits con eficiencia energética optimizada, una cantidad de memoria RAM de 8GB que garantiza el margen operativo necesario, y la disponibilidad de interfaces requeridas por el diseño del sistema. La arquitectura ARM cuenta con soporte robusto por parte de los principales fabricantes de software, aspecto fundamental para garantizar la compatibilidad con las librerías y herramientas utilizadas en el desarrollo de aplicaciones embebidas.
 
 \section{Especificaciones Técnicas}
-    El modelo de 8GB de la Raspberry Pi 4 se basa en una arquitectura de hardware que ofreció una relación prestaciones-precio valorada positivamente, aunque se reconoce que las expectativas iniciales eran moderadas:
 
-    \subsection{Procesador y Memoria}
+El modelo de 8GB de la Raspberry Pi 4 se basa en una arquitectura de hardware que ofrece una relación prestaciones-precio adecuada para aplicaciones embebidas de tiempo real:
+
+\subsection{Procesador y Memoria}
+
+\begin{itemize}
+    \item CPU: Quad-Core ARM Cortex-A72 (64 bits) a 1.5GHz, con capacidad de alcanzar hasta 1.8GHz mediante overclocking.
+    \item GPU: VideoCore VI compatible con OpenGL ES 3.0, apropiada para aplicaciones que requieren aceleración gráfica.
+    \item Memoria RAM: 8 GB LPDDR4 SDRAM. Esta configuración de memoria proporciona el margen operativo necesario para aplicaciones en tiempo real complejas.
+\end{itemize}
+
+\subsection{Requerimientos de Energía}
+
+La Raspberry Pi 4 Model B requiere una fuente de alimentación de 5V y 3A a través de USB-C. Para configuraciones que incluyan dispositivos USB adicionales, se recomienda el uso de una fuente con mayor capacidad para garantizar la estabilidad del sistema. La correcta especificación de la fuente de alimentación constituye un aspecto fundamental en sistemas donde la estabilidad operacional es crítica. La insuficiencia de corriente puede manifestarse como inestabilidades aparentemente relacionadas con software cuando en realidad tienen origen en limitaciones de la alimentación.
+
+\subsection{Interfaces y Conectividad}
+
+\begin{itemize}
+    \item Red:
     \begin{itemize}
-        \item CPU: Quad-Core ARM Cortex-A72 (64 bits) a 1.5GHz —si bien puede alcanzar hasta 1.8GHz en ciertas condiciones, un detalle que se conoció posteriormente—.
-        \item GPU: VideoCore VI compatible con OpenGL ES 3.0 —suficiente para las necesidades del proyecto, sin esperar un rendimiento gráfico excepcional—.
-        \item Memoria RAM: 8 GB LPDDR4 SDRAM. Este fue el factor que motivó la inversión adicional en este modelo específico, especialmente tras experiencias previas de limitaciones de memoria en otros desarrollos.
+        \item Gigabit Ethernet (compatible con PoE mediante un módulo adicional).
+        \item Wi-Fi 802.11 b/g/n/ac de doble banda (2.4 GHz y 5.0 GHz) con rendimiento adecuado para aplicaciones embebidas.
+        \item Bluetooth 5.0 con BLE, apropiado para la conexión con dispositivos de monitorización biométrica.
     \end{itemize}
-
-    \subsection{Requerimientos de Energía}
-    La Raspberry Pi 4 Model B requiere una fuente de alimentación de 5V y 3A a través de USB-C. Para configuraciones que incluyan dispositivos USB adicionales, se recomienda el uso de una fuente con mayor capacidad —una lección aprendida tras algunos problemas de estabilidad inesperados durante las primeras pruebas—. Considerar este aspecto es fundamental, especialmente en un proyecto donde la estabilidad es un requisito principal. De hecho, se invirtió una considerable cantidad de tiempo en la depuración de un supuesto problema de software que, en realidad, se debía a una fuente de alimentación con corriente insuficiente para el sistema completo.
-
-    \subsection{Interfaces y Conectividad}
+    \item Almacenamiento:
     \begin{itemize}
-        \item Red:
-        \begin{itemize}
-            \item Gigabit Ethernet (compatible con PoE mediante un módulo adicional, aunque esta opción no fue implementada —quizás su consideración más detenida hubiera sido pertinente—).
-            \item Wi-Fi 802.11 b/g/n/ac de doble banda (2.4 GHz y 5.0 GHz). Su funcionamiento general es adecuado, aunque la potencia de la señal podría ser superior.
-            \item Bluetooth 5.0 con BLE, que resultó idóneo para la conexión con el dispositivo BrainBit —uno de los componentes cuya integración funcionó de manera óptima desde el inicio—.
-        \end{itemize}
-        \item Almacenamiento:
-        \begin{itemize}
-            \item Ranura para tarjeta microSD. Se recomienda encarecidamente la inversión en una tarjeta de alta calidad —las opciones de bajo coste generaron problemas de rendimiento y algunos incidentes relacionados con la corrupción de datos—.
-        \end{itemize}
-        \item Puertos USB:
-        \begin{itemize}
-            \item 2 puertos USB 3.0.
-            \item 2 puertos USB 2.0.
-        \end{itemize}
-        \item Vídeo y Audio:
-        \begin{itemize}
-            \item 2 puertos micro-HDMI con soporte hasta 4K a 60Hz.
-            \item Salida de audio analógico y vídeo compuesto mediante conector TRRS de 3.5 mm.
-        \end{itemize}
-        \item Expansión:
-        \begin{itemize}
-            \item Conector GPIO de 40 pines compatible con modelos anteriores.
-            \item Conector CSI para cámaras.
-            \item Conector DSI para pantallas.
-        \end{itemize}
+        \item Ranura para tarjeta microSD. Se recomienda el uso de tarjetas de alta calidad para garantizar rendimiento y fiabilidad en aplicaciones críticas.
     \end{itemize}
+    \item Puertos USB:
+    \begin{itemize}
+        \item 2 puertos USB 3.0.
+        \item 2 puertos USB 2.0.
+    \end{itemize}
+    \item Vídeo y Audio:
+    \begin{itemize}
+        \item 2 puertos micro-HDMI con soporte hasta 4K a 60Hz.
+        \item Salida de audio analógico y vídeo compuesto mediante conector TRRS de 3.5 mm.
+    \end{itemize}
+    \item Expansión:
+    \begin{itemize}
+        \item Conector GPIO de 40 pines compatible con modelos anteriores.
+        \item Conector CSI para cámaras.
+        \item Conector DSI para pantallas.
+    \end{itemize}
+\end{itemize}
 
-    \subsection{Consideraciones Térmicas}
-    El sistema de gestión térmica de la Raspberry Pi 4 reduce automáticamente la frecuencia y el voltaje del procesador durante periodos de baja demanda, lo cual opera eficientemente para el ahorro de energía y la prevención del sobrecalentamiento. Ahora bien, bajo cargas intensivas y, especialmente, en condiciones de temperatura ambiente elevada, es necesario añadir disipación adicional, como disipadores o ventiladores. Esta necesidad se confirmó de manera directa cuando el sistema comenzó a reiniciarse durante las primeras sesiones de pruebas intensivas, y tomó cierto tiempo identificar que se trataba de un problema térmico y no de software.
+\subsection{Consideraciones Térmicas}
 
-\section{Elección de este dispositivo para el Proyecto}
-    El modelo de 8GB de la Raspberry Pi 4 demostró ser una solución versátil y compacta para los requerimientos del desarrollo, aunque es preciso reconocer que hubo momentos en los que se sopesó la posibilidad de optar por una plataforma de mayor potencia. Disponer de 8GB de RAM proporcionó el margen suficiente para ejecutar aplicaciones complejas sin una preocupación constante por las limitaciones de memoria, y el rendimiento general se mostró adecuado para procesos en tiempo real —al menos para las exigencias específicas de este proyecto—.
-    
-    El aspecto más valorado finalmente fue la compatibilidad con sistemas operativos en tiempo real y las distribuciones Linux con las que ya se tenía familiaridad. La posibilidad de utilizar herramientas conocidas aceleró considerablemente el desarrollo, una ventaja no anticipada en su totalidad al inicio, pero que resultó de gran importancia cuando los plazos comenzaron a ser más ajustados.
+El sistema de gestión térmica de la Raspberry Pi 4 reduce automáticamente la frecuencia y el voltaje del procesador durante periodos de baja demanda, operando eficientemente para el ahorro energético y la prevención del sobrecalentamiento. Bajo cargas intensivas y en condiciones de temperatura ambiente elevada, se requiere disipación adicional mediante disipadores o ventiladores. La gestión térmica inadecuada puede manifestarse como inestabilidades del sistema que requieren identificación precisa del origen del problema para su resolución efectiva.
+
+\section{Elección de este dispositivo}
+
+El modelo de 8GB de la Raspberry Pi 4 constituye una solución versátil y compacta que satisface los requerimientos técnicos de aplicaciones embebidas de tiempo real. La configuración de 8GB de RAM proporciona el margen operativo suficiente para ejecutar aplicaciones complejas sin limitaciones de memoria, mientras que el rendimiento general cumple con las exigencias de procesamiento en tiempo real.
+
+La compatibilidad con sistemas operativos en tiempo real y distribuciones Linux estándar facilita la integración con el ecosistema de herramientas de desarrollo requerido. Esta compatibilidad optimiza el proceso de desarrollo al permitir el uso de herramientas y bibliotecas consolidadas, aspectos fundamentales para el cumplimiento de objetivos técnicos en aplicaciones embebidas de alta disponibilidad.

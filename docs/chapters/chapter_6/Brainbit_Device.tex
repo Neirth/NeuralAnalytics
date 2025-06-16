@@ -1,12 +1,12 @@
 \chapter{BrainBit Headset}
 
 \section{Introducci\'on}
-La elección del dispositivo EEG adecuado para este proyecto resultó ser un proceso más complejo de lo anticipado inicialmente. Después de una revisión de varias opciones disponibles, la decisión recayó en el \textbf{BrainBit} \cite{brainbit} por razones que trascienden las meras especificaciones técnicas.
+La selección del dispositivo EEG constituye un factor determinante en el desarrollo de interfaces cerebro-computadora. Tras la evaluación de múltiples opciones disponibles en el mercado, se seleccionó el \textbf{BrainBit} \cite{brainbit} como solución óptima, fundamentada en criterios que exceden las especificaciones técnicas básicas.
 
-El proceso de selección se centró en identificar un dispositivo que ofreciera tanto precisión como practicidad. No resultaba útil un equipo que solo funcionara de manera óptima en condiciones de laboratorio —categoría en la que se encuentran numerosos dispositivos en el mercado— sino que se requería un sistema que pudiera ser empleado en condiciones reales, sin una complejidad de configuración excesiva en cada uso. En última instancia, la decisión se redujo a encontrar un equilibrio adecuado entre calidad científica y facilidad de uso, una convergencia que no siempre se materializa en el ámbito de las interfaces cerebro-computadora.
+El proceso de selección priorizó la identificación de un dispositivo que combinara precisión en la adquisición de señales con facilidad de uso en entornos reales. Los criterios establecidos descartaron equipos limitados a condiciones de laboratorio controladas, requiriendo un sistema capaz de operar eficientemente en condiciones variables sin procedimientos de configuración complejos. La decisión final se fundamentó en el equilibrio entre calidad científica y practicidad operacional, características esenciales para el desarrollo de aplicaciones de neurocontrol efectivas.
 
 \section{Características Técnicas del Dispositivo}
-El BrainBit es un casco EEG portátil que utiliza \textbf{electrodos secos}. Esta característica en particular simplificó considerablemente los procedimientos, ya que la no utilización de gel conductor agiliza el proceso general —especialmente cuando es necesario repetir mediciones varias veces al día y se busca minimizar la preparación de los electrodos en cada ocasión—.
+El BrainBit es un casco EEG portátil que utiliza \textbf{electrodos secos}. Esta característica elimina la necesidad de gel conductor, optimizando los procedimientos de adquisición de datos y facilitando mediciones repetidas sin preparación adicional de electrodos.
 
 Las especificaciones de mayor relevancia para el proyecto fueron:
 
@@ -15,26 +15,26 @@ Las especificaciones de mayor relevancia para el proyecto fueron:
         \item \textbf{Frecuencia de muestreo}: 250 Hz.
         \item \textbf{Interfaz de comunicación}: Bluetooth Low Energy (BLE).
         \item \textbf{Tiempo de uso continuo}: Hasta 12 horas.
-        \item \textbf{Filtro de ruido integrado}: Este componente evitó la necesidad de implementar una cantidad significativa de procesamiento adicional.
+        \item \textbf{Filtro de ruido integrado}: Reduce la necesidad de procesamiento adicional de señales.
         \item \textbf{Ubicación de electrodos}: Sistema 10-20 estándar, con sensores en \textbf{O1 y O2} para actividad occipital.
     \end{itemize}
 
-La configuración de los electrodos O1 y O2, junto con los electrodos T3 y T4, fue un factor determinante para la selección del dispositivo. Su posicionamiento sobre la región occipital y temporal se ajustaba de manera precisa a los requerimientos para la detección de patrones visuales relacionados con colores. No siempre es sencillo encontrar un dispositivo que disponga de los electrodos necesarios en las ubicaciones exactas —en ocasiones, la disposición de los sensores por parte de los fabricantes puede parecer arbitraria—.
+La configuración específica de los electrodos O1 y O2, junto con los electrodos T3 y T4, constituye un factor determinante en la capacidad del dispositivo para detectar patrones visuales relacionados con colores. El posicionamiento sobre las regiones occipital y temporal proporciona acceso directo a las áreas cerebrales responsables del procesamiento visual, cumpliendo los requerimientos técnicos para aplicaciones de neurocontrol basadas en estimulación visual.
 
 \section{Metodologías para la Adquisición y Procesamiento}
-El desarrollo práctico siguió un protocolo estructurado en tres fases, aunque es preciso admitir que, en la práctica, fue necesario un grado de improvisación mayor al planeado inicialmente.
+El desarrollo técnico se estructuró en tres fases diferenciadas, cada una abordando aspectos específicos del procesamiento de señales EEG para aplicaciones de neurocontrol.
 
     \subsection{Captación de Señales}
-    La colocación correcta de los electrodos \textbf{O1 y O2} sobre la región occipital demostró ser más crítica de lo supuesto. Aunque teóricamente parecía un procedimiento simple, requirió varias sesiones experimentales hasta definir un protocolo que funcionara consistentemente. Existe un componente de frustración al constatar que procedimientos descritos como triviales en la literatura científica pueden demandar una considerable destreza en su aplicación práctica.
+    La colocación precisa de los electrodos \textbf{O1 y O2} sobre la región occipital constituye un aspecto crítico para la calidad de la adquisición de señales. El establecimiento de un protocolo de posicionamiento requiere múltiples sesiones experimentales para garantizar la reproducibilidad y consistencia de las mediciones. La literatura científica describe estos procedimientos como estándar, aunque su implementación práctica demanda destreza técnica específica.
     
-    El SDK proporcionado por el fabricante resulta adecuado para una primera toma de contacto, pero pronto se evidenció la necesidad de una solución más personalizada, dadas las exigencias del proyecto. Las herramientas básicas de captura en tiempo real incluidas no cubrían la totalidad de los requisitos específicos, ya que estas se orientaban a modelos básicos para inferir, por ejemplo, el nivel de estrés del paciente. Consecuentemente, se desarrolló una interfaz propia que se integrara de manera más efectiva con el sistema de procesamiento y clasificación diseñado, una medida necesaria para alcanzar la funcionalidad deseada.
+    El SDK proporcionado por el fabricante ofrece funcionalidades básicas de captura, sin embargo, las exigencias específicas del proyecto requieren el desarrollo de una interfaz personalizada. Las herramientas estándar se orientan hacia aplicaciones genéricas de monitorización del estado cognitivo, mientras que este proyecto demanda capacidades especializadas en el procesamiento de patrones visuales. En consecuencia, se implementó una interfaz propia que se integra eficientemente con el sistema de procesamiento y clasificación desarrollado.
     
-    Uno dei problemi che generò mayor preocupación fue garantizar la estabilidad en la conexión de los electrodos. Para abordar esta cuestión, se desarrolló una interfaz de calibración que muestra en tiempo real la calidad del contacto de cada electrodo. Esta herramienta resultó de gran utilidad durante las sesiones experimentales, y los detalles de su implementación se encuentran en el Capítulo~\ref{ch:core_implementing}.
+    Para garantizar la estabilidad en la conexión de los electrodos, se desarrolló una interfaz de calibración que monitoriza durante dicho proceso la calidad del contacto de cada electrodo. Esta herramienta optimiza la calidad de las sesiones experimentales, cuyos detalles de implementación se presentan en el Capítulo~\ref{ch:core_implementing}.
 
     \subsection{Acondicionamiento de Señales}
-    Aunque el BrainBit ya incluye un sistema de filtrado de calidad notable, las señales EEG requirieron algunos procesamientos adicionales. Afortunadamente, la calidad base de las señales proporcionadas por el dispositivo es elevada, lo que permitió mantener estos procesamientos en un nivel de complejidad relativamente bajo —una circunstancia favorable, ya que el procesamiento de señales EEG puede convertirse rápidamente en una tarea intrincada—.
+    El BrainBit incorpora un sistema de filtrado integrado de calidad, y la propia calidad base de las señales proporcionadas por el dispositivo permite mantener estos procesamientos en un nivel de complejidad moderado, evitando la implementación de algoritmos de filtrado complejos característicos del procesamiento avanzado de señales EEG.
     
-    El enfoque principal del acondicionamiento fue la normalización de amplitudes y una segmentación temporal adecuada para el análisis posterior. Aunque puedan parecer pasos básicos, fueron esenciales para asegurar la consistencia de los datos de entrada al sistema. En ocasiones, las tareas aparentemente más simples son las que requieren mayor tiempo para su perfeccionamiento.
+    El acondicionamiento se centra en la normalización de amplitudes y la segmentación temporal apropiada para el análisis posterior. Estos procesos, fundamentales para asegurar la consistencia de los datos de entrada al sistema, requieren ajustes precisos para optimizar la calidad de la clasificación posterior.
 
     \subsection{Análisis mediante Aprendizaje Profundo}
     En esta fase, se implementaron modelos de \textbf{aprendizaje profundo} especializados en el procesamiento de series temporales EEG. Estos modelos fueron entrenados para identificar patrones específicos relacionados con la visualización mental de colores —concretamente rojo y verde—.
@@ -42,12 +42,12 @@ El desarrollo práctico siguió un protocolo estructurado en tres fases, aunque 
     Los fundamentos teóricos de estos modelos se explican en detalle en el Capítulo~\ref{ch:deep_learning_models}, y todo lo concerniente al entrenamiento práctico se describe en el Capítulo~\ref{ch:model_training}.
 
 \section{Campos de Aplicación}
-Las posibilidades de aplicación de esta tecnología son considerablemente amplias, aunque muchas se encuentran aún en fase experimental —o directamente en un terreno donde la viabilidad práctica es incierta—:
+La tecnología de interfaces cerebro-computadora basada en señales EEG presenta múltiples campos de aplicación potencial, aunque muchos se encuentran en fase de investigación y desarrollo:
 
     \begin{itemize}
-        \item Desarrollo de interfaces cerebro-máquina para asistir a personas con diversidad funcional. Esto podría habilitar nuevas formas de comunicación e interacción con la tecnología, si bien se reconoce que existe un camino considerable por recorrer hasta alcanzar aplicaciones verdaderamente prácticas.
-        \item Sistemas de control en entornos estériles —tanto médicos como industriales— donde el contacto físico podría comprometer la asepsia o la seguridad. En este ámbito se percibe un potencial de aplicación más inmediato.
-        \item Aplicaciones en realidad aumentada y virtual, que permitirían formas de interacción más naturales e intuitivas. No obstante, surge la reflexión sobre la conveniencia de controlar todos los aspectos mediante el pensamiento, o si esta aspiración se debe meramente a la disponibilidad tecnológica.
+        \item Desarrollo de interfaces cerebro-máquina para asistir a personas con diversidad funcional. Esta aplicación habilita nuevas modalidades de comunicación e interacción tecnológica, representando un área de investigación con potencial significativo para mejorar la calidad de vida.
+        \item Sistemas de control en entornos estériles médicos e industriales donde el contacto físico compromete la asepsia o la seguridad operacional. Este campo presenta viabilidad técnica inmediata dado el estado actual de la tecnología.
+        \item Aplicaciones en realidad aumentada y virtual que permiten modalidades de interacción más naturales e intuitivas. El desarrollo de estas aplicaciones plantea consideraciones sobre la ergonomía cognitiva y la conveniencia de diferentes modalidades de control.
     \end{itemize}
 
-Durante el desarrollo del proyecto, la consideración de estas aplicaciones potenciales contribuyó a mantener la motivación al enfrentar obstáculos técnicos que parecían de difícil resolución. La perspectiva del impacto real que este tipo de interfaces podría tener —incluso en casos muy específicos— justifica el tiempo y esfuerzo invertidos en su desarrollo y optimización.
+La consideración de estos campos de aplicación proporciona perspectiva sobre el potencial impacto de las interfaces cerebro-computadora en diversos contextos tecnológicos y sociales. El desarrollo de prototipos funcionales constituye un paso fundamental hacia la materialización de aplicaciones prácticas en estos dominios específicos.

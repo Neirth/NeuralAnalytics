@@ -15,7 +15,6 @@ En el campo de los sistemas embebidos, un RTOS actúa como intermediario entre e
 
 Al investigar las aplicaciones de RTOS, se han identificado numerosos sectores donde son vitales: en entornos industriales para el control de procesos críticos; en aviónica para sistemas de navegación (sujetos a certificaciones de alta exigencia); en defensa para sistemas de radar; y —aspecto relevante para este proyecto— en el sector médico, donde dispositivos como marcapasos, respiradores y bombas de infusión requieren respuestas predecibles para garantizar la seguridad del paciente.
 
-\newpage
 \section{Taxonomía de Sistemas en Tiempo Real}
     La clasificación básica de RTOS se fundamenta en la criticidad de sus restricciones temporales. Esta taxonomía, propuesta por Liu y Layland en 1973 \cite{Siewert_Pratt_2016}, distingue principalmente entre sistemas estrictos (\textit{hard real-time}) y flexibles (\textit{soft real-time}). La comprensión de estas categorías evolucionó significativamente al observar aplicaciones reales, donde la línea divisoria entre ambas no siempre es tan nítida como se describe en la literatura teórica.
 
@@ -208,6 +207,6 @@ Al investigar las aplicaciones de RTOS, se han identificado numerosos sectores d
         \end{itemize}
 
     \subsection{Aspectos Regulatorios y Económicos}
-        Aunque Poky Linux no cuenta con precertificaciones como Wind River Linux, su base en Yocto facilita la migración a Wind River Linux si se requieren certificaciones para la comercialización. Esta decisión no fue inmediata; implicó semanas de análisis de ventajas y desventajas, incluyendo consultas con profesionales del sector médico. Finalmente, esta estrategia permite la optimización de costes iniciais y el mantenimiento de la flexibilidad en la fase actual, con la previsión de un camino hacia la certificación si el proyecto se convierte en un producto comercial.
+        Aunque Poky Linux no cuenta con precertificaciones como Wind River Linux, su base en Yocto facilita la migración a Wind River Linux si se requieren certificaciones para la comercialización. Esta decisión no fue inmediata; implicó analizar ventajas y desventajas. Finalmente, esta estrategia permite la optimización de costes iniciales y el mantenimiento de la flexibilidad en la fase actual, con la previsión de un camino hacia la certificación si el proyecto se convierte en un producto comercial.
 
-    Esta combinación de factores hace que Poky Linux sea la opción más adecuada para esta fase del proyecto, ofreciendo un buen equilibrio entre rendimiento, flexibilidad y costes. Como sucede con frecuencia en ingeniería, la solución óptima no siempre es la más avanzada tecnicamente, sino aquella que mejor se adapta al problema concreto que se está resolviendo.
+    Esta combinación de factores hace que Poky Linux sea la opción más adecuada para esta fase del proyecto, ofreciendo un buen equilibrio entre rendimiento, flexibilidad y costes. Como sucede con frecuencia en ingeniería, la solución óptima no siempre es la más avanzada técnicamente, sino aquella que mejor se adapta al problema concreto que se está resolviendo.

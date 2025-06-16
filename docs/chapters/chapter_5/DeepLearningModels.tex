@@ -6,12 +6,13 @@ La selección de estos modelos constituyó un proceso de análisis técnico deta
 
 Aunque seguramente ya existen trabajos previos que abordan la clasificación de señales EEG mediante Deep Learning, en este proyecto se buscó una implementación desde cero, con el objetivo de comprender, y aprender, a fondo como se puede llegar a construir un modelo de clasificación adaptado a este contexto. Por tanto, se ha evitado el uso de modelos preentrenados o bibliotecas de alto nivel que abstraigan demasiado los detalles del proceso de entrenamiento y ajuste.
 
+\newpage
 \section{Conceptos Fundamentales}
 
 \subsection{Ventanas Temporales}
 Las ventanas temporales en el procesamiento de señales EEG representan segmentos discretos de tiempo durante los cuales se recopilan datos. En este proyecto, estas ventanas capturan patrones de actividad cerebral asociados al pensamiento de diferentes colores. La longitud de la ventana se reveló como un parámetro de alta sensibilidad: si era demasiado corta, no capturaba suficiente información para la clasificación; si era excesivamente larga, introducía latencias consideradas inaceptables para una aplicación en tiempo real.
 
-Tras pruebas exhaustivas con diferentes configuraciones, se determinó que ventanas de 62 muestras ofrecían el equilibrio más adecuado para el sistema. Este hallazgo difirió de las expectativas iniciales basadas en la literatura técnica, donde se suelen sugerir ventanas más extensas, pero fue validado empíricamente como la configuración de mayor eficiencia para esta implementación específica.
+Tras pruebas exhaustivas con diferentes configuraciones, se determinó que ventanas de 62 muestras ofrecían el equilibrio más adecuado para el sistema. Esta longitud precisamente fue la que permitió capturar la dinámica de la actividad cerebral sin comprometer la inmediatez de la respuesta del sistema.
 
 \subsection{One-Hot Encoding}
 El One-Hot Encoding \cite{raschka2022machine} es una técnica de preprocesamiento que transforma etiquetas categóricas (en este caso, colores) en vectores binarios. Por ejemplo, para tres colores:
@@ -60,7 +61,7 @@ Las principales ventajas que condujeron a la selección de ReLU son:
     \item \textbf{Activación Dispersa}: Produce activaciones dispersas, ya que cualquier entrada negativa se convierte en cero.
 \end{itemize}
 
-Durante la fase de experimentación, se probaron diferentes funciones de activación, incluyendo Leaky ReLU y ELU, pero no se observaron mejoras significativas en el rendimiento que justificaran la complejidad adicional. La implementación de ReLU estándar resultó ser la opción más práctica y eficiente para el caso de uso específico de este proyecto.
+La implementación de ReLU estándar resultó ser la opción más práctica y eficiente para el caso de uso específico de este proyecto.
 
 \subsection{LSTM (Long Short-Term Memory)}
 
@@ -119,7 +120,7 @@ En Softmax, la probabilidad de que una muestra con entrada neta $z$ pertenezca a
 
 Las probabilidades resultantes suman 1, como es de esperar. También es destacable que la etiqueta predicha es la misma que al aplicar argmax a la salida logística.
 
-Durante el desarrollo del modelo, se consideró brevemente la utilización de una capa sigmoide final con entrenamiento independiente para cada clase (enfoque one-vs-all), pero la implementación con Softmax resultó más depurada y directa, además de proporcionar interpretaciones probabilísticas más intuitivas de las predicciones.
+Durante el desarrollo del modelo, se consideró brevemente la utilización de una capa sigmoide final con entrenamiento independiente para cada clase (enfoque one-vs-all), pero la implementación con Softmax resultó más conveniente y directa, además de proporcionar interpretaciones probabilísticas más intuitivas de las predicciones.
 
 \section{Evaluación del Modelo}
 

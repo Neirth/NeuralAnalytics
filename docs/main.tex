@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt]{book}            % Book class with paper size and font
+\documentclass[a4paper,12pt]{report}            % Report class with paper size and font
 
 % Essential packages
 \usepackage[utf8]{inputenc}                     % UTF-8 encoding
@@ -16,9 +16,17 @@
 \usepackage{hyperref}                           % For clickable links and references
 \usepackage{bookmark}                           % For bookmarks
 \usepackage{makeidx}
-\usepackage{geometry}                           % For margins
+\usepackage[
+  inner	=	3.0cm, % Margen interior
+  outer	=	2.5cm, % Margen exterior
+  top	=	2.5cm, % Margen superior
+  bottom=	2.5cm, % Margen inferior
+  includeheadfoot, % Incluye cabecera y pie de página en los márgenes
+]{geometry}
+% Valor de interlineado
 \usepackage{fancyhdr}                           % Headers and footers
 \usepackage{parskip}                            % Spacing between paragraphs
+\usepackage{needspace}                          % For better paragraph control
 \usepackage{xcolor}                             % For colors
 \usepackage{pgfgantt}                           % For Gantt charts
 \usepackage{authoraftertitle}                   % For author and title
@@ -34,6 +42,9 @@
 
 \title{Neural Analytics: una herramienta software basada en redes neuronales de procesado de EEGs}
 \author{Sergio Martínez Aznar}                  
+
+% Extra configurations
+\include{config}                                % Include custom configurations
 
 % Header and footer configuration
 \pagestyle{fancy}
@@ -57,15 +68,12 @@
 
 \begin{document}
 
-% Title
 \include{cover/project_cover}
-
-% Giving thanks
 \include{chapters/chapter_aux/GivingThanks}
 
+
 % Introduction and Abstract
-\frontmatter
-    % Abstracts
+\pagenumbering{roman}  % Abstracts
     \include{chapters/chapter_aux/Resume}
     \include{chapters/chapter_aux/Abstract}
 
@@ -75,7 +83,7 @@
     \include{chapters/chapter_aux/TableOfNotations}
 
 % Chapters
-\mainmatter
+\pagenumbering{arabic}
 
     \include{chapters/chapter_1/Introduction}
 
@@ -99,14 +107,14 @@
 
 % End chapters
 \bookmarksetup{startatroot}
-\backmatter
     \include{chapters/chapter_end/Conclusions}
     \include{chapters/chapter_end/Acknowledgments}
 
-    % Bibliografía
+    % Bibliography
     \include{chapters/chapter_end/Bibliography}
 
-    % Anexos
+    % Annexes
+    \include{chapters/chapter_end/SustainableDevelopment}
     \include{chapters/chapter_end/Annex_OperatorGuide}
     \include{chapters/chapter_end/Annex_UserGuide}
 

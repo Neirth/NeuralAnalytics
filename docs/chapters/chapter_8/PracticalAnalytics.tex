@@ -2,7 +2,7 @@
 
 \section{Requisitos funcionales y no funcionales}
 
-La definición de los requisitos del sistema resultó ser un proceso más complejo de lo anticipado inicialmente. Se había considerado que consistiría simplemente en elaborar una lista de las funcionalidades deseadas para el sistema; sin embargo, se constató que muchos requisitos no se manifiestan hasta que se inicia la implementación y surgen problemas no previstos. Configurando así un proceso marcadamente iterativo, donde cada fase del desarrollo revelaba nuevas necesidades.
+El análisis de requisitos es una fase crucial en el desarrollo de software, ya que establece las bases para la implementación y asegura que el sistema cumpla con las expectativas del usuario. En este proyecto, se identificaron y documentaron los requisitos funcionales y no funcionales a partir del código final, lo que permitió una comprensión clara de las capacidades y limitaciones del sistema.
 
 \subsection{Requisitos Funcionales}
 
@@ -21,14 +21,12 @@ Los requisitos funcionales definen esencialmente las operaciones que el sistema 
     \item \textbf{RF-10}: El sistema debe mostrar al usuario las predicciones realizadas por el modelo de inferencia.
 \end{itemize}
 
-\newpage
-
 \subsection{Requisitos No Funcionales}
 
-La definición de los requisitos no funcionales representó el aspecto más intrincado. En esta categoría se incluyen temas como el rendimiento, la seguridad y el cumplimiento de normativas —aspectos que con frecuencia se omiten en las fases iniciales por ser menos evidentes—. Algunos de estos requisitos no habían sido siquiera considerados hasta el inicio de las primeras pruebas del sistema, momento en el cual se observó que ciertos componentes no operaban según lo esperado. Los requisitos finalmente identificados son:
+La especificación de requisitos no funcionales es igualmente importante, ya que define las características del sistema que no están directamente relacionadas con las funciones específicas, pero que son esenciales para su rendimiento y usabilidad. Los requisitos no funcionales identificados son:
 
 \begin{itemize}
-    \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304:2007 para software de dispositivos médicos.\label{rnf-01}
+    \item \textbf{RNF-01}: \textbf{Normativa}: El sistema debe cumplir con la norma UNE-EN 62304 para software de dispositivos médicos.\label{rnf-01}
     \item \textbf{RNF-02}: \textbf{Tiempo Real}: El sistema debe operar en tiempo real blando para asegurar una respuesta adecuada a los cambios en la señal EEG.\label{rnf-02}
     \item \textbf{RNF-03}: \textbf{Fiabilidad}: El sistema debe validar la calidad de las señales EEG mediante los datos de impedancia antes de realizar predicciones.\label{rnf-03}
     \item \textbf{RNF-04}: \textbf{Portabilidad}: El sistema debe poder ejecutarse en una Raspberry Pi.\label{rnf-04}
@@ -44,7 +42,7 @@ La definición de los requisitos no funcionales representó el aspecto más intr
 
 \section{Bibliotecas Usadas}
 
-La selección de las bibliotecas adecuadas requirió un tiempo considerable de investigación. Inicialmente, se pensó que sería suficiente con identificar las opciones más populares; sin embargo, se constató que muchas tecnologías que parecían idóneas en teoría, posteriormente no operaban correctamente con los requisitos de tiempo real o no compilaban para la arquitectura ARM. Este fue un caso donde la teoría y la práctica presentaron divergencias significativas.
+La selección de bibliotecas apropiadas para el proyecto representa un proceso complejo que trasciende la mera identificación de opciones populares. La evaluación de tecnologías disponibles debe considerar criterios específicos como la compatibilidad con requisitos de tiempo real y la capacidad de compilación para arquitecturas ARM. Numerosas tecnologías que presentan especificaciones prometedoras en documentación técnica pueden mostrar limitaciones significativas durante la implementación práctica, especialmente en entornos embebidos con restricciones específicas.
 
 El proyecto utiliza una combinación de bibliotecas para diferentes propósitos. Algunas fueron seleccionadas desde el inicio, mientras que otras se incorporaron a medida que surgían necesidades específicas no previstas. A continuación, se organizan según su función principal:
 

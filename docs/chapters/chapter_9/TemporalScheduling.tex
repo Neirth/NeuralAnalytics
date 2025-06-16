@@ -15,7 +15,7 @@ Durante enero se establecieron las bases teóricas y técnicas del proyecto medi
     
     \item \textbf{Investigación de bibliotecas de adquisición de datos}: Se evaluaron múltiples bibliotecas para la captura de datos EEG, seleccionando finalmente BrainFlow debido a su compatibilidad con diversos dispositivos y la robustez de su documentación técnica, factores de alta relevancia para el desarrollo de aplicaciones médicas.
     
-    \item \textbf{Estudio de normativas aplicables}: Se analizaron las regulaciones y estándares pertinentes para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304:2007 para software de dispositivos médicos. Este análisis permitió establecer los requisitos de desarrollo y documentación correspondientes.
+    \item \textbf{Estudio de normativas aplicables}: Se analizaron las regulaciones y estándares pertinentes para dispositivos médicos, prestando especial atención a la norma UNE-EN 62304 para software de dispositivos médicos. Este análisis permitió establecer los requisitos de desarrollo y documentación correspondientes.
     
     \item \textbf{Estudio de plataformas para implementación}: Se evaluaron diferentes opciones de hardware para la implementación del sistema, analizando capacidad de procesamiento en tiempo real y adecuación para aplicaciones médicas. Esta evaluación determinó los requisitos técnicos para la selección posterior del hardware.
 \end{itemize}
@@ -49,34 +49,36 @@ Se desarrolló este módulo como primer componente del sistema, estableciendo la
     
     \item \textbf{Diseño de protocolos de captura}: Se desarrollaron rutinas estructuradas para la captura de datos EEG durante tareas de imaginación de colores. Se establecieron protocolos temporales precisos para garantizar la consistencia de las muestras y facilitar el posterior entrenamiento del modelo.
     
-    \item \textbf{Implementación de procesamiento de señales}: Esta etapa implicó una inmersión en un área de conocimiento que resultaba novedosa. Se desarrollaron funciones para filtrar y preprocesar las señales raw, si bien es preciso admitir que inicialmente existía una comprensión limitada del proceso. Se invirtió un tiempo considerable en el estudio de transformadas de Fourier y filtros digitales —conceptos teóricamente notables pero de aplicación práctica compleja—.
+    \item \textbf{Implementación de procesamiento de señales}: Se desarrollaron funciones especializadas para filtrar y preprocesar las señales EEG en formato raw. Esta implementación abarca el estudio y aplicación de transformadas de Fourier y filtros digitales para optimizar la calidad de las señales destinadas al entrenamiento del modelo.
     
-    \item \textbf{Almacenamiento y etiquetado de datos}: Se implementó un sistema para almacenar y etiquetar automáticamente los datos capturados. La automatización de este proceso se consideró de alta importancia para evitar errores manuales. No obstante, lograr un etiquetado fiable requirió un esfuerzo superior al estimado.
+    \item \textbf{Almacenamiento y etiquetado de datos}: Se implementó un sistema automatizado para almacenar y etiquetar los datos capturados. La automatización de este proceso garantiza la consistencia y reduce errores en la gestión de datos.
 \end{itemize}
 
+\newpage
 \subsubsection{Desarrollo del Programa de Entrenamiento del Modelo (neural\_analytics\_model)}
 
-Esta fase presentó desafíos imprevistos. Durante la resolución de problemas en la extracción de datos, surgió la idea de desarrollar el módulo de entrenamiento en paralelo. En retrospectiva, la simultaneidad de estas dos tareas complejas podría parecer cuestionable, pero el resultado no fue tan caótico como podría haberse previsto.
+El desarrollo del módulo de entrenamiento se ejecutó en paralelo con la extracción de datos para optimizar el tiempo de desarrollo. Esta estrategia permitió la validación temprana del pipeline de entrenamiento utilizando datasets parciales, facilitando la identificación de problemas en las etapas iniciales del procesamiento de datos.
 
-Una estrategia funcional consistió en probar el pipeline de entrenamiento con los primeros datos extraídos, incluso si eran parciales. Esto permitió la detección temprana de problemas —como la constatación de que el preprocesamiento eliminaba información crucial para la clasificación—. Son aspectos que frecuentemente solo se descubren al trabajar con datos reales.
+La implementación del pipeline de entrenamiento con datos iniciales reveló aspectos críticos del preprocesamiento que afectaban la calidad de la clasificación, información valiosa que solo se obtiene mediante la evaluación con datos reales.
 
-El módulo de entrenamiento se convirtió en un entorno de experimentación para diversas configuraciones:
+El módulo de entrenamiento se configuró como entorno de experimentación para diversas arquitecturas y configuraciones:
 
 \begin{itemize}
-    \item \textbf{Diseño de arquitectura LSTM}: Esta tarea implicó adentrarse en un terreno poco explorado previamente. Fue necesario diseñar una red neuronal basada en capas LSTM, optimizada específicamente para clasificar patrones en señales EEG. Inicialmente, la definición del punto de partida presentó dificultades. Se dedicaron varias semanas a la revisión de literatura científica y a la prueba de configuraciones, en algunos casos de forma exploratoria, hasta comprender los parámetros de mayor impacto. Hubo períodos en los que una arquitectura parecía óptima, para luego descubrir su bajo rendimiento con conjuntos de datos diferentes.
+    \item \textbf{Diseño de arquitectura LSTM}: Se diseñó una red neuronal basada en capas LSTM, optimizada específicamente para la clasificación de patrones en señales EEG. El proceso incluyó la revisión exhaustiva de literatura científica y la evaluación sistemática de múltiples configuraciones para identificar los parámetros de mayor impacto en el rendimiento. Se realizaron pruebas comparativas de diferentes arquitecturas para optimizar el rendimiento con diversos conjuntos de datos.
     
-    \item \textbf{Implementación en PyTorch}: Se eligió PyTorch por su reputación de ser más intuitivo que TensorFlow. Sin embargo, la adaptación a su sintaxis desde otros frameworks representó una curva de aprendizaje pronunciada. Las primeras semanas fueron intensas; tareas conceptualmente simples requerían horas de esfuerzo debido a la falta de familiaridad con el manejo de tensores. Hubo ocasiones en que se dedicaron noches enteras a lograr que un entrenamiento básico se ejecutara sin errores.
+    \item \textbf{Implementación en PyTorch}: Se seleccionó PyTorch como framework principal debido a su flexibilidad y facilidad de uso en comparación con TensorFlow. La implementación requirió la adaptación a la sintaxis específica del framework y el dominio del manejo de tensores para operaciones de aprendizaje profundo. Se desarrollaron rutinas optimizadas para garantizar la ejecución eficiente de los procesos de entrenamiento.
     
-    \item \textbf{Rutinas de entrenamiento y validación}: Este fue uno de los aspectos más laboriosos del proceso. Se desarrollaron procedimientos para entrenar el modelo de manera eficiente y validarlo con diferentes conjuntos de datos. No obstante, conseguir la estabilidad del entrenamiento se convirtió en un desafío recurrente. El modelo exhibía variabilidad en su comportamiento —en ocasiones convergía adecuadamente en pocas épocas, mientras que en otras no lograba aprender patrones coherentes a pesar de los ajustes de parámetros—. Esta situación generaba frustración.
+    \item \textbf{Rutinas de entrenamiento y validación}: Se desarrollaron procedimientos sistemáticos para entrenar el modelo de manera eficiente y validarlo con diferentes conjuntos de datos. La implementación incluye mecanismos de monitorización para garantizar la estabilidad del entrenamiento y la convergencia consistente del modelo. Se establecieron métricas de evaluación para optimizar el rendimiento y detectar variabilidades en el comportamiento del modelo durante el proceso de entrenamiento.
     
-    \item \textbf{Exportación a formato ONNX}: Esta tarea requirió más esfuerzo del previsto. Se implementó la conversión para utilizar el modelo posteriormente en Rust, pero la compatibilidad entre PyTorch y ONNX demostró ser más problemática de lo que la documentación sugería. Ciertas operaciones que funcionaban correctamente en PyTorch no eran interpretadas adecuadamente por ONNX. Se invirtieron varios días en reescribir partes del modelo para asegurar una exportación exitosa.
+    \item \textbf{Exportación a formato ONNX}: Se implementó la conversión del modelo para su posterior utilización en Rust mediante el formato ONNX. El proceso de exportación requirió adaptaciones en la arquitectura del modelo para garantizar la compatibilidad completa entre PyTorch y ONNX. Se optimizaron las operaciones del modelo para asegurar una exportación exitosa y mantener la funcionalidad completa en el entorno de producción.
 \end{itemize}
 
+\newpage
 \subsubsection{Desarrollo del Core del Sistema (neural\_analytics\_core)}
 
-Esta sección se erigió como el componente central y más demandante del proyecto. Consumió una cantidad de tiempo considerablemente mayor a la estimada, a pesar de que las previsiones iniciales ya contemplaban un margen amplio.
+Este componente constituye el núcleo central del sistema y representa la mayor complejidad técnica del proyecto. Su desarrollo requirió una planificación detallada debido a la implementación de la arquitectura hexagonal y la integración de múltiples subsistemas.
 
-La correcta implementación de la arquitectura hexagonal se convirtió en un foco de atención principal durante semanas. Hubo períodos en los que la reflexión sobre puertos, adaptadores y diagramas de arquitectura ocupaba gran parte del pensamiento cotidiano.
+La implementación de la arquitectura hexagonal demandó un análisis exhaustivo de los principios de diseño, incluyendo la definición precisa de puertos, adaptadores y la separación entre dominio e infraestructura.
 
 Se estableció la arquitectura núcleo del sistema implementando los principios de diseño hexagonal para garantizar la separación entre lógica de negocio e infraestructura. Se desarrolló un sistema modular que permite la interoperabilidad eficiente entre componentes:
 
@@ -94,6 +96,7 @@ Se estableció la arquitectura núcleo del sistema implementando los principios 
     \item \textbf{Control de dispositivos domóticos}: Se implementó la integración con dispositivos inteligentes a través de la biblioteca tapo. Esta integración permite el control remoto efectivo de dispositivos de iluminación basado en las predicciones del modelo.
 \end{itemize}
 
+\newpage
 \subsubsection{Desarrollo de la Interfaz Gráfica (neural\_analytics\_gui)}
 
 Se desarrolló la interfaz gráfica del sistema utilizando tecnologías modernas para crear una experiencia de usuario eficiente y accesible. El desarrollo se centró en proporcionar visualización en tiempo real de las señales EEG y control intuitivo del sistema:
@@ -117,7 +120,7 @@ Durante abril se implementó una fase intensiva de refinamiento del modelo de ap
 \begin{itemize}
     \item \textbf{Ampliación del dataset}: Se organizaron sesiones adicionales de captura de datos EEG para aumentar significativamente tanto el tamaño como la diversidad del dataset disponible. Se incluyeron grabaciones de múltiples usuarios en diferentes condiciones temporales para mejorar la capacidad de generalización del modelo.
     
-    \item \textbf{Diversificación de casos de uso}: Se expandieron los escenarios de prueba para incluir variaciones en los enfoques mentales utilizados por diferentes usuarios durante las tareas de imaginación de colores. Esta diversificación permitió al modelo adaptarse a diferentes estrategias cognitivas individuales.
+    \item \textbf{Diversificación de casos de uso}: Se expandieron los escenarios de prueba para incluir variaciones en los enfoques mentales utilizados por un único usuario durante las tareas de imaginación de colores. Esta diversificación permitió al modelo adaptarse a diferentes estrategias cognitivas individuales.
     
     \item \textbf{Reentrenamiento del modelo}: Se realizaron múltiples iteraciones de reentrenamiento del modelo LSTM utilizando los datos ampliados. Se optimizaron sistemáticamente los hiperparámetros para maximizar la precisión del modelo manteniendo el rendimiento en tiempo real.
     
@@ -125,6 +128,8 @@ Durante abril se implementó una fase intensiva de refinamiento del modelo de ap
     
     \item \textbf{Ajuste de umbrales de confianza}: Se refinaron los mecanismos para determinar cuándo una predicción debe clasificarse como "desconocida" en lugar de forzar una clasificación incorrecta. Esta optimización mejoró significativamente la fiabilidad percibida del sistema durante operación en condiciones de incertidumbre.
 \end{itemize}
+
+Para optimizar el tiempo requerido para refinar el modelo, se utilizó una única persona como sujeto de prueba. Esta decisión, si bien limita la generalización de los resultados, permite una validación más rápida y controlada del sistema en las fases iniciales de desarrollo. En futuras iteraciones se considera necesaria la ampliación del conjunto de datos con múltiples usuarios para mejorar la robustez del modelo.
 
 \section{Distribución Temporal}
 
@@ -242,13 +247,13 @@ La evaluación retrospectiva de la planificación temporal del proyecto permite 
     
     \item \textbf{Paralelización de tareas}: La estructuración del desarrollo en componentes modulares desde el inicio permitió el desarrollo simultáneo de varios módulos. Esta estrategia optimizó significativamente el tiempo total de desarrollo y facilitó la gestión de la complejidad del proyecto.
     
-    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril demostró ser de mayor criticidad de lo inicialmente estimado. La ampliación del dataset con muestras diversas y representativas incrementó significativamente el rendimiento del modelo, justificando la inversión temporal adicional requerida.
+    \item \textbf{Importancia de la fase de refinamiento}: La fase de abril presentó mayor criticidad de la inicialmente estimada. La ampliación del dataset con muestras diversas y representativas mejoró significativamente el rendimiento del modelo, validando la inversión temporal adicional requerida.
     
-    \item \textbf{Iteración continua}: El enfoque iterativo resultó fundamental, especialmente durante la etapa de refinamiento del modelo. Cada incorporación de datos permitió ajustes incrementales que mejoraron gradualmente el rendimiento del sistema.
+    \item \textbf{Iteración continua}: El enfoque iterativo constituye un aspecto fundamental, especialmente durante la etapa de refinamiento del modelo. Cada incorporación de datos genera ajustes incrementales que mejoran progresivamente el rendimiento del sistema.
     
-    \item \textbf{Áreas de mejora identificadas}: Para futuros desarrollos similares, se recomienda ampliar significativamente la fase de pruebas con usuarios reales para obtener mayor retroalimentación sobre la usabilidad del sistema. También se sugiere continuar expandiendo el dataset con muestras más diversas y representativas.
+    \item \textbf{Áreas de mejora identificadas}: Para futuros desarrollos similares, resulta conveniente ampliar significativamente la fase de pruebas con usuarios reales para obtener mayor retroalimentación sobre la usabilidad del sistema. Asimismo, se considera necesario continuar expandiendo el dataset con muestras más diversas y representativas.
 \end{itemize}
 
 La implementación de la arquitectura hexagonal, aunque inicialmente más costosa en tiempo de desarrollo, proporcionó una base sólida para cumplir efectivamente con los requisitos normativos y facilitar futuras extensiones del sistema.
 
-La dedicación de un mes completo al refinamiento intensivo del modelo fue fundamental para alcanzar niveles de precisión adecuados para un dispositivo de uso médico. La experiencia obtenida sugiere que esta fase crítica debería considerarse con mayor peso temporal en planificaciones futuras de proyectos similares.
+La dedicación de un mes completo al refinamiento intensivo del modelo fue fundamental para alcanzar niveles de precisión adecuados para un dispositivo de uso médico. Los resultados obtenidos, que se explicarán en detalle en el capítulo \ref{ch:prototype_testing}, indican que esta fase crítica debería considerarse con mayor peso temporal en planificaciones futuras de proyectos similares.

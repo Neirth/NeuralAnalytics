@@ -1,6 +1,6 @@
 \chapter{Normativa UNE-EN 62304}\label{ch:regulatory_framework}
 
-La norma \textbf{UNE-EN 62304:2007} \cite{UNE-EN-62304} corresponde a la versión española de la norma \textbf{IEC 62304:2006/A1:2015}, la cual ha sido adoptada como norma europea EN 62304:2006/A1:2015. Esta normativa establece los requisitos para los \textbf{procesos del ciclo de vida del software} en \textbf{dispositivos médicos}, asegurando su desarrollo, mantenimiento y gestión de riesgos de acuerdo con estándares internacionales —un aspecto de considerable importancia para cualquier implementación rigurosa en este campo—.
+La norma \textbf{UNE-EN 62304:2007} \cite{UNE-EN-62304} corresponde a la versión española de la norma \textbf{IEC 62304:2006/A1:2015}, la cual ha sido adoptada como norma europea EN 62304:2006/A1:2015. Esta normativa establece los requisitos para los \textbf{procesos del ciclo de vida del software} en \textbf{dispositivos médicos}, asegurando su desarrollo, mantenimiento y gestión de riesgos de acuerdo con estándares internacionales, aspecto fundamental para cualquier implementación rigurosa en este campo.
 
 \section{Objetivo y Alcance}
 El propósito de la UNE-EN 62304, desarrollado por la \cite{UNE-EN-62304}, es definir un marco normativo para la \textbf{gestión del ciclo de vida del software} en dispositivos médicos, con el fin de asegurar su seguridad y eficacia.
@@ -22,9 +22,8 @@ El estándar establece \textbf{procesos y actividades} que los fabricantes deben
     \item Gestión de la configuración y cambios.
 \end{itemize}
 
-\newpage
 \section{Clasificación del Software}
-La norma clasifica el software en \textbf{tres niveles de seguridad} según el riesgo que pueda representar para el paciente o el operador. Esta clasificación, aunque en una primera aproximación pudiera parecer simplificada, encierra relevantes matices que condicionan todo el proceso de desarrollo.
+La norma clasifica el software en \textbf{tres niveles de seguridad} según el riesgo que pueda representar para el paciente o el operador. Esta clasificación presenta matices relevantes que condicionan todo el proceso de desarrollo.
 
 \begin{itemize}
     \item \textbf{Clase A}: El software no puede causar daño en ninguna circunstancia.
@@ -32,20 +31,20 @@ La norma clasifica el software en \textbf{tres niveles de seguridad} según el r
     \item \textbf{Clase C}: El software puede contribuir a una situación peligrosa con \textbf{riesgo de daño serio o muerte}.
 \end{itemize}
 
-Tras el análisis de diversos casos de estudio y precedentes, se ha constatado que la determinación de la clase correcta requiere un enfoque crítico y no meramente formal.
+El análisis de diversos casos de estudio y precedentes demuestra que la determinación de la clase correcta requiere un enfoque crítico y no meramente formal.
 
-\section{Cumplimiento y Aplicación durante el proyecto}
-Dado el carácter riguroso, y la propia necesidad de garantizar el cumplimiento de la UNE-EN 62304 \cite{UNE-EN-62304} en este trabajo, se seguirá un enfoque basado en la \textbf{gestión del ciclo de vida del software} y la evaluación de riesgos. Se adoptarán buenas prácticas de ingeniería de software y se documentarán las actividades necesarias para cumplir con los requisitos de seguridad y calidad establecidos por la normativa. En ocasiones, esto supone un esfuerzo adicional que podría percibirse como extenso, no obstante, se considera necesario.
+\section{Cumplimiento y Aplicación}
+Para garantizar el cumplimiento de la UNE-EN 62304 \cite{UNE-EN-62304}, se sigue un enfoque basado en la \textbf{gestión del ciclo de vida del software} y la evaluación de riesgos. Se adoptan buenas prácticas de ingeniería de software y se documentan las actividades necesarias para cumplir con los requisitos de seguridad y calidad establecidos por la normativa.
 
-En este proyecto, se utilizará un \textbf{modelo de desarrollo iterativo e incremental} inspirado en metodologías ágiles como Scrum, adaptado a las necesidades específicas del desarrollo de software médico. Después de una prueba inicial con un enfoque más tradicional, se identificaron limitaciones significativas que condujeron a una reconsideración de la aproximación. Este enfoque permitirá una mayor flexibilidad y capacidad de adaptación a los cambios, así como una entrega continua de valor.
+Se utiliza un \textbf{modelo de desarrollo iterativo e incremental} inspirado en metodologías ágiles como Scrum, adaptado a las necesidades específicas del desarrollo de software médico. Este enfoque permite una mayor flexibilidad y capacidad de adaptación a los cambios, así como una entrega continua de valor.
 
-Considerando que el sistema únicamente controla el encendido y apagado de una bombilla inteligente TP-Link Tapo de manera remota, se ha clasificado el software como de \textbf{Clase A}. Esta clasificación se justifica porque el software no puede causar daño al usuario en ninguna circunstancia, puesto que:
+Considerando que el sistema únicamente controla el encendido y apagado de una bombilla inteligente TP-Link Tapo de manera remota, el software se clasifica como de \textbf{Clase A}. Esta clasificación se justifica porque el software no puede causar daño al usuario en ninguna circunstancia, puesto que:
 \begin{itemize}
     \item La diadema BrainBit es un dispositivo no invasivo de lectura pasiva.
     \item El control se realiza sobre una bombilla doméstica de baja tensión.
     \item No hay interacción directa con sistemas críticos o vitales.
 \end{itemize}
 
-A pesar de esta clasificación de bajo riesgo —podría incluso argumentarse que resulta cautelosa en exceso— se mantendrán buenas prácticas de desarrollo y documentación para asegurar la calidad del software. La experiencia acumulada sugiere que la subestimación de los aspectos de calidad en fases tempranas suele traducirse en complicaciones posteriores de difícil resolución.
+Se mantienen buenas prácticas de desarrollo y documentación para asegurar la calidad del software. La implementación adecuada de aspectos de calidad en fases tempranas previene complicaciones posteriores de difícil resolución.
 
 Dado que esta normativa constituye un \textbf{requisito esencial} para el desarrollo de software en el mercado sanitario español y europeo, su correcta implementación asegurará la viabilidad del producto en entornos clínicos y su aceptación por parte de los organismos reguladores.

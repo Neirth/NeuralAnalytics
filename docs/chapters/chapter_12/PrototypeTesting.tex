@@ -1,18 +1,16 @@
 \chapter{Validación del Prototipo}\label{ch:prototype_testing}
 
-Después de meses de desarrollo de Neural Analytics, llegó el momento que generaba una mezcla de aprensión y entusiasmo: probar si todo lo construido realmente funcionaba. No se trata solo de que el sistema arrancara sin errores, sino de validar que cumplía con todos los estándares médicos requeridos para un dispositivo de esta naturaleza.
-
-Este capítulo documenta todo el proceso de validación seguido, desde las pruebas más básicas hasta las más complejas, de acuerdo con la normativa para software de dispositivos médicos. Es preciso reconocer que la rigurosidad de este proceso no fue completamente anticipada hasta una inmersión total en él; llevó un tiempo considerable comprender que la validación de software médico se rige por un conjunto de reglas específicas.
+Este capítulo documenta exhaustivamente el proceso de validación implementado, abarcando desde verificaciones elementales hasta evaluaciones de complejidad considerable, todo ello en conformidad con la normativa vigente para software de dispositivos médicos. 
 
 \section{Marco Normativo de Validación}
 
 \subsection{Normativa Aplicable}
 
-Para la validación de Neural Analytics, fue necesario seguir las directrices de la norma \cite{UNE-EN-62304} UNE-EN 62304:2007, "Software de dispositivos médicos - Procesos del ciclo de vida del software". Inicialmente, se percibió como una formalidad, pero rápidamente se constató que esta norma establece requisitos muy específicos para todo el proceso de desarrollo y mantenimiento del software en dispositivos médicos —considerablemente más rigurosos de lo esperado—.
+Para la validación de Neural Analytics, se siguieron las directrices de la norma UNE-EN 62304 \cite{UNE-EN-62304}, "Software de dispositivos médicos - Procesos del ciclo de vida del software". Esta norma establece requisitos específicos para todo el proceso de desarrollo y mantenimiento del software en dispositivos médicos, caracterizándose por su rigor metodológico.
 
 \subsection{Clasificación del Software}
 
-Según la sección 4.3 de la norma UNE-EN 62304, fue necesario clasificar el software Neural Analytics como dispositivo de \textbf{Clase A}, debido a que:
+Según la sección 4.3 de la norma UNE-EN 62304, el software Neural Analytics se clasifica como dispositivo de \textbf{Clase A}, debido a que:
 
 \begin{itemize}
     \item No puede contribuir directamente a situaciones peligrosas, ya que funciona únicamente como herramienta de monitorización sin capacidad de realizar acciones directas sobre el paciente.
@@ -20,19 +18,19 @@ Según la sección 4.3 de la norma UNE-EN 62304, fue necesario clasificar el sof
     \item El sistema incluye restricciones de uso explícitas que previenen su aplicación en escenarios clínicos críticos.
 \end{itemize}
 
-Esta clasificación determinó con exactitud el nivel de rigor que debía aplicarse a las pruebas y documentación del software. Resultó un alivio constatar que no era necesario seguir los procesos de Clase B o C, los cuales son mucho más exigentes.
+Esta clasificación determina el nivel de rigor aplicable a las pruebas y documentación del software. Los procesos de Clase A son menos exigentes que los correspondientes a las Clases B o C.
 
 \section{Estrategia de Pruebas}
 
-Siguiendo los requisitos de la norma UNE-EN 62304 para software de Clase A, se tuvo que implementar una estrategia de pruebas estructurada en tres niveles:
+Siguiendo los requisitos de la norma UNE-EN 62304 para software de Clase A, se implementó una estrategia de pruebas estructurada en tres niveles:
 
 \begin{itemize}
-    \item \textbf{Pruebas unitarias}: Verificar que cada componente individual del software funcionara correctamente.
-    \item \textbf{Pruebas de integración}: Verificar que los componentes trabajaran bien juntos.
-    \item \textbf{Pruebas del sistema}: Verificar que todo el sistema funcionara correctamente en conjunto.
+    \item \textbf{Pruebas unitarias}: Verificar que cada componente individual del software funcione correctamente.
+    \item \textbf{Pruebas de integración}: Verificar que los componentes trabajen conjuntamente.
+    \item \textbf{Pruebas del sistema}: Verificar que todo el sistema funcione correctamente en conjunto.
 \end{itemize}
 
-Como parte del alcance definido para este proyecto, se decidió focalizar la estrategia de pruebas en los dos componentes principales: \texttt{neural\_analytics\_core} y \texttt{neural\_analytics\_gui}, ya que estos son los módulos que constituyen el producto final utilizado por el usuario. Esta decisión resultó ser acertada, porque estos dos módulos capturan la mayor parte de la funcionalidad crítica del sistema.
+Como parte del alcance definido, la estrategia de pruebas se focalizó en los dos componentes principales: \texttt{neural\_analytics\_core} y \texttt{neural\_analytics\_gui}, módulos que constituyen el producto final utilizado por el usuario. Esta focalización permite concentrar los esfuerzos de validación en los componentes que capturan la mayor parte de la funcionalidad crítica del sistema.
 
 \subsection{Herramientas y Entorno de Pruebas}
 
@@ -64,6 +62,7 @@ Para ejecutar las pruebas se utilizó el siguiente entorno:
     \label{tab:test_environment}
 \end{table}
 
+\newpage
 \section{Pruebas Unitarias}
 
 \subsection{Estrategia de Pruebas Unitarias}
@@ -77,11 +76,11 @@ Las pruebas unitarias se diseñaron para verificar el correcto funcionamiento de
     \item Consistencia en la interfaz de los componentes.
 \end{itemize}
 
-De acuerdo con la sección 5.5.3 de la norma UNE-EN 62304, para cada prueba unitaria se definieron criterios de aceptación explícitos antes de su ejecución —una práctica que inicialmente pareció excesiva pero que posteriormente ahorró una cantidad considerable de tiempo cuando las pruebas fallaban—.
+De acuerdo con la sección 5.5.3 de la norma UNE-EN 62304, para cada prueba unitaria se definieron criterios de aceptación explícitos antes de su ejecución. Esta práctica permite optimizar el tiempo de depuración cuando las pruebas fallan.
 
 \subsubsection{Enfoque para Arquitectura Hexagonal}
 
-La arquitectura hexagonal adoptada en el sistema Neural Analytics requirió un enfoque bastante específico para las pruebas unitarias. Se implementaron las siguientes estrategias:
+La arquitectura hexagonal adoptada en el sistema Neural Analytics requiere un enfoque específico para las pruebas unitarias. Se implementaron las siguientes estrategias:
 
 \begin{itemize}
     \item \textbf{Aislamiento de componentes}: Los tests se ejecutan sobre componentes aislados mediante la inyección de dependencias simuladas (mocks) para puertos y adaptadores.
@@ -130,7 +129,7 @@ Un componente crítico del sistema son los adaptadores para hardware, como el di
     \item \textbf{MockSmartBulbAdapter}: Simula el comportamiento de las bombillas inteligentes, permitiendo probar los casos de uso de control domótico sin necesidad de dispositivos físicos.
 \end{itemize}
 
-La implementación de estos mocks requirió un trabajo inicial considerable, pero finalmente ahorraron una cantidad significativa de tiempo al permitir probar toda la lógica sin la necesidad de conectar y desconectar constantemente el hardware real.
+La implementación de estos adaptadores mock permitió realizar pruebas unitarias exhaustivas sin depender de hardware real, lo que aceleró significativamente el proceso de desarrollo y validación.
 
 \newpage
 \subsubsection{Pruebas Unitarias de Casos de Uso}
@@ -204,7 +203,7 @@ Los resultados fueron reveladores: aunque algunos componentes tenían una cobert
     \label{tab:code_coverage_metrics}
 \end{table}
 
-Los resultados mostraron aspectos muy interesantes. Los casos de uso principales, que son realmente el corazón del sistema, tenían una cobertura excelente (98-99\% de líneas), lo que tranquilizó mucho porque significaba que se estaba probando tanto el flujo normal como todos los casos de error que se habían podido identificar. La máquina de estados, que es súper crítica porque coordina todo el flujo de trabajo, tuvo una cobertura bastante satisfactoria (91.67\%), aunque costó más trabajo conseguir probar todas las transiciones posibles.
+Los resultados mostraron aspectos muy interesantes. Los casos de uso principales, que son realmente el corazón del sistema, tenían una cobertura excelente (98-99\% de líneas), lo que tranquilizó mucho porque significaba que se estaba probando tanto el flujo normal como todos los casos de error que se habían podido identificar. La máquina de estados, que es bastante crítica porque coordina todo el flujo de trabajo, tuvo una cobertura bastante satisfactoria (91.67\%), lo que era un buen indicativo de que las transiciones y estados estaban bien cubiertos.
 
 El servicio de inferencia fue donde se hizo evidente la complejidad: solo se consiguió un 72.51\% de cobertura porque es increíblemente difícil simular todas las posibles situaciones que pueden ocurrir al procesar señales EEG reales y trabajar con modelos de machine learning. Ahí se constató que no todo se puede probar de manera automatizada.
 
@@ -343,7 +342,6 @@ Se desarrollaron varios casos de prueba del sistema que cubrían desde los escen
 \begin{center}
 \small
 \begin{longtable}{|p{1cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|p{1.5cm}|}
-    \caption{Casos de prueba del sistema}\label{tab:system_tests} \\
     \hline
     \textbf{ID} & \textbf{Descripción} & \textbf{Procedimiento} & \textbf{Criterio de aceptación} & \textbf{Resultado} \\
     \hline
@@ -368,6 +366,7 @@ Se desarrollaron varios casos de prueba del sistema que cubrían desde los escen
     \hline
     SYS-08 & Recuperación ante errores & Simular desconexión del dispositivo EEG durante operación & Sistema detecta error y permite reconexión & PASA \\
     \hline
+    \caption{Casos de prueba del sistema}\label{fig:system_tests}
 \end{longtable}
 \end{center}
 
@@ -435,7 +434,6 @@ Una de las tareas más laboriosas pero necesarias fue desarrollar una matriz de 
 \begin{center}
 \small
 \begin{longtable}{|p{2.5cm}|p{5.5cm}|p{3.5cm}|p{2.5cm}|}
-    \caption{Matriz de trazabilidad de requisitos y pruebas}\label{tab:traceability} \\
     \hline
     \textbf{Requisito} & \textbf{Descripción} & \textbf{Pruebas asociadas} & \textbf{Estado} \\
     \hline
@@ -460,13 +458,14 @@ Una de las tareas más laboriosas pero necesarias fue desarrollar una matriz de 
     \hline
     REQ-NF03 & Operación continua durante > 30min & TC-023, SYS-07 & VERIFICADO \\
     \hline
+    \caption{Matriz de trazabilidad de requisitos y pruebas}\label{fig:traceability}
 \end{longtable}
 \end{center}
 
 \newpage
 \section{Conclusión de la Validación}
 
-Después de meses de desarrollo y semanas intensas de pruebas, se puede afirmar con seguridad que la validación del prototipo Neural Analytics ha seguido rigurosamente las directrices de la norma UNE-EN 62304:2007 para software de dispositivos médicos de Clase A. Cumplir con esta normativa fue crucial para garantizar que lo construido era seguro y efectivo.
+Después de meses de desarrollo y semanas intensas de pruebas, se puede afirmar con seguridad que la validación del prototipo Neural Analytics ha seguido rigurosamente las directrices de la norma UNE-EN 62304 para software de dispositivos médicos de Clase A. Cumplir con esta normativa fue crucial para garantizar que lo construido era seguro y efectivo.
 
 Como requiere la sección 5.7 de la norma UNE-EN 62304, se estableció una estrategia de verificación para cada requisito del sistema. Se completaron satisfactoriamente los tres niveles de prueba necesarios —unitarias, integración y sistema— verificando el cumplimiento de todos los requisitos especificados mediante la matriz de trazabilidad presentada anteriormente.
 
