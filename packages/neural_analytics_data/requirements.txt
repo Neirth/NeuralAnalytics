@@ -4,7 +4,7 @@ numpy==2.1.2
 pandas==2.2.3
 torch>=2.5.1
 onnx==1.17.0
-protobuf==5.29.3
+protobuf==5.29.5
 
 # Dependencias para la interfaz de terminal
 blessed>=1.20.0
