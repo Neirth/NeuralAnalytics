@@ -402,7 +402,10 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+build/*
+!build/assets/*
+!build/neural_analytics.onnx
+
 develop-eggs/
 dist/
 downloads/
