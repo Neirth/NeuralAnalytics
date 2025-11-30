@@ -87,8 +87,12 @@ def main():
 
     # Create datasets with controlled stride (50% overlap instead of 98%+ overlap)
     # Both use z-score normalization per window (same as runtime)
+    # First create train_dataset to compute global normalization statistics
     train_dataset = NeuralAnalyticsDataset(train_files, WINDOW_SIZE, device, augment=False, stride=WINDOW_STRIDE)
-    val_dataset = NeuralAnalyticsDataset(val_files, WINDOW_SIZE, device, augment=False, stride=WINDOW_STRIDE)
+    
+    # Use the same global_stats from training for validation to ensure consistent normalization
+    train_global_stats = train_dataset.get_global_stats()
+    val_dataset = NeuralAnalyticsDataset(val_files, WINDOW_SIZE, device, augment=False, stride=WINDOW_STRIDE, global_stats=train_global_stats)
 
     # Load the dataset in PyTorch
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)

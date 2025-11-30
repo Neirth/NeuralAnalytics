@@ -228,7 +228,6 @@ impl ModelInferenceService {
 
         // Process each channel to obtain WINDOW_SIZE values per channel
         let mut channels_data = Vec::new();
-        let mut all_values: Vec<f32> = Vec::new();
 
         // First pass: collect all values and resize channels
         for channel in required_channels.iter() {
@@ -248,7 +247,6 @@ impl ModelInferenceService {
                 channel_values = channel_values[start..].to_vec();
             }
 
-            all_values.extend(channel_values.iter());
             channels_data.push(channel_values);
         }
 
@@ -308,8 +306,8 @@ impl ModelInferenceInterface for ModelInferenceService {
         // Log the actual length of the processed data
         info!("Processed data length: {}", processed_data.len());
 
-        // We verify that we have exactly 62*4 = 76 elements (62 temporal samples, 4 channels)
-        let expected_elements = 62 * 4;
+        // We verify that we have exactly WINDOW_SIZE*NUM_CHANNELS elements (62 temporal samples, 4 channels)
+        let expected_elements = WINDOW_SIZE * NUM_CHANNELS;
         if processed_data.len() != expected_elements {
             return Err(format!(
                 "Processed data has unexpected length: {} (expected {})",
@@ -322,8 +320,8 @@ impl ModelInferenceInterface for ModelInferenceService {
         let batch_size = 1; // We process one example at a time
 
         info!(
-            "Creating tensor with shape [batch_size={}, 62, 4]",
-            batch_size
+            "Creating tensor with shape [batch_size={}, {}, {}]",
+            batch_size, WINDOW_SIZE, NUM_CHANNELS
         );
 
         // Log first few values of processed_data to verify data is actually changing
@@ -333,11 +331,13 @@ impl ModelInferenceInterface for ModelInferenceService {
             processed_data[4], processed_data[5], processed_data[6], processed_data[7]
         );
 
-        // Create a tensor with the correct shape [batch_size, 62, 4]
-        let input_tensor =
-            tract_ndarray::Array3::from_shape_vec((batch_size, 62, 4), processed_data.clone())
-                .map_err(|e| format!("Error creating input tensor: {}", e))?
-                .into_arc_tensor();
+        // Create a tensor with the correct shape [batch_size, WINDOW_SIZE, NUM_CHANNELS]
+        let input_tensor = tract_ndarray::Array3::from_shape_vec(
+            (batch_size, WINDOW_SIZE, NUM_CHANNELS),
+            processed_data.clone(),
+        )
+        .map_err(|e| format!("Error creating input tensor: {}", e))?
+        .into_arc_tensor();
 
         // Perform inference with tract-onnx
         let outputs = match model.run(tvec!(tract_onnx::prelude::TValue::Const(input_tensor))) {
@@ -388,12 +388,21 @@ impl ModelInferenceInterface for ModelInferenceService {
             return Err(format!("Prediction index out of range: {}", max_idx));
         }
 
-        // Apply confidence threshold
-        if max_prob < CONFIDENCE_THRESHOLD {
+        // Determine the applicable confidence threshold based on prediction class
+        // GREEN (idx=1) uses a lower threshold since it's harder to detect
+        let applicable_threshold = if max_idx == 1 {
+            GREEN_CONFIDENCE_THRESHOLD
+        } else {
+            CONFIDENCE_THRESHOLD
+        };
+
+        // Apply per-color confidence threshold
+        if max_prob < applicable_threshold {
             info!(
-                "Prediction confidence ({:.2}%) below threshold ({:.2}%). Returning 'trash'.",
+                "Prediction confidence ({:.2}%) below threshold ({:.2}%) for {}. Returning 'trash'.",
                 max_prob * 100.0,
-                CONFIDENCE_THRESHOLD * 100.0
+                applicable_threshold * 100.0,
+                color_map[max_idx]
             );
             return Ok("trash".to_string());
         }
@@ -417,25 +426,6 @@ impl ModelInferenceInterface for ModelInferenceService {
                 second_prob * 100.0
             );
             return Ok("trash".to_string());
-        }
-
-        // For RED/GREEN predictions, check against appropriate thresholds
-        // GREEN uses a lower threshold since it's harder to detect
-        if max_idx != 2 {
-            let action_threshold = if max_idx == 1 {
-                GREEN_CONFIDENCE_THRESHOLD
-            } else {
-                CONFIDENCE_THRESHOLD
-            };
-            if max_prob < action_threshold {
-                info!(
-                    "Action prediction ({}) confidence ({:.2}%) below action threshold ({:.2}%). Returning 'trash'.",
-                    color_map[max_idx],
-                    max_prob * 100.0,
-                    action_threshold * 100.0
-                );
-                return Ok("trash".to_string());
-            }
         }
 
         info!(
