@@ -1,6 +1,6 @@
 [package]
 name = "neural_analytics_gui"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Sergio Martinez <7413024+Neirth@users.noreply.github.com>"]
 description = "GUI interface for Neural Analytics project"
 edition = "2021"
