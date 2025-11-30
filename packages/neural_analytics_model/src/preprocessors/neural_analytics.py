@@ -16,15 +16,25 @@
 import os
 import pandas as pd
 import numpy as np
+import json
 from sklearn.preprocessing import MinMaxScaler
 
-def normalize_features(df: pd.DataFrame, features: list) -> pd.DataFrame:
+def normalize_features(df: pd.DataFrame, features: list, scaler: MinMaxScaler = None) -> pd.DataFrame:
     """
-    Globally normalizes the specified columns using MinMaxScaler.
+    Normalizes the specified columns using MinMaxScaler.
+    If a scaler is provided, it uses that scaler (for consistent normalization).
+    If scaler is 'skip', it skips normalization.
+    Otherwise, it fits a new scaler.
     """
-    scaler = MinMaxScaler()
     df_norm = df.copy()
-    df_norm[features] = scaler.fit_transform(df_norm[features])
+    if scaler == 'skip':
+        return df_norm
+        
+    if scaler is None:
+        scaler = MinMaxScaler()
+        df_norm[features] = scaler.fit_transform(df_norm[features])
+    else:
+        df_norm[features] = scaler.transform(df_norm[features])
     # print("[*] Feature normalization completed for:", features)
     return df_norm
 
@@ -58,16 +68,17 @@ def onehot_encode_class_label(class_label: str) -> np.ndarray:
     }
     return np.array(mapping.get(class_label, [0, 0]))
 
-def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_label: str) -> pd.DataFrame:
+def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_label: str, scaler: MinMaxScaler = None) -> pd.DataFrame:
     """
     Creates sliding windows from the dataset.
 
     Each window is a consecutive sequence (of size window_size) of columns T3, T4, O1 and O2.
     Each window is assigned the label (one-hot encoded) obtained from the folder path.
+    If a scaler is provided, it uses that scaler for consistent normalization.
     """
     feature_cols = ['T3', 'T4', 'O1', 'O2']
-    df = normalize_features(df, feature_cols)
-    
+    df = normalize_features(df, feature_cols, scaler)
+
     windows = []
     for i in range(len(df) - window_size + 1):
         window_features = df.loc[i:i + window_size - 1, feature_cols].values
@@ -76,36 +87,58 @@ def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_lab
 
     if not windows:
         print("[!] No windows were generated, check the dataset size and window parameter.")
-    
+
     window_df = pd.DataFrame(windows, columns=['window_features', 'class'])
     # print("[*] Sliding windows successfully created. Last entries:")
     # print(window_df.tail())
 
     return window_df
 
-def neural_analytics_preprocessor(file: str, window_size: int) -> pd.DataFrame:
+def neural_analytics_preprocessor(file: str, window_size: int, scaler: MinMaxScaler = None) -> pd.DataFrame:
     """
     Preprocesses the current dataset for classification.
 
     The CSV is expected to contain at least the columns:
       - 'T3', 'T4', 'O1', 'O2': Numerical features to be used by the model.
-    
+
     The class label is extracted from the folder path and one-hot encoding is applied.
     Then, sliding windows of size window_size are generated and the label is assigned to each window.
+    If a scaler is provided, it uses that scaler for consistent normalization.
     """
     # Read the CSV and filter the required columns.
     df = pd.read_csv(file, on_bad_lines='skip', delimiter=",", low_memory=False)
     required_cols = ['T3', 'T4', 'O1', 'O2']
     df = df.dropna(subset=required_cols)
+    df = df[~(df[required_cols] == 0).all(axis=1)]
+    df = df.reset_index(drop=True)
     # print("[*] View of preprocessed dataset:")
     # print(df.head())
     df = df[required_cols].copy()
-    
+
     # Get the class label from the file path.
     class_label = get_class_label_from_path(file)
     # print("[*] Class obtained from path:", class_label)
-    
+
     # Generate sliding windows with the assigned label.
-    window_df = create_present_sliding_windows(df, window_size, class_label)
-    
+    window_df = create_present_sliding_windows(df, window_size, class_label, scaler)
+
     return window_df
+
+def export_scaler_params(scaler: MinMaxScaler, output_path: str):
+    """
+    Exports the MinMaxScaler parameters to a JSON file.
+
+    :param scaler: Fitted MinMaxScaler
+    :param output_path: Path where to save the JSON file
+    """
+    params = {
+        "min": scaler.data_min_.tolist(),
+        "max": scaler.data_max_.tolist(),
+        "scale": scaler.scale_.tolist(),
+        "data_range": scaler.data_range_.tolist()
+    }
+
+    with open(output_path, 'w') as f:
+        json.dump(params, f, indent=2)
+
+    print(f"[*] Scaler parameters exported to: {output_path}")
