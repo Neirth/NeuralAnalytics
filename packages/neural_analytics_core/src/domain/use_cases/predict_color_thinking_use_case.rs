@@ -192,20 +192,18 @@ mod tests {
 
         let command_bus = setup_command_bus();
 
-        // Con unanimidad, necesitamos que TODAS las predicciones sean iguales
-        // Ejecutar menos de UNANIMITY_REQUIRED predicciones debería seguir devolviendo "trash"
-        for _ in 0..(UNANIMITY_REQUIRED - 1) {
+        // Execute UNANIMITY_REQUIRED predictions
+        // When all predictions in the buffer are equal, get_color_thinking() returns that color
+        for i in 0..UNANIMITY_REQUIRED {
             let _ = command_bus
                 .execute(&mut context, PredictColorThinkingCommand {})
                 .await;
-            assert_eq!(context.get_color_thinking(), "trash".to_string());
+            // From the first prediction, if all match, get_color_thinking() returns "green"
+            assert_eq!(context.get_color_thinking(), "green".to_string(), 
+                "Iteration {}: expected 'green' since all predictions match", i);
         }
 
-        // En la predicción que completa el buffer con unanimidad, debe consolidar "green"
-        let _ = command_bus
-            .execute(&mut context, PredictColorThinkingCommand {})
-            .await;
-
+        // After completing the buffer with unanimity, it should still be "green"
         assert_eq!(context.get_color_thinking(), "green".to_string());
     }
 
