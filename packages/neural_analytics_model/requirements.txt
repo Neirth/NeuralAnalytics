@@ -4,8 +4,9 @@ numpy==2.1.2
 pandas==2.2.3
 torch>=2.5.1
 onnx==1.17.0
-onnxscript>=0.1.0
+onnxscript==0.1.0
 protobuf==5.29.5
+matplotlib>=3.8.0
 
 # Dependencias para la interfaz de terminal
 blessed>=1.20.0
@@ -19,3 +20,4 @@ tensorboard>=2.15.0
 # Dependencias utilitarias
 setuptools>=65.5.1
 wheel>=0.38.4
+tqdm==4.67.1

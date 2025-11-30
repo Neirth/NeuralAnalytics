@@ -105,12 +105,12 @@ def main():
     # Train and evaluate the model
     epochs = int(os.getenv("TRAIN_EPOCHS", "200"))
     learning_rate = float(os.getenv("TRAIN_LR", "0.0005"))
-    label_smoothing = float(os.getenv("TRAIN_LABEL_SMOOTHING", "0.1"))
     
     # Class weights to balance accuracy across classes
     # Order: [RED=0, GREEN=1, TRASH=2]
-    # Finding optimal balance between RED and TRASH
-    class_weights = torch.tensor([1.0, 1.0, 1.0], dtype=torch.float32)
+    # GREEN has highest confusion (11 misclassified as RED), so increase its weight
+    # TRASH is already very accurate, can reduce slightly
+    class_weights = torch.tensor([1.0, 1.3, 0.9], dtype=torch.float32)
 
     model, train_losses, train_accuracies = train_model(
         train_loader,
@@ -119,7 +119,6 @@ def main():
         writer,
         epochs=epochs,
         learning_rate=learning_rate,
-        label_smoothing=label_smoothing,
         class_weights=class_weights,
     )
     

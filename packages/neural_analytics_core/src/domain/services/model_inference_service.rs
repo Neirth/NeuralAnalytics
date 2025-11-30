@@ -252,31 +252,24 @@ impl ModelInferenceService {
             channels_data.push(channel_values);
         }
 
-        // Use per-channel z-score normalization (same as Python training)
-        // Each channel is normalized independently using its own mean/std
-        // This preserves relative differences between channels
+        // Use GLOBAL z-score normalization (same as Python training)
+        // Each channel is normalized using the global mean/std from training data
+        // This ensures consistency between training and inference
         for (ch_idx, channel_values) in channels_data.iter_mut().enumerate() {
-            // Calculate mean for this channel
-            let ch_mean: f32 = channel_values.iter().sum::<f32>() / channel_values.len() as f32;
-            // Calculate std for this channel
-            let ch_variance: f32 = channel_values
-                .iter()
-                .map(|x| (x - ch_mean).powi(2))
-                .sum::<f32>()
-                / channel_values.len() as f32;
-            let ch_std = ch_variance.sqrt().max(1e-6);
+            let global_mean = self.global_mean[ch_idx];
+            let global_std = self.global_std[ch_idx].max(1e-6);
 
             let raw_first = channel_values.first().copied().unwrap_or(0.0);
 
-            // Normalize this channel with its own mean/std
+            // Normalize this channel with global mean/std
             for val in channel_values.iter_mut() {
-                *val = (*val - ch_mean) / ch_std;
+                *val = (*val - global_mean) / global_std;
             }
 
             let norm_first = channel_values.first().copied().unwrap_or(0.0);
             info!(
-                "Channel {}: raw_mean={:.2}, raw_std={:.2}, first_raw={:.2}, first_norm={:.4}",
-                required_channels[ch_idx], ch_mean, ch_std, raw_first, norm_first
+                "Channel {}: global_mean={:.2}, global_std={:.2}, first_raw={:.2}, first_norm={:.4}",
+                required_channels[ch_idx], global_mean, global_std, raw_first, norm_first
             );
         }
 
