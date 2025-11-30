@@ -6,6 +6,9 @@
 
 This project develops a system for real-time analysis of electroencephalographic signals using deep learning techniques, using the BrainBit device to capture occipital and temporal lobe data; LSTM models are used to detect specific patterns and guarantee a response within temporal constraints.
 
+> [!NOTE]
+> **Convolutional Filters Update**: The deep learning model architecture has been updated to add convolutional layers before the LSTM layers. This change aims to improve feature extraction without the strictly dependency of hardware prefiltering.
+
 ## Key Features
 
 - Acquisition of EEG signals using the BrainBit device.
