@@ -118,16 +118,6 @@ class NeuralAnalyticsDataset(Dataset):
         """Returns the global statistics used for normalization."""
         return self.global_stats
     
-    def export_global_stats(self, output_path: str):
-        """
-        Exports the global statistics to a JSON file for use in Rust inference.
-        
-        :param output_path: Path where to save the JSON file
-        """
-        with open(output_path, 'w') as f:
-            json.dump(self.global_stats, f, indent=2)
-        print(f"[*] Global stats exported to: {output_path}")
-    
     def export_normalization_params(self, output_path: str):
         """
         Exports the normalization parameters to a JSON file for use in Rust inference.
@@ -145,19 +135,14 @@ class NeuralAnalyticsDataset(Dataset):
     
     def _normalize(self, data: np.ndarray) -> np.ndarray:
         """
-        Apply per-channel z-score normalization.
-        Each channel is normalized independently using its own mean/std.
-        This preserves relative differences between channels while being robust to calibration.
-        Formula: (x - channel_mean) / channel_std for each channel
+        Apply GLOBAL z-score normalization using pre-calculated statistics.
+        Each channel is normalized using the global mean/std calculated from the entire dataset.
+        This ensures consistency between training and runtime inference.
+        Formula: (x - global_mean) / global_std for each channel
         """
         # data shape: [timesteps, channels] = [62, 4]
-        normalized = np.zeros_like(data, dtype=np.float32)
-        for ch in range(data.shape[1]):
-            ch_data = data[:, ch]
-            ch_mean = ch_data.mean()
-            ch_std = max(ch_data.std(), 1e-6)
-            normalized[:, ch] = (ch_data - ch_mean) / ch_std
-        return normalized
+        # global_mean/global_std shape: [4]
+        return (data - self.global_mean) / self.global_std
     
     def get_file_count(self):
         """Returns the number of valid files in the dataset."""

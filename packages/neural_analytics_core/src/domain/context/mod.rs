@@ -1,6 +1,6 @@
+use singletons::{get_brainflow_adapter, get_model_service, get_tapo_smartbulb_adapter};
 use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
-use singletons::{get_brainflow_adapter, get_tapo_smartbulb_adapter, get_model_service};
 
 use presage::{async_trait, Error, Event, EventWriter, SerializedEvent};
 use tokio::sync::RwLock;
@@ -18,6 +18,7 @@ use super::{
 mod singletons;
 
 const BUFFER_SIZE: usize = 6;
+pub const UNANIMITY_REQUIRED: usize = BUFFER_SIZE;
 
 pub(crate) struct NeuralAnalyticsContext {
     // Data Context
@@ -57,10 +58,10 @@ impl Default for NeuralAnalyticsContext {
 
 impl NeuralAnalyticsContext {
     /// Get the real color that the user is thinking about.
-    /// 
+    ///
     /// This function checks if all the colors in the `color_thinking` buffer are the same.
     /// If they are, it returns that color. Otherwise, it returns "unknown".
-    /// 
+    ///
     /// # Returns
     /// * `String`: The color that the user is thinking about, or "unknown" if it cannot be determined.
     pub fn get_color_thinking(&self) -> String {
@@ -71,7 +72,7 @@ impl NeuralAnalyticsContext {
         let first_color = self.color_thinking.front().unwrap();
 
         if self.color_thinking.iter().all(|color| color == first_color) {
-           first_color.clone()
+            first_color.clone()
         } else {
             "unknown".to_string()
         }
@@ -83,12 +84,12 @@ impl EventWriter for NeuralAnalyticsContext {
     type Error = Error;
 
     /// Write an event to the context. This function is called when an event is received.
-    /// 
+    ///
     /// It updates the context with the event data, depending on the type of event.
-    /// 
+    ///
     /// # Arguments
     /// * `event`: The serialized event to be processed.
-    /// 
+    ///
     /// # Returns
     /// * `Result<(), Error>`: Returns `Ok(())` if the event is processed successfully, or an error if it fails.
     async fn write(&mut self, event: &SerializedEvent) -> Result<(), Error> {

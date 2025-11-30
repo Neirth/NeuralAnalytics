@@ -16,6 +16,7 @@
 from models.neural_analytics import NeuralAnalyticsModel
 from tqdm import tqdm  # Import tqdm for progress bars
 
+import copy
 import time
 import torch
 import torch.nn as nn
@@ -87,7 +88,7 @@ def accuracy_torch(outputs, targets):
     
     return correct / total
 
-def train_model(train_loader, val_loader, device, writer, epochs=100, learning_rate=0.001, label_smoothing=0.0, class_weights=None):
+def train_model(train_loader, val_loader, device, writer, epochs=100, learning_rate=0.001, class_weights=None):
     """
     Trains the neural analytics classification model with a progress bar at the epoch level.
     Includes validation and saving the best model.
@@ -190,7 +191,7 @@ def train_model(train_loader, val_loader, device, writer, epochs=100, learning_r
             # Save best model
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
-                best_model_state = model.state_dict().copy()
+                best_model_state = copy.deepcopy(model.state_dict())
 
             # Get current learning rate
             current_lr = optimizer.param_groups[0]['lr']

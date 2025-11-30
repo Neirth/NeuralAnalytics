@@ -17,26 +17,37 @@ import os
 import pandas as pd
 import numpy as np
 import json
+from typing import Literal, Tuple, Union, Optional
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.utils.validation import check_is_fitted
 
-def normalize_features(df: pd.DataFrame, features: list, scaler: MinMaxScaler = None) -> pd.DataFrame:
+def normalize_features(
+    df: pd.DataFrame, 
+    features: list, 
+    scaler: Union[MinMaxScaler, Literal['skip'], None] = None
+) -> Tuple[pd.DataFrame, Optional[MinMaxScaler]]:
     """
     Normalizes the specified columns using MinMaxScaler.
     If a scaler is provided, it uses that scaler (for consistent normalization).
     If scaler is 'skip', it skips normalization.
     Otherwise, it fits a new scaler.
+    
+    Returns:
+        Tuple of (normalized_df, fitted_scaler). Scaler is None if normalization was skipped.
     """
     df_norm = df.copy()
     if scaler == 'skip':
-        return df_norm
-        
+        return df_norm, None
+    
+    fitted_scaler: Optional[MinMaxScaler] = None
     if scaler is None:
-        scaler = MinMaxScaler()
-        df_norm[features] = scaler.fit_transform(df_norm[features])
+        fitted_scaler = MinMaxScaler()
+        df_norm[features] = fitted_scaler.fit_transform(df_norm[features])
     else:
+        fitted_scaler = scaler
         df_norm[features] = scaler.transform(df_norm[features])
     # print("[*] Feature normalization completed for:", features)
-    return df_norm
+    return df_norm, fitted_scaler
 
 def get_class_label_from_path(file: str) -> str:
     """
@@ -77,7 +88,7 @@ def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_lab
     If a scaler is provided, it uses that scaler for consistent normalization.
     """
     feature_cols = ['T3', 'T4', 'O1', 'O2']
-    df = normalize_features(df, feature_cols, scaler)
+    df, _ = normalize_features(df, feature_cols, scaler)
 
     windows = []
     for i in range(len(df) - window_size + 1):
@@ -130,7 +141,22 @@ def export_scaler_params(scaler: MinMaxScaler, output_path: str):
 
     :param scaler: Fitted MinMaxScaler
     :param output_path: Path where to save the JSON file
+    :raises ValueError: If the scaler is not fitted
+    :raises RuntimeError: If file I/O fails or output directory doesn't exist
     """
+    # Verify the scaler is fitted
+    try:
+        check_is_fitted(scaler, ['data_min_', 'data_max_', 'scale_', 'data_range_'])
+    except Exception:
+        raise ValueError(
+            "Scaler is not fitted. Call scaler.fit() or scaler.fit_transform() before exporting parameters."
+        )
+    
+    # Verify output directory exists
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        raise RuntimeError(f"Output directory does not exist: {output_dir}")
+    
     params = {
         "min": scaler.data_min_.tolist(),
         "max": scaler.data_max_.tolist(),
@@ -138,7 +164,12 @@ def export_scaler_params(scaler: MinMaxScaler, output_path: str):
         "data_range": scaler.data_range_.tolist()
     }
 
-    with open(output_path, 'w') as f:
-        json.dump(params, f, indent=2)
+    try:
+        with open(output_path, 'w') as f:
+            json.dump(params, f, indent=2)
+    except (OSError, IOError) as e:
+        raise RuntimeError(f"Failed to write scaler parameters to '{output_path}': {e}")
+    except (TypeError, ValueError) as e:
+        raise RuntimeError(f"Failed to serialize scaler parameters to JSON: {e}")
 
     print(f"[*] Scaler parameters exported to: {output_path}")
