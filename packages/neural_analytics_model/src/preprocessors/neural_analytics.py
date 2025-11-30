@@ -79,16 +79,20 @@ def onehot_encode_class_label(class_label: str) -> np.ndarray:
     }
     return np.array(mapping.get(class_label, [0, 0]))
 
-def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_label: str, scaler: MinMaxScaler = None) -> pd.DataFrame:
+def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_label: str, scaler: Union[MinMaxScaler, Literal['skip'], None] = None) -> Tuple[pd.DataFrame, Optional[MinMaxScaler]]:
     """
     Creates sliding windows from the dataset.
 
     Each window is a consecutive sequence (of size window_size) of columns T3, T4, O1 and O2.
     Each window is assigned the label (one-hot encoded) obtained from the folder path.
     If a scaler is provided, it uses that scaler for consistent normalization.
+    If scaler is 'skip', normalization is skipped.
+    
+    Returns:
+        Tuple of (window_df, fitted_scaler). Scaler is None if normalization was skipped.
     """
     feature_cols = ['T3', 'T4', 'O1', 'O2']
-    df, _ = normalize_features(df, feature_cols, scaler)
+    df, fitted_scaler = normalize_features(df, feature_cols, scaler)
 
     windows = []
     for i in range(len(df) - window_size + 1):
@@ -103,9 +107,9 @@ def create_present_sliding_windows(df: pd.DataFrame, window_size: int, class_lab
     # print("[*] Sliding windows successfully created. Last entries:")
     # print(window_df.tail())
 
-    return window_df
+    return window_df, fitted_scaler
 
-def neural_analytics_preprocessor(file: str, window_size: int, scaler: MinMaxScaler = None) -> pd.DataFrame:
+def neural_analytics_preprocessor(file: str, window_size: int, scaler: Union[MinMaxScaler, Literal['skip'], None] = None) -> Tuple[pd.DataFrame, Optional[MinMaxScaler]]:
     """
     Preprocesses the current dataset for classification.
 
@@ -115,6 +119,10 @@ def neural_analytics_preprocessor(file: str, window_size: int, scaler: MinMaxSca
     The class label is extracted from the folder path and one-hot encoding is applied.
     Then, sliding windows of size window_size are generated and the label is assigned to each window.
     If a scaler is provided, it uses that scaler for consistent normalization.
+    If scaler is 'skip', normalization is skipped.
+    
+    Returns:
+        Tuple of (window_df, fitted_scaler). Scaler is None if normalization was skipped.
     """
     # Read the CSV and filter the required columns.
     df = pd.read_csv(file, on_bad_lines='skip', delimiter=",", low_memory=False)
@@ -131,9 +139,9 @@ def neural_analytics_preprocessor(file: str, window_size: int, scaler: MinMaxSca
     # print("[*] Class obtained from path:", class_label)
 
     # Generate sliding windows with the assigned label.
-    window_df = create_present_sliding_windows(df, window_size, class_label, scaler)
+    window_df, fitted_scaler = create_present_sliding_windows(df, window_size, class_label, scaler)
 
-    return window_df
+    return window_df, fitted_scaler
 
 def export_scaler_params(scaler: MinMaxScaler, output_path: str):
     """
