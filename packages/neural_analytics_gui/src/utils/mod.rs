@@ -5,10 +5,11 @@ use slint::{Image, Model, ModelRc, SharedPixelBuffer, SharedString};
 ///
 /// This function takes EEG signal data and generates an image with a chart
 /// similar to the one shown in the Python interface.
+/// Raw EEG data is normalized per-channel using z-score for display.
 ///
 /// # Arguments
 /// * `name` - Electrode name (T3, T4, O1, O2)
-/// * `data` - Vector with signal values
+/// * `data` - Vector with raw EEG signal values
 /// * `width` - Image width in pixels
 /// * `height` - Image height in pixels
 ///
@@ -23,10 +24,6 @@ pub fn render_signal_plot(
     // Use width and height
     let width_px = width.round() as u32;
     let height_px = height.round() as u32;
-
-    // INFO: Debug line
-    // println!("Rendering signal plot for electrode '{}' with width: {}px, height: {}px, data points: {}",
-    //          name, width_px, height_px, data.row_count());
 
     // Create buffer of pixels
     let mut pixel_buffer = SharedPixelBuffer::<slint::Rgb8Pixel>::new(width_px, height_px);
@@ -47,11 +44,15 @@ pub fn render_signal_plot(
             return Image::from_rgb8(pixel_buffer);
         }
 
-        // Data is already normalized between 0 and 1 from BrainFlowAdapter
-        // But we calculate the current range to improve visualization
-        let normalized_data = data_vec.clone();
+        // Apply z-score normalization per-channel for visualization
+        // This centers data around 0 with std ~1
+        let mean: f32 = data_vec.iter().sum::<f32>() / data_vec.len() as f32;
+        let variance: f32 = data_vec.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / data_vec.len() as f32;
+        let std = variance.sqrt().max(1e-6); // Avoid division by zero
+        
+        let normalized_data: Vec<f32> = data_vec.iter().map(|x| (x - mean) / std).collect();
 
-        // Calculate current min and max values to dynamically adjust the Y range
+        // Calculate current min and max of normalized values
         let min_value = normalized_data
             .iter()
             .cloned()
@@ -61,21 +62,15 @@ pub fn render_signal_plot(
             .cloned()
             .fold(f32::NEG_INFINITY, f32::max);
 
-        // Add a small margin for better visualization
-        let margin = (max_value - min_value) * 0.0001;
-
-        // Ensure the range is within [0,1] (normalized data)
-        let display_min = (min_value - margin).max(0.0);
-        let display_max = (max_value + margin).min(1.0);
-
-        // If the range is too small, set a minimum range for visualization
-        let (final_min, final_max) = if (display_max - display_min).abs() < 0.05 {
-            // Center a minimum range around the middle value
-            let mid = (display_min + display_max) * 0.5;
-            let half_range = 0.025;
-            ((mid - half_range).max(0.0), (mid + half_range).min(1.0))
+        // For z-score data, use symmetric range around 0
+        let abs_max = max_value.abs().max(min_value.abs());
+        let margin = 0.2; // Add 20% margin
+        
+        // Set range to be symmetric around 0
+        let (final_min, final_max) = if abs_max < 0.5 {
+            (-1.5, 1.5) // Minimum range for very flat signals
         } else {
-            (display_min, display_max)
+            (-(abs_max + margin), abs_max + margin)
         };
 
         // Draw the title
@@ -98,7 +93,7 @@ pub fn render_signal_plot(
             .configure_mesh()
             .axis_style(WHITE.mix(0.5))
             .x_desc("Timeseries")
-            .y_desc("Signal Value")
+            .y_desc("Z-Score")
             .x_label_style(
                 ("Open Sans Pro", 15)
                     .into_text_style(&root_area)
@@ -108,9 +103,8 @@ pub fn render_signal_plot(
                 ("Open Sans Pro", 15)
                     .into_text_style(&root_area)
                     .color(&WHITE),
-            ) // Estilo de ejes semitransparente
+            )
             .x_label_formatter(&|v| {
-                // Calculamos mod_value asegurándonos de que nunca sea 0
                 let mod_value = (normalized_data.len() / 5).max(1);
                 if *v % mod_value == 0 {
                     format!("{}", v)

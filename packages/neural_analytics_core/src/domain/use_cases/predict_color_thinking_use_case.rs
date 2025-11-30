@@ -3,7 +3,7 @@ use crate::domain::{
     context::NeuralAnalyticsContext,
     models::event_internals::ReceivedPredictColorThinkingDataEvent,
 };
-use log::{error, info};
+use log::{error, info, warn};
 use presage::{command_handler, Error, Events};
 
 /// Este caso de uso es responsable de predecir el color en el que está pensando el usuario
@@ -24,6 +24,8 @@ pub async fn predict_color_thinking_use_case(
     _context: &mut NeuralAnalyticsContext,
     _command: PredictColorThinkingCommand,
 ) -> Result<Events, Error> {
+    const REQUIRED_CHANNELS: [&str; 4] = ["T3", "T4", "O1", "O2"];
+
     info!("Starting color prediction for what the user is thinking...");
 
     // Verificar si los datos del EEG están disponibles
@@ -35,6 +37,43 @@ pub async fn predict_color_thinking_use_case(
             return Err(Error::MissingCommandHandler(error_msg).into());
         }
     };
+
+    // Ensure we have all required channels before attempting prediction
+    let missing_channels: Vec<&str> = REQUIRED_CHANNELS
+        .iter()
+        .copied()
+        .filter(|channel| {
+            headset_data
+                .get(*channel)
+                .map(|samples| samples.is_empty())
+                .unwrap_or(true)
+        })
+        .collect();
+
+    if !missing_channels.is_empty() {
+        warn!(
+            "Cannot predict color: missing or empty channels {:?}. Waiting for complete data set.",
+            missing_channels
+        );
+        return Ok(Events::new());
+    }
+
+    // Log data statistics for debugging
+    for channel in &REQUIRED_CHANNELS {
+        if let Some(data) = headset_data.get(*channel) {
+            let min = data.iter().cloned().fold(f32::INFINITY, f32::min);
+            let max = data.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+            let mean: f32 = data.iter().sum::<f32>() / data.len() as f32;
+            info!(
+                "Channel {} stats: len={}, min={:.2}, max={:.2}, mean={:.2}",
+                channel,
+                data.len(),
+                min,
+                max,
+                mean
+            );
+        }
+    }
 
     let model_service = _context.model_service.read().await;
 
@@ -65,6 +104,7 @@ pub async fn predict_color_thinking_use_case(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::context::UNANIMITY_REQUIRED;
     use crate::domain::services::model_inference_service::ModelInferenceInterface as ModelServicePort;
     use mockall::mock;
     use mockall::predicate::*;
@@ -104,10 +144,8 @@ mod tests {
     /// Función auxiliar para configurar el CommandBus para los tests
     /// Ahora se requiere que el handler tenga lifetime 'static.
     fn setup_command_bus() -> CommandBus<NeuralAnalyticsContext, Error> {
-        CommandBus::<NeuralAnalyticsContext, Error>::new().configure(
-            Configuration::new()
-                .command_handler(&predict_color_thinking_use_case)
-            )
+        CommandBus::<NeuralAnalyticsContext, Error>::new()
+            .configure(Configuration::new().command_handler(&predict_color_thinking_use_case))
     }
 
     #[tokio::test]
@@ -134,23 +172,40 @@ mod tests {
         let mut mock = MockModelService::new();
 
         let mut headset_data = HashMap::new();
-        headset_data.insert("channel1".to_string(), vec![1.0, 2.0, 3.0]);
+        headset_data.insert("T3".to_string(), vec![1.0; 62]);
+        headset_data.insert("T4".to_string(), vec![2.0; 62]);
+        headset_data.insert("O1".to_string(), vec![3.0; 62]);
+        headset_data.insert("O2".to_string(), vec![4.0; 62]);
 
         mock.expect_predict_color()
-            .times(1)
-            .withf(move |data: &HashMap<String, Vec<f32>>| data.contains_key("channel1"))
+            .times(UNANIMITY_REQUIRED)
+            .withf(|data: &HashMap<String, Vec<f32>>| {
+                ["T3", "T4", "O1", "O2"]
+                    .iter()
+                    .all(|c| data.contains_key(*c))
+            })
             .returning(|_| Ok("green".to_string()));
 
         let mut context = NeuralAnalyticsContext::default();
         context.headset_data = Some(headset_data);
         context.model_service = create_static_mock(mock);
 
-        let command = PredictColorThinkingCommand {};
         let command_bus = setup_command_bus();
 
-        let _ = command_bus.execute(&mut context, command).await;
+        // Con unanimidad, necesitamos que TODAS las predicciones sean iguales
+        // Ejecutar menos de UNANIMITY_REQUIRED predicciones debería seguir devolviendo "trash"
+        for _ in 0..(UNANIMITY_REQUIRED - 1) {
+            let _ = command_bus
+                .execute(&mut context, PredictColorThinkingCommand {})
+                .await;
+            assert_eq!(context.get_color_thinking(), "trash".to_string());
+        }
 
-        assert!(!context.color_thinking.is_empty());
+        // En la predicción que completa el buffer con unanimidad, debe consolidar "green"
+        let _ = command_bus
+            .execute(&mut context, PredictColorThinkingCommand {})
+            .await;
+
         assert_eq!(context.get_color_thinking(), "green".to_string());
     }
 
@@ -160,7 +215,10 @@ mod tests {
         let mut mock = MockModelService::new();
 
         let mut headset_data = HashMap::new();
-        headset_data.insert("channel1".to_string(), vec![1.0, 2.0, 3.0]);
+        headset_data.insert("T3".to_string(), vec![1.0; 62]);
+        headset_data.insert("T4".to_string(), vec![2.0; 62]);
+        headset_data.insert("O1".to_string(), vec![3.0; 62]);
+        headset_data.insert("O2".to_string(), vec![4.0; 62]);
 
         mock.expect_predict_color()
             .times(1)
@@ -175,7 +233,7 @@ mod tests {
 
         // Act
         let _ = command_bus.execute(&mut context, command).await;
-    
+
         assert!(context.color_thinking.is_empty());
     }
 }

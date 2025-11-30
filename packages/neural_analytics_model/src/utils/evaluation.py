@@ -64,6 +64,8 @@ def evaluate_model(model, val_loader, device, writer, epoch=50, output_dir="buil
 
             all_true.extend(true_class.cpu().numpy())
             all_pred.extend(predicted_class.cpu().numpy())
+            
+            # Outputs are already probabilities due to Softmax in model
             all_scores.extend(outputs.cpu().numpy())
 
     # Calculate average loss and accuracy
@@ -171,3 +173,74 @@ def save_roc_curve(y_true, y_scores, class_mapping, output_dir="build"):
         plt.legend()
         plt.savefig(os.path.join(output_dir, 'assets/roc_curve.png'))
         plt.close()
+
+
+def evaluate_model_file_level(model, dataset, device):
+    """
+    Evaluates the model at the file level by aggregating predictions from all windows
+    of each file and using majority voting or mean probability.
+    
+    This is the TRUE metric for classification tasks where each file represents
+    a single recording session with one ground truth label.
+    
+    :param model: PyTorch model to evaluate.
+    :param dataset: NeuralAnalyticsDataset with get_windows_for_file method.
+    :param device: Device where the model runs (CPU or GPU).
+    :return: File-level accuracy.
+    """
+    model.eval()
+    
+    correct_files = 0
+    total_files = dataset.get_file_count()
+    
+    all_true = []
+    all_pred = []
+    
+    with torch.no_grad():
+        for file_idx in range(total_files):
+            windows, label = dataset.get_windows_for_file(file_idx)
+            
+            if windows is None:
+                continue
+            
+            # Get predictions for all windows of this file
+            outputs = model(windows)  # (num_windows, num_classes)
+            
+            # Aggregate predictions: Mean of probabilities (soft voting)
+            mean_probs = outputs.mean(dim=0)  # (num_classes,)
+            predicted_class = torch.argmax(mean_probs).item()
+            
+            # True class
+            true_class = torch.argmax(label).item()
+            
+            all_true.append(true_class)
+            all_pred.append(predicted_class)
+            
+            if predicted_class == true_class:
+                correct_files += 1
+    
+    file_accuracy = correct_files / total_files if total_files > 0 else 0.0
+    
+    # Print per-class breakdown
+    from collections import Counter
+    true_counts = Counter(all_true)
+    pred_counts = Counter(all_pred)
+    
+    print(f"    True class distribution: {dict(true_counts)}")
+    print(f"    Predicted class distribution: {dict(pred_counts)}")
+    
+    # Per-class accuracy
+    class_correct = {c: 0 for c in set(all_true)}
+    class_total = {c: 0 for c in set(all_true)}
+    
+    for t, p in zip(all_true, all_pred):
+        class_total[t] += 1
+        if t == p:
+            class_correct[t] += 1
+    
+    for c in sorted(class_correct.keys()):
+        acc = class_correct[c] / class_total[c] if class_total[c] > 0 else 0
+        class_name = NeuralAnalyticsModel.class_mapping.get(c, str(c))
+        print(f"    {class_name}: {class_correct[c]}/{class_total[c]} = {acc:.2%}")
+    
+    return file_accuracy

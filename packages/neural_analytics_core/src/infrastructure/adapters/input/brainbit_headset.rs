@@ -17,6 +17,7 @@ pub struct BrainFlowAdapter {
     work_mode: WorkMode,
     min_values: RwLock<HashMap<String, f32>>,
     max_values: RwLock<HashMap<String, f32>>,
+    has_received_data: RwLock<bool>,  // Track if we've ever received data this session
 }
 
 impl Default for BrainFlowAdapter {
@@ -45,6 +46,7 @@ impl Default for BrainFlowAdapter {
             work_mode: WorkMode::Initialized,
             min_values: RwLock::new(HashMap::new()),
             max_values: RwLock::new(HashMap::new()),
+            has_received_data: RwLock::new(false),
         }
     }
 }
@@ -182,17 +184,71 @@ impl EegHeadsetPort for BrainFlowAdapter {
         // Await for the device to stabilize
         std::thread::sleep(std::time::Duration::from_millis(300));
 
-        // Send the command to get generalist data
+        // Check how many samples are available in the buffer
+        let available_samples = self
+            .board
+            .get_board_data_count(BrainFlowPresets::DefaultPreset)
+            .unwrap_or(0);
+        
+        info!(
+            "Buffer status: {} samples available, requesting 62",
+            available_samples
+        );
+
+        // If not enough samples, wait for more data to arrive
+        if available_samples < 62 {
+            warn!(
+                "Not enough samples in buffer ({} < 62). Waiting for more data...",
+                available_samples
+            );
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            
+            // Check again after waiting
+            let available_after_wait = self
+                .board
+                .get_board_data_count(BrainFlowPresets::DefaultPreset)
+                .unwrap_or(0);
+            
+            // Check if we've ever received data this session
+            let has_data_before = *self.has_received_data.read().unwrap();
+            
+            // Only treat as disconnection if:
+            // 1. We had data before (not startup)
+            // 2. After waiting 500ms there's STILL 0 samples (device not producing data)
+            if available_after_wait == 0 && has_data_before {
+                error!("Still no samples after waiting 500ms - device disconnected mid-session!");
+                return Err("Device disconnected: no samples after waiting".to_string());
+            }
+            
+            info!("After waiting: {} samples available", available_after_wait);
+        }
+
+        // Send the command to get generalist data (this REMOVES data from buffer)
         let data = self
             .board
             .get_board_data(Some(62), BrainFlowPresets::DefaultPreset)
             .map_err(|e| format!("Failed to get board data for raw extraction: {}", e))?;
+        
+        info!(
+            "Retrieved data shape: {} rows x {} columns",
+            data.shape()[0],
+            data.shape()[1]
+        );
 
         let mut raw_data_map = HashMap::new();
 
         if data.shape()[0] == 0 {
             warn!("No new raw data returned from get_board_data.");
             return Ok(raw_data_map);
+        }
+
+        // Mark that we've successfully received data this session
+        {
+            let mut has_data = self.has_received_data.write().unwrap();
+            if !*has_data {
+                info!("First successful data received - session is now active");
+                *has_data = true;
+            }
         }
 
         for (&channel_index, channel_name) in channel_map.iter() {
@@ -231,25 +287,15 @@ impl EegHeadsetPort for BrainFlowAdapter {
                     }
                 }
 
-                // Obtain the original min and max values for the channel
-                let min_orig = *self
-                    .min_values
-                    .read()
-                    .unwrap()
-                    .get(channel_name)
-                    .unwrap_or(&0.0);
-                let max_orig = *self
-                    .max_values
-                    .read()
-                    .unwrap()
-                    .get(channel_name)
-                    .unwrap_or(&1.0);
-
-                // Apply Min-Max scaling using the private helper function
-                let normalized_data =
-                    self._apply_min_max_scaling(&channel_data_f32, min_orig, max_orig);
-
-                raw_data_map.insert(channel_name.clone(), normalized_data);
+                // Pass raw data directly - the model has BatchNorm and handles normalization internally
+                info!(
+                    "Channel {} raw data: {} samples, range [{:.2}, {:.2}]",
+                    channel_name,
+                    channel_data_f32.len(),
+                    channel_data_f32.iter().cloned().fold(f32::INFINITY, f32::min),
+                    channel_data_f32.iter().cloned().fold(f32::NEG_INFINITY, f32::max)
+                );
+                raw_data_map.insert(channel_name.clone(), channel_data_f32);
             } else {
                 error!(
                     "EEG Channel index {} ('{}') out of bounds for data rows {}",
@@ -388,6 +434,12 @@ impl EegHeadsetPort for BrainFlowAdapter {
 
         // Attempt to stop the stream
         self.work_mode = WorkMode::Initialized;
+        
+        // Reset session tracking
+        {
+            let mut has_data = self.has_received_data.write().unwrap();
+            *has_data = false;
+        }
 
         // Release the session
         self.board.release_session().map_err(|e| {

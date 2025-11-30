@@ -40,16 +40,19 @@ def export_model(model, device, input_size, output_path):
 
     # Export the model to ONNX format
     torch.onnx.export(
-        model, dummy_input, output_path,
+        model,
+        dummy_input,
+        output_path,
         export_params=True,
-        opset_version=11,
+        opset_version=18,
         do_constant_folding=True,  # Constant optimization
         input_names=['input'],
         output_names=['output'],
         dynamic_axes={
             'input': {0: 'batch_size'},  # Dynamic axis for batch size
             'output': {0: 'batch_size'}
-        }
+        },
+        dynamo=False,
     )
 
     # Load the ONNX model for simplification

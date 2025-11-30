@@ -15,7 +15,7 @@
 
 from utils.trainer import train_model
 from utils.export import export_model
-from utils.evaluation import evaluate_model, save_training_curves
+from utils.evaluation import evaluate_model, save_training_curves, evaluate_model_file_level
 
 from datasets.neural_analytics import NeuralAnalyticsDataset
 from models.neural_analytics import NeuralAnalyticsModel
@@ -23,13 +23,28 @@ from sklearn.model_selection import train_test_split
 
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from collections import Counter
 
 import os
+import random
+import numpy as np
+from pathlib import Path
 import torch
 
-BATCH_SIZE = 64
+# Reproducibility
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+
+BATCH_SIZE = 64      # Standard batch size
 WINDOW_SIZE = 62
-DATASET_FOLDER = os.path.join(os.getcwd(), '../' 'dataset')
+WINDOW_STRIDE = 31   # 50% overlap
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DATASET_FOLDER = REPO_ROOT / "dataset"
+BUILD_DIR = REPO_ROOT / "build"
+ASSETS_DIR = BUILD_DIR / "assets"
+RUNS_DIR = BUILD_DIR / "runs"
 
 def main():
     # Notify about the purpose of this module
@@ -41,40 +56,91 @@ def main():
     print(f'[*] The device to be used will be "{device}"')
 
     # Prepare the dataset from the folder with class subfolders
-    dataset = NeuralAnalyticsDataset(DATASET_FOLDER, WINDOW_SIZE, device)
-    train_dataset, val_dataset = train_test_split(dataset, test_size=0.2, random_state=42)
+    train_files = []
+    val_files = []
+    
+    # Iterate over each class directory to ensure stratified split
+    for class_dir in sorted([d for d in DATASET_FOLDER.iterdir() if d.is_dir()]):
+        files = sorted([str(f) for f in class_dir.glob("*.csv")])
+        if not files:
+            continue
+        
+        class_name = class_dir.name.upper()
+        
+        # Stratified split with fixed seed and shuffle for better distribution
+        t_files, v_files = train_test_split(
+            files, 
+            test_size=0.2, 
+            shuffle=True,      # Shuffle to avoid temporal bias
+            random_state=SEED  # Fixed seed for reproducibility
+        )
+        
+        print(f"    {class_name}: {len(t_files)} train, {len(v_files)} val")
+        train_files.extend(t_files)
+        val_files.extend(v_files)
+    
+    print(f"[*] Total: {len(train_files)} train, {len(val_files)} val")
+    
+    # Verify class balance in validation set
+    val_classes = [Path(f).parent.name for f in val_files]
+    print(f"[*] Val distribution: {dict(Counter(val_classes))}")
+
+    # Create datasets with controlled stride (50% overlap instead of 98%+ overlap)
+    # Both use z-score normalization per window (same as runtime)
+    train_dataset = NeuralAnalyticsDataset(train_files, WINDOW_SIZE, device, augment=False, stride=WINDOW_STRIDE)
+    val_dataset = NeuralAnalyticsDataset(val_files, WINDOW_SIZE, device, augment=False, stride=WINDOW_STRIDE)
 
     # Load the dataset in PyTorch
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)  # No shuffle in validation
 
     # Create folders for saving the model and training logs
-    if not os.path.exists("../build"):
-        os.makedirs("../build")
-
-    if not os.path.exists("../build/assets"):
-        os.makedirs("../build/assets")
-    
-    if not os.path.exists("../build/runs"):
-        os.makedirs("../build/runs")
+    BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Configure TensorBoard
-    writer = SummaryWriter(log_dir="../build/runs")
+    writer = SummaryWriter(log_dir=str(RUNS_DIR))
 
     # Train and evaluate the model
-    model, train_losses, train_accuracies = train_model(train_loader, device, writer)
+    epochs = int(os.getenv("TRAIN_EPOCHS", "200"))
+    learning_rate = float(os.getenv("TRAIN_LR", "0.0005"))
+    label_smoothing = float(os.getenv("TRAIN_LABEL_SMOOTHING", "0.1"))
+    
+    # Class weights to balance accuracy across classes
+    # Order: [RED=0, GREEN=1, TRASH=2]
+    # Finding optimal balance between RED and TRASH
+    class_weights = torch.tensor([1.0, 1.0, 1.0], dtype=torch.float32)
+
+    model, train_losses, train_accuracies = train_model(
+        train_loader,
+        val_loader,
+        device,
+        writer,
+        epochs=epochs,
+        learning_rate=learning_rate,
+        label_smoothing=label_smoothing,
+        class_weights=class_weights,
+    )
+    
+    # Window-level evaluation
     val_losses, val_accuracies = evaluate_model(
         model, 
         val_loader, 
         device, writer,
-        output_dir="../build"
+        output_dir=str(BUILD_DIR)
     )
+    
+    # File-level evaluation (aggregate predictions per file)
+    print("\n[*] File-level evaluation (aggregating predictions per file):")
+    file_accuracy = evaluate_model_file_level(model, val_dataset, device)
+    print(f"[*] File-level accuracy: {file_accuracy:.2%}")
 
     # Export training curves
     save_training_curves(
         train_losses=train_losses,
         train_accuracies=train_accuracies,
-        output_dir="../build"
+        output_dir=str(BUILD_DIR)
     )
 
     # Export the model
@@ -82,8 +148,12 @@ def main():
         model,
         device,
         input_size=(1, WINDOW_SIZE, 4),
-        output_path='../build/neural_analytics.onnx'
+        output_path=str(BUILD_DIR / 'neural_analytics.onnx')
     )
+    
+    # Export normalization parameters for Rust inference
+    train_dataset.export_normalization_params(str(BUILD_DIR / 'normalization_params.json'))
+    print(f"[*] Normalization params exported to {BUILD_DIR / 'normalization_params.json'}")
 
     # Close the training log
     writer.close()
