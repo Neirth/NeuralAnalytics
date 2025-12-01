@@ -786,11 +786,9 @@ mod tests {
 
         eeg_mock.expect_get_work_mode().return_const(WorkMode::Extraction);
 
-        let mut bulb_mock = MockSmartBulbAdapter::new();
-        // The code may attempt to change the bulb state even if prediction fails
-        bulb_mock
-            .expect_change_state()
-            .returning(|_| Ok(()));
+        // No bulb state change is expected on prediction failure since
+        // the error path returns before UpdateLightStatusCommand is executed
+        let bulb_mock = MockSmartBulbAdapter::new();
 
         let mut model_mock = MockModelService::new();
         model_mock
@@ -815,12 +813,13 @@ mod tests {
             .capturing_headset_data(&NeuralAnalyticsCoreEvents::BackgroundTick)
             .await;
 
-        // Assert - Verify that we return to the awaiting connection state
-        if let Response::Transition(State::AwaitingHeadsetConnection { .. }) = result {
-            // Transition to connection state (expected)
+        // Assert - Verify that we remain in capturing state when prediction fails
+        // (only "has no data" errors trigger transition to awaiting connection)
+        if let Response::Transition(State::CapturingHeadsetData { .. }) = result {
+            // Remains in capturing state (expected for generic prediction errors)
             assert!(true);
         } else {
-            panic!("Expected transition to awaiting_headset_connection state");
+            panic!("Expected to remain in capturing_headset_data state");
         }
     }
 }

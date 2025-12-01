@@ -77,15 +77,14 @@ pub async fn predict_color_thinking_use_case(
 
     let model_service = _context.model_service.read().await;
 
-    // Usar el servicio de inferencia para predecir el color
+    // Use the inference service to predict the color
     info!("Processing EEG data for prediction...");
     let color_result = model_service.predict_color(headset_data).map_err(|e| {
-        let error_msg = format!("Error predicting color: {}", e);
-        error!("{}", error_msg);
-        Error::MissingCommandHandler(Box::leak(error_msg.into_boxed_str()))
+        error!("Error predicting color: {}", e);
+        Error::MissingCommandHandler("Error predicting color")
     })?;
 
-    // Guardar el resultado en el contexto
+    // Save the result in the context
     info!(
         "Successful prediction: the user is thinking of the color '{}'",
         color_result
